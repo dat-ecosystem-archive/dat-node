@@ -4,7 +4,7 @@
   "description": "Share datasets on the Internet",
   "main": "index.js",
   "scripts": {
-    "test": "standard && echo 'No Tests Specified'"
+    "test": "standard && tape tests/*.js | tap-spec"
   },
   "repository": {
     "type": "git",
