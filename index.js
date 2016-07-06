@@ -2,6 +2,7 @@ var events = require('events')
 var fs = require('fs')
 var path = require('path')
 var util = require('util')
+var encoding = require('dat-encoding')
 var hyperdrive = require('hyperdrive')
 var createSwarm = require('hyperdrive-archive-swarm')
 var level = require('level')
@@ -20,12 +21,17 @@ function Dat (opts) {
 
   var self = this
 
-  this.dir = opts.dir === '.' ? process.cwd() : opts.dir
-  this.datPath = opts.datPath || path.join(self.dir, '.dat')
-  this.key = opts.key ? Buffer(opts.key, 'hex') : null
-  this.snapshot = opts.snapshot
-  this.swarm = null
-  this.stats = {
+  if (opts.key && opts.key.length === 50) opts.key = encoding.decode(opts.key)
+  else if (opts.key && opts.key.length === 64) opts.key = Buffer(opts.key, 'hex')
+  self.key = opts.key
+  self.dir = opts.dir === '.' ? process.cwd() : opts.dir
+  self.datPath = opts.datPath || path.join(self.dir, '.dat')
+  self.db = opts.db || null
+  self.snapshot = opts.snapshot
+  self.port = opts.port
+  self.ignore = ignore
+  self.swarm = null
+  self.stats = {
     filesTotal: 0,
     bytesTotal: 0,
     bytesUp: 0,
@@ -33,10 +39,10 @@ function Dat (opts) {
     rateUp: speedometer(),
     rateDown: speedometer()
   }
-  getDb(function (err, db) {
+
+  getDb(function (err) {
     if (err) return self.emit('error', err)
-    self.db = db
-    var drive = hyperdrive(db)
+    var drive = hyperdrive(self.db)
     var isLive = opts.key ? null : !opts.snapshot
     self.archive = drive.createArchive(self.key, {
       live: isLive,
@@ -48,30 +54,38 @@ function Dat (opts) {
   })
 
   function getDb (cb) {
-    if (!fs.existsSync(self.datPath)) fs.mkdirSync(self.datPath)
-    var db = level(self.datPath)
+    if (!self.db && !fs.existsSync(self.datPath)) fs.mkdirSync(self.datPath)
+    var db = self.db = self.db || level(self.datPath)
     tryResume()
 
     function tryResume () {
-      if (opts.port) db.put('!dat!port', opts.port)
+      if (self.port) db.put('!dat!port', self.port)
       db.get('!dat!key', function (err, value) {
-        if (err || !value) return cb(null, db)
-        if (self.key && value !== self.key.toString('hex')) return cb('Existing key does not match.')
-        self.key = value
+        if (err || !value) return cb(null)
+        if (self.key && value !== encoding.encode(self.key)) {
+          return cb('Existing key does not match.')
+        }
+        self.key = encoding.decode(value)
         self.resume = true
         db.get('!dat!port', function (err, portVal) {
-          if (err || !portVal) return cb(null, db)
+          if (err || !portVal) return cb(null)
           self.port = portVal
-          return cb(null, db)
+          return cb(null)
         })
       })
     }
+  }
+
+  function ignore (filepath) {
+    // TODO: split this out and make it composable/modular/optional/modifiable
+    return filepath.indexOf('.dat') === -1 && filepath.indexOf('.swp') === -1
   }
 }
 
 util.inherits(Dat, events.EventEmitter)
 
 Dat.prototype.share = function (cb) {
+  if (!this.dir) cb(new Error('Directory required for share.'))
   var self = this
   var archive = self.archive
 
@@ -79,13 +93,14 @@ Dat.prototype.share = function (cb) {
     if (err) return cb(err)
 
     if (archive.key && !archive.owner) {
-      cb('Dat previously downloaded. Run dat ' + archive.key.toString('hex') + ' to resume')
+      // TODO: allow this but change to download
+      cb('Dat previously downloaded. Run dat ' + encoding.encode(archive.key) + ' to resume')
     }
 
     if ((archive.live || archive.owner) && archive.key) {
-      if (!self.key) self.db.put('!dat!key', archive.key.toString('hex'))
+      if (!self.key) self.db.put('!dat!key', encoding.encode(archive.key))
       self.joinSwarm()
-      self.emit('key', archive.key.toString('hex'))
+      self.emit('key', encoding.encode(archive.key))
     }
 
     append.initialAppend(self, done)
@@ -102,40 +117,50 @@ Dat.prototype.share = function (cb) {
 
     archive.finalize(function (err) {
       if (err) return cb(err)
-      self.db.put('!dat!finalized', true)
-      self.emit('archive-finalized')
 
       if (self.snapshot) {
         self.joinSwarm()
-        self.emit('key', archive.key.toString('hex'))
-        cb(null)
+        self.emit('key', encoding.encode(archive.key))
+        self.emit('archive-finalized')
+        self.db.put('!dat!finalized', true, cb)
       }
 
-      var watch = yoloWatch(self.dir)
-      watch.on('changed', function (name, data) {
-        if (name === self.dir) return
-        append.liveAppend(self, data)
-        self.emit('archive-updated')
+      self.db.put('!dat!finalized', true, function (err) {
+        if (err) return cb(err)
+        self.emit('archive-finalized')
+        watchLive()
       })
-      watch.on('added', function (name, data) {
-        append.liveAppend(self, data)
-        self.emit('archive-updated')
-      })
+
+      function watchLive () {
+        self.watching = true
+        var watch = yoloWatch(self.dir, {filter: self.ignore})
+        watch.on('changed', function (name, data) {
+          if (name === self.dir) return
+          append.liveAppend(self, data)
+          self.emit('archive-updated')
+        })
+        watch.on('added', function (name, data) {
+          append.liveAppend(self, data)
+          self.emit('archive-updated')
+        })
+      }
     })
   }
 }
 
 Dat.prototype.download = function (cb) {
+  if (!this.key) cb('Key required for download.')
+  if (!this.dir) cb('Directory required for download.')
   var self = this
   var archive = self.archive
 
   self.stats.filesDown = 0
   self.joinSwarm()
-  self.emit('key', self.key.toString('hex'))
+  self.emit('key', encoding.encode(self.key))
 
   archive.open(function (err) {
     if (err) return cb(err)
-    self.db.put('!dat!key', archive.key.toString('hex'))
+    self.db.put('!dat!key', encoding.encode(archive.key))
     updateTotalStats()
 
     each(archive.list({live: archive.live}), function (data, next) {
