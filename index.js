@@ -129,11 +129,12 @@ Dat.prototype.share = function (cb) {
         if (err) return cb(err)
         self.emit('archive-finalized')
         watchLive()
+        cb(null)
       })
 
       function watchLive () {
         self.watching = true
-        var watch = yoloWatch(self.dir, {filter: self.ignore})
+        var watch = self.watcher = yoloWatch(self.dir, {filter: self.ignore})
         watch.on('changed', function (name, data) {
           if (name === self.dir) return
           append.liveAppend(self, data)
@@ -212,4 +213,10 @@ Dat.prototype.joinSwarm = function () {
       self.emit('swarm-update')
     })
   })
+}
+
+Dat.prototype.close = function () {
+  var self = this
+  if (self.watching) self.watcher.close()
+  if (self.swarm) self.swarm.close()
 }

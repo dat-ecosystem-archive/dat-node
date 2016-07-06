@@ -1,6 +1,6 @@
 # Dat-js
 
-Very WIP. See Dat CLI at https://github.com/maxogden/dat for now.
+Very WIP. See Dat CLI at [maxogden/dat](https://github.com/maxogden/dat) for now.
 
 # Options
 
@@ -13,9 +13,13 @@ Very WIP. See Dat CLI at https://github.com/maxogden/dat for now.
 
 # API
 
-### dat.download(cb) download `opts.key` to `opts.dir`
+### dat.download(cb)
 
-### dat.share(cb) share directory specified in `opts.dir`
+download `dat.key` to `dat.dir`
+
+### dat.share(cb) 
+
+share directory specified in `opts.dir`
 
 Swarm is automatically joined for key when it is available for share & download.
 
