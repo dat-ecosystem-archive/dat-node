@@ -25,8 +25,8 @@ function Dat (opts) {
   else if (opts.key && opts.key.length === 64) opts.key = Buffer(opts.key, 'hex')
   self.key = opts.key
   self.dir = opts.dir === '.' ? process.cwd() : opts.dir
-  self.datPath = opts.datPath || path.join(self.dir, '.dat')
-  self.db = opts.db || null
+  if (opts.db) self.db = opts.db
+  else self.datPath = opts.datPath || path.join(self.dir, '.dat')
   self.snapshot = opts.snapshot
   self.port = opts.port
   self.ignore = ignore
