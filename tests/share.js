@@ -28,9 +28,9 @@ test('Share events with default opts', function (t) {
     })
   })
 
-  dat.once('append-ready', function (stats) {
+  dat.once('append-ready', function () {
     t.pass('append ready emits')
-    t.ok(stats && dat.appendStats, 'append ready has append stats')
+    t.ok(dat.stats.filesTotal > 0, 'append ready stats')
   })
 
   dat.once('key', function (key) {
@@ -45,9 +45,8 @@ test('Share events with default opts', function (t) {
 test('Share stats', function (t) {
   dat = Dat({dir: fixtures})
   var stats = {
-    dirs: 1,
-    files: 2,
-    bytes: 1441
+    filesTotal: 3,
+    bytesTotal: 1543
   }
 
   dat.once('ready', function () {
@@ -58,12 +57,13 @@ test('Share stats', function (t) {
   })
 
   dat.once('append-ready', function () {
-    t.looseEqual(stats, dat.appendStats, 'append stats are correct')
+    t.same(stats.filesTotal, dat.stats.filesTotal, 'total files')
+    t.same(stats.bytesTotal, dat.stats.bytesTotal, 'total bytes')
   })
 
   dat.once('archive-finalized', function () {
-    t.ok(dat.stats.filesTotal = stats.files, 'total file count correct')
-    t.ok(dat.stats.bytesTotal = stats.bytes, 'total byte count correct')
+    t.same(dat.stats.filesProgress, stats.filesTotal, 'progress file count')
+    t.same(dat.stats.bytesProgress, stats.bytesTotal, 'progress byte count')
   })
 })
 

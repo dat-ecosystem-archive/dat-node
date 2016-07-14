@@ -1,11 +1,9 @@
 var events = require('events')
-var fs = require('fs')
 var path = require('path')
 var util = require('util')
 var encoding = require('dat-encoding')
 var hyperdrive = require('hyperdrive')
 var createSwarm = require('hyperdrive-archive-swarm')
-var level = require('level')
 var raf = require('random-access-file')
 var speedometer = require('speedometer')
 var each = require('stream-each')
@@ -107,10 +105,12 @@ Dat.prototype.share = function (cb) {
         if (err) return cb(err)
         self.emit('archive-finalized')
         watchLive()
+        cb(null)
       })
 
       function watchLive () {
-        var watch = yoloWatch(self.dir, {filter: self.ignore})
+        var watch = self.watcher = yoloWatch(self.dir, {filter: self.ignore})
+        self.watching = true
         watch.on('changed', function (name, data) {
           if (name === self.dir) return
           self.emit('archive-updated')
