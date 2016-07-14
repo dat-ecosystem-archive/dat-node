@@ -64,6 +64,3 @@ Swarm events and stats are available from `dat.swarm`.
 * `dat.archive`: hyperdrive archive
 * `dat.snapshot` (boolean): sharing snapshot archive
 * `dat.stats`
-* `dat.appendStats`
-* 
-* 

@@ -11,6 +11,7 @@ var speedometer = require('speedometer')
 var each = require('stream-each')
 var yoloWatch = require('yolowatch')
 var append = require('./lib/append')
+var getDb = require('./lib/db')
 
 module.exports = Dat
 
@@ -21,9 +22,7 @@ function Dat (opts) {
 
   var self = this
 
-  if (opts.key && opts.key.length === 50) opts.key = encoding.decode(opts.key)
-  else if (opts.key && opts.key.length === 64) opts.key = Buffer(opts.key, 'hex')
-  self.key = opts.key
+  self.key = opts.key ? encoding.decode(opts.key) : null
   self.dir = opts.dir === '.' ? process.cwd() : opts.dir
   if (opts.db) self.db = opts.db
   else self.datPath = opts.datPath || path.join(self.dir, '.dat')
@@ -31,16 +30,18 @@ function Dat (opts) {
   self.port = opts.port
   self.ignore = ignore
   self.swarm = null
-  self.stats = {
+  this.stats = {
     filesTotal: 0,
+    filesProgress: 0,
     bytesTotal: 0,
+    bytesProgress: 0,
     bytesUp: 0,
     bytesDown: 0,
     rateUp: speedometer(),
     rateDown: speedometer()
   }
 
-  getDb(function (err) {
+  getDb(self, function (err) {
     if (err) return self.emit('error', err)
     var drive = hyperdrive(self.db)
     var isLive = opts.key ? null : !opts.snapshot
@@ -52,29 +53,6 @@ function Dat (opts) {
     })
     self.emit('ready')
   })
-
-  function getDb (cb) {
-    if (!self.db && !fs.existsSync(self.datPath)) fs.mkdirSync(self.datPath)
-    var db = self.db = self.db || level(self.datPath)
-    tryResume()
-
-    function tryResume () {
-      if (self.port) db.put('!dat!port', self.port)
-      db.get('!dat!key', function (err, value) {
-        if (err || !value) return cb(null)
-        if (self.key && value !== encoding.encode(self.key)) {
-          return cb('Existing key does not match.')
-        }
-        self.key = encoding.decode(value)
-        self.resume = true
-        db.get('!dat!port', function (err, portVal) {
-          if (err || !portVal) return cb(null)
-          self.port = portVal
-          return cb(null)
-        })
-      })
-    }
-  }
 
   function ignore (filepath) {
     // TODO: split this out and make it composable/modular/optional/modifiable
@@ -98,7 +76,7 @@ Dat.prototype.share = function (cb) {
     }
 
     if ((archive.live || archive.owner) && archive.key) {
-      if (!self.key) self.db.put('!dat!key', encoding.encode(archive.key))
+      if (!self.key) self.db.put('!dat!key', archive.key.toString('hex'))
       self.joinSwarm()
       self.emit('key', encoding.encode(archive.key))
     }
@@ -129,20 +107,18 @@ Dat.prototype.share = function (cb) {
         if (err) return cb(err)
         self.emit('archive-finalized')
         watchLive()
-        cb(null)
       })
 
       function watchLive () {
-        self.watching = true
-        var watch = self.watcher = yoloWatch(self.dir, {filter: self.ignore})
+        var watch = yoloWatch(self.dir, {filter: self.ignore})
         watch.on('changed', function (name, data) {
           if (name === self.dir) return
-          append.liveAppend(self, data)
           self.emit('archive-updated')
+          append.liveAppend(self, data)
         })
         watch.on('added', function (name, data) {
-          append.liveAppend(self, data)
           self.emit('archive-updated')
+          append.liveAppend(self, data)
         })
       }
     })
@@ -155,32 +131,46 @@ Dat.prototype.download = function (cb) {
   var self = this
   var archive = self.archive
 
-  self.stats.filesDown = 0
   self.joinSwarm()
   self.emit('key', encoding.encode(self.key))
 
   archive.open(function (err) {
     if (err) return cb(err)
-    self.db.put('!dat!key', encoding.encode(archive.key))
+    self.db.put('!dat!key', archive.key.toString('hex'))
     updateTotalStats()
 
     each(archive.list({live: archive.live}), function (data, next) {
-      var startBytes = self.stats.bytesDown
+      var startBytes = self.stats.bytesProgress
       archive.download(data, function (err) {
         if (err) return cb(err)
-        self.stats.filesDown += 1
+        self.stats.filesProgress += 1
         self.emit('file-downloaded', data)
-        if (startBytes === self.stats.bytesDown) self.stats.bytesDown += data.length // file already exists
-        if (self.stats.filesDown === self.stats.filesTotal) done()
+        if (startBytes === self.stats.bytesProgress) self.stats.bytesProgress += data.length // file already exists
+        if (self.stats.filesProgress === self.stats.filesTotal) self.emit('download-finished')
         else next()
       })
-    }, done)
+    }, function (err) {
+      if (err) return cb(err)
+      cb(null)
+    })
+
+    archive.content.on('download-finished', function () {
+      self.emit('download-finished')
+    })
+  })
+
+  archive.metadata.once('download-finished', function () {
+    updateTotalStats()
+  })
+
+  archive.metadata.on('update', function () {
+    // TODO: better stats for live updates
+    updateTotalStats()
+    self.emit('archive-updated')
   })
 
   archive.on('download', function (data) {
-    // TODO: better way to update totals on live updates?
-    updateTotalStats()
-
+    self.stats.bytesProgress += data.length
     self.stats.bytesDown += data.length
     self.stats.rateDown(data.length)
     self.emit('download', data)
@@ -195,11 +185,6 @@ Dat.prototype.download = function (cb) {
   function updateTotalStats () {
     self.stats.filesTotal = archive.metadata.blocks - 1 // first block is header.
     self.stats.bytesTotal = archive.content ? archive.content.bytes : 0
-  }
-
-  function done () {
-    self.emit('download-finished')
-    if (!archive.live) cb(null)
   }
 }
 
