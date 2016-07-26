@@ -7,7 +7,6 @@ var createSwarm = require('hyperdrive-archive-swarm')
 var raf = require('random-access-file')
 var speedometer = require('speedometer')
 var each = require('stream-each')
-var yoloWatch = require('yolowatch')
 var append = require('./lib/append')
 var getDb = require('./lib/db')
 
@@ -51,11 +50,6 @@ function Dat (opts) {
     })
     self.emit('ready')
   })
-
-  function ignore (filepath) {
-    // TODO: split this out and make it composable/modular/optional/modifiable
-    return filepath.indexOf('.dat') === -1 && filepath.indexOf('.swp') === -1
-  }
 }
 
 util.inherits(Dat, events.EventEmitter)
@@ -104,23 +98,8 @@ Dat.prototype.share = function (cb) {
       self.db.put('!dat!finalized', true, function (err) {
         if (err) return cb(err)
         self.emit('archive-finalized')
-        watchLive()
         cb(null)
       })
-
-      function watchLive () {
-        var watch = self.watcher = yoloWatch(self.dir, {filter: self.ignore})
-        self.watching = true
-        watch.on('changed', function (name, data) {
-          if (name === self.dir) return
-          self.emit('archive-updated')
-          append.liveAppend(self, data)
-        })
-        watch.on('added', function (name, data) {
-          self.emit('archive-updated')
-          append.liveAppend(self, data)
-        })
-      }
     })
   }
 }
@@ -202,6 +181,9 @@ Dat.prototype.joinSwarm = function () {
 
 Dat.prototype.close = function () {
   var self = this
-  if (self.watching) self.watcher.close()
-  if (self.swarm) self.swarm.close()
+  self.swarm.close(function () {
+    self.archive.close(function () {
+      if (self.fileStats) self.fileStats.close()
+    })
+  })
 }
