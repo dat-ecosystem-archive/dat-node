@@ -1,17 +1,27 @@
 # Dat-js
 
-Very WIP. See Dat CLI at [maxogden/dat](https://github.com/maxogden/dat) for now.
+Dat is a decentralized data tool for distributing data and files. **dat-js** is a javascript module to help you build applications with Dat.
 
-# Options
+* Dat CLI at [maxogden/dat](https://github.com/maxogden/dat).
+* Dat Desktop
+* Dat.land
 
-* `dir`
-* `key`
-* `datPath`: `.dat` folder location
-* `db`
-* `snapshot`
-* `port`
+[![#dat IRC channel on freenode](https://img.shields.io/badge/irc%20channel-%23dat%20on%20freenode-blue.svg)](http://webchat.freenode.net/?channels=dat)
+[![datproject/discussions](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/datproject/discussions?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
+[![Travis](https://api.travis-ci.org/joehand/dat-js.svg)](https://travis-ci.org/joehand/dat-js)
 
 # API
+
+## Options
+
+* `dat.key`: key
+* `dat.dir`: directory
+* `dat.datPath`: path to .dat folder
+* `dat.db`: database instance
+* `dat.swarm`: hyperdrive-archive-swarm instance
+* `dat.archive`: hyperdrive archive
+* `dat.snapshot` (boolean): sharing snapshot archive
 
 ### dat.download(cb)
 
@@ -54,13 +64,18 @@ Swarm events and stats are available from `dat.swarm`.
 * `dat.on('upload', data)`: piece of data uploaded
 * `dat.on('download-finished')`: archive download finished
 
-## Other
+#### Internal Stats
 
-* `dat.key`: key
-* `dat.dir`: directory
-* `dat.datPath`: path to .dat folder
-* `dat.db`: database instance
-* `dat.swarm`: hyperdrive-archive-swarm instance
-* `dat.archive`: hyperdrive archive
-* `dat.snapshot` (boolean): sharing snapshot archive
-* `dat.stats`
+```javascript
+
+dat.stats = {
+    filesProgress: 0,
+    bytes: progress: 0,
+    filesTotal: 0,
+    bytesTotal: 0,
+    bytesUp: 0,
+    bytesDown: 0,
+    rateUp: speedometer(),
+    rateDown: speedometer()
+}
+```
