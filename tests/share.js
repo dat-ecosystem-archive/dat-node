@@ -1,7 +1,6 @@
 var fs = require('fs')
 var path = require('path')
 var test = require('tape')
-var rimraf = require('rimraf')
 
 var Dat = require('..')
 
@@ -13,6 +12,12 @@ var dat
 
 test('Share events with default opts', function (t) {
   dat = Dat({dir: fixtures})
+  var stats = {
+    filesTotal: 3,
+    bytesTotal: 1543
+  }
+
+  t.plan(12)
 
   dat.once('ready', function () {
     t.pass('emits ready')
@@ -24,7 +29,6 @@ test('Share events with default opts', function (t) {
 
     dat.share(function (err) {
       t.error(err, 'no sharing error')
-      endTest(t)
     })
   })
 
@@ -34,26 +38,11 @@ test('Share events with default opts', function (t) {
   })
 
   dat.once('key', function (key) {
-    t.ok(key && key.length === 50, 'emits key')
+    t.ok(key && key.length === 64, 'emits key')
   })
 
   dat.once('archive-finalized', function () {
     t.pass('emits archive-finalized')
-  })
-})
-
-test('Share stats', function (t) {
-  dat = Dat({dir: fixtures})
-  var stats = {
-    filesTotal: 3,
-    bytesTotal: 1543
-  }
-
-  dat.once('ready', function () {
-    dat.share(function (err) {
-      t.error(err, 'no share error')
-      endTest(t)
-    })
   })
 
   dat.once('append-ready', function () {
@@ -67,11 +56,6 @@ test('Share stats', function (t) {
   })
 })
 
-function endTest (t) {
-  dat.db.close(function () {
-    rimraf(path.join(dat.dir, '.dat'), function () {
-      dat.close()
-      t.end()
-    })
-  })
-}
+test.onFinish(function () {
+  dat.close()
+})
