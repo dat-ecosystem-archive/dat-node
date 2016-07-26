@@ -20,14 +20,14 @@ function Dat (opts) {
   var self = this
 
   self.key = opts.key ? encoding.decode(opts.key) : null
-  self.dir = opts.dir === '.' ? process.cwd() : opts.dir
+  self.dir = opts.dir === '.' ? process.cwd() : path.resolve(opts.dir)
   if (opts.db) self.db = opts.db
   else self.datPath = opts.datPath || path.join(self.dir, '.dat')
   self.snapshot = opts.snapshot
   self.port = opts.port
-  self.ignore = ignore
+  self.ignore = [/\.dat\//] || opts.ignore
   self.swarm = null
-  this.stats = {
+  self.stats = {
     filesTotal: 0,
     filesProgress: 0,
     bytesTotal: 0,
@@ -70,7 +70,7 @@ Dat.prototype.share = function (cb) {
     if ((archive.live || archive.owner) && archive.key) {
       if (!self.key) self.db.put('!dat!key', archive.key.toString('hex'))
       self.joinSwarm()
-      self.emit('key', encoding.encode(archive.key))
+      self.emit('key', archive.key.toString('hex'))
     }
 
     append.initialAppend(self, done)
@@ -90,7 +90,7 @@ Dat.prototype.share = function (cb) {
 
       if (self.snapshot) {
         self.joinSwarm()
-        self.emit('key', encoding.encode(archive.key))
+        self.emit('key', archive.key.toString('hex'))
         self.emit('archive-finalized')
         self.db.put('!dat!finalized', true, cb)
       }
@@ -111,41 +111,45 @@ Dat.prototype.download = function (cb) {
   var archive = self.archive
 
   self.joinSwarm()
-  self.emit('key', encoding.encode(self.key))
+  self.emit('key', archive.key.toString('hex'))
 
   archive.open(function (err) {
     if (err) return cb(err)
     self.db.put('!dat!key', archive.key.toString('hex'))
     updateTotalStats()
 
+    archive.content.on('download-finished', function () {
+      self.emit('download-finished')
+    })
+
     each(archive.list({live: archive.live}), function (data, next) {
       var startBytes = self.stats.bytesProgress
       archive.download(data, function (err) {
         if (err) return cb(err)
         self.stats.filesProgress += 1
-        self.emit('file-downloaded', data)
-        if (startBytes === self.stats.bytesProgress) self.stats.bytesProgress += data.length // file already exists
-        if (self.stats.filesProgress === self.stats.filesTotal) self.emit('download-finished')
-        else next()
+        if (startBytes === self.stats.bytesProgress) {
+          // TODO: better way to measure progress with existing files
+          self.stats.bytesProgress += data.length // file already exists
+        }
+        // if (self.stats.filesProgress === self.stats.filesTotal) self.emit('download-finished')
+        next()
       })
     }, function (err) {
       if (err) return cb(err)
       cb(null)
     })
-
-    archive.content.on('download-finished', function () {
-      self.emit('download-finished')
-    })
   })
 
-  archive.metadata.once('download-finished', function () {
-    updateTotalStats()
-  })
+  archive.metadata.once('download-finished', updateTotalStats)
 
   archive.metadata.on('update', function () {
-    // TODO: better stats for live updates
     updateTotalStats()
     self.emit('archive-updated')
+  })
+
+  archive.once('download', function () {
+    // TODO: fix https://github.com/maxogden/dat/issues/502
+    if (self.stats.bytesTotal === 0) updateTotalStats()
   })
 
   archive.on('download', function (data) {
@@ -182,8 +186,6 @@ Dat.prototype.joinSwarm = function () {
 Dat.prototype.close = function () {
   var self = this
   self.swarm.close(function () {
-    self.archive.close(function () {
-      if (self.fileStats) self.fileStats.close()
-    })
+    if (self.fileStats) self.fileStats.close()
   })
 }
