@@ -23,7 +23,7 @@ function Dat (opts) {
   self.dir = opts.dir === '.' ? process.cwd() : path.resolve(opts.dir)
   if (opts.db) self.db = opts.db
   else self.datPath = opts.datPath || path.join(self.dir, '.dat')
-  self.snapshot = opts.snapshot
+  self.snapshot = opts.snapshot || false
   self.port = opts.port
   self.ignore = [/\.dat\//] || opts.ignore
   self.swarm = null
@@ -41,7 +41,7 @@ function Dat (opts) {
   getDb(self, function (err) {
     if (err) return self.emit('error', err)
     var drive = hyperdrive(self.db)
-    var isLive = opts.key ? null : !opts.snapshot
+    var isLive = self.key ? null : !self.snapshot
     self.archive = drive.createArchive(self.key, {
       live: isLive,
       file: function (name) {
@@ -91,8 +91,6 @@ Dat.prototype.share = function (cb) {
       if (self.snapshot) {
         self.joinSwarm()
         self.emit('key', archive.key.toString('hex'))
-        self.emit('archive-finalized')
-        self.db.put('!dat!finalized', true, cb)
       }
 
       self.db.put('!dat!finalized', true, function (err) {
@@ -183,9 +181,12 @@ Dat.prototype.joinSwarm = function () {
   })
 }
 
-Dat.prototype.close = function () {
+Dat.prototype.close = function (cb) {
   var self = this
   self.swarm.close(function () {
-    if (self.fileStats) self.fileStats.close()
+    if (self._fileStatus) self._fileStatus.close()
+    self.archive.close(function () {
+      self.db.close(cb)
+    })
   })
 }
