@@ -13,7 +13,7 @@ var stats = {
   filesTotal: 2,
   bytesTotal: 1441
 }
-var fixturesKey = '4d74013c32ce739d6c6b960c9371fe3689f6dfba23e8f88d03cc202489a3cd65'
+var fixturesKey = '1c9a237203f6397442dfc3430e9e842a2a31ef81c14156a0a3cde83fd614578a'
 var dat
 var liveKey
 
@@ -104,7 +104,7 @@ test('share snapshot', function (t) {
 
   dat.once('key', function (key) {
     // TODO: check this when mtime bugs are fixed
-    t.skip(fixturesKey, key, 'TODO: key matches snapshot key')
+    t.same(fixturesKey, key, 'TODO: key matches snapshot key')
   })
 })
 

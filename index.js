@@ -7,7 +7,7 @@ var createSwarm = require('hyperdrive-archive-swarm')
 var raf = require('random-access-file')
 var speedometer = require('speedometer')
 var each = require('stream-each')
-var append = require('./lib/append')
+var importFiles = require('./lib/count-import')
 var getDb = require('./lib/db')
 
 module.exports = Dat
@@ -73,7 +73,43 @@ Dat.prototype.share = function (cb) {
       self.emit('key', archive.key.toString('hex'))
     }
 
-    append.initialAppend(self, done)
+    var importer = self._fileStatus = importFiles(self.archive, self.dir, {
+      live: archive.live,
+      resume: self.resume,
+      ignore: self.ignore
+    }, function (err) {
+      if (err) return cb(err)
+      if (!archive.live) return done()
+      importer.on('file imported', function (path, mode) {
+        self.emit('archive-updated')
+      })
+      done()
+    })
+
+    importer.on('error', function (err) {
+      self.emit('error', err)
+    })
+
+    importer.on('file-counted', function () {
+      self.emit('file-counted')
+    })
+
+    importer.on('files-counted', function (stats) {
+      self.stats.filesTotal = stats.filesTotal
+      self.stats.bytesTotal = stats.bytesTotal
+    })
+
+    importer.on('file imported', function (path, mode) {
+      self.stats.filesProgress = importer.fileCount
+      self.stats.bytesProgress = importer.totalSize
+      self.emit('file-added')
+    })
+
+    importer.on('file skipped', function (path) {
+      self.stats.filesProgress = importer.fileCount
+      self.stats.bytesProgress = importer.totalSize
+      self.emit('file-added')
+    })
   })
 
   archive.on('upload', function (data) {
@@ -114,9 +150,11 @@ Dat.prototype.download = function (cb) {
   archive.open(function (err) {
     if (err) return cb(err)
     self.db.put('!dat!key', archive.key.toString('hex'))
-    updateTotalStats()
+
+    archive.metadata.once('download-finished', updateTotalStats)
 
     archive.content.on('download-finished', function () {
+      if (self.stats.bytesTotal === 0) updateTotalStats() // TODO: why is this getting here with 0
       self.emit('download-finished')
     })
 
@@ -127,7 +165,7 @@ Dat.prototype.download = function (cb) {
         self.stats.filesProgress += 1
         if (startBytes === self.stats.bytesProgress) {
           // TODO: better way to measure progress with existing files
-          self.stats.bytesProgress += data.length // file already exists
+          self.stats.bytesProgress += data.length
         }
         // if (self.stats.filesProgress === self.stats.filesTotal) self.emit('download-finished')
         next()
@@ -137,8 +175,6 @@ Dat.prototype.download = function (cb) {
       cb(null)
     })
   })
-
-  archive.metadata.once('download-finished', updateTotalStats)
 
   archive.metadata.on('update', function () {
     updateTotalStats()

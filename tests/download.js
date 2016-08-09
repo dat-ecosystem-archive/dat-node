@@ -40,14 +40,14 @@ test('Download with default opts', function (t) {
     dat.download(function (err) {
       t.error(err)
     })
-  })
 
-  dat.once('download-finished', function () {
-    t.same(dat.stats.filesTotal, stats.filesTotal, 'files total match')
-    t.same(dat.stats.bytesTotal, stats.bytesTotal, 'bytes total match')
-    t.pass('download finished event')
-    dat.close(function () {
-      t.end()
+    dat.once('download-finished', function () {
+      t.same(dat.stats.filesTotal, stats.filesTotal, 'files total match')
+      t.same(dat.stats.bytesTotal, stats.bytesTotal, 'bytes total match')
+      t.pass('download finished event')
+      dat.close(function () {
+        t.end()
+      })
     })
   })
 })
