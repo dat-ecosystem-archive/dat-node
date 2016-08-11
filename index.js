@@ -37,6 +37,7 @@ function Dat (opts) {
     rateUp: speedometer(),
     rateDown: speedometer()
   }
+  self.discovery = opts.discovery || true
 
   getDb(self, function (err) {
     if (err) return self._emitError(err)
@@ -75,7 +76,7 @@ Dat.prototype.share = function (cb) {
 
     if ((archive.live || archive.owner) && archive.key) {
       if (!self.key) self.db.put('!dat!key', archive.key.toString('hex'))
-      self._joinSwarm()
+      if (self.discovery) self._joinSwarm()
       self.emit('key', archive.key.toString('hex'))
     }
 
@@ -131,7 +132,7 @@ Dat.prototype.share = function (cb) {
       if (err) return cb(err)
 
       if (self.snapshot) {
-        self._joinSwarm()
+        if (self.discovery) self._joinSwarm()
         self.emit('key', archive.key.toString('hex'))
       }
 
@@ -152,7 +153,7 @@ Dat.prototype.download = function (cb) {
 
   cb = cb || self._emitError
 
-  self._joinSwarm()
+  if (self.discovery) self._joinSwarm()
   self.emit('key', archive.key.toString('hex'))
 
   archive.open(function (err) {

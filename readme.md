@@ -22,6 +22,7 @@ Dat is a decentralized data tool for distributing data and files. **dat-js** is 
 * `dat.swarm`: hyperdrive-archive-swarm instance
 * `dat.archive`: hyperdrive archive
 * `dat.snapshot` (boolean): sharing snapshot archive
+* `dat.discovery` (boolean): join discovery swarm
 
 ### dat.download(cb)
 
