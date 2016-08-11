@@ -39,9 +39,9 @@ function Dat (opts) {
   }
 
   getDb(self, function (err) {
-    if (err) return self.emit('error', err)
+    if (err) return self._emitError(err)
     var drive = hyperdrive(self.db)
-    var isLive = self.key ? null : !self.snapshot
+    var isLive = opts.key ? null : !self.snapshot // need opts.key here. self.key may be populated for resume share
     self.archive = drive.createArchive(self.key, {
       live: isLive,
       file: function (name) {
@@ -50,6 +50,10 @@ function Dat (opts) {
     })
     self.emit('ready')
   })
+
+  self._emitError = function (err) {
+    if (err) self.emit('error', err)
+  }
 }
 
 util.inherits(Dat, events.EventEmitter)
@@ -58,6 +62,8 @@ Dat.prototype.share = function (cb) {
   if (!this.dir) cb(new Error('Directory required for share.'))
   var self = this
   var archive = self.archive
+
+  cb = cb || self._emitError
 
   archive.open(function (err) {
     if (err) return cb(err)
@@ -69,7 +75,7 @@ Dat.prototype.share = function (cb) {
 
     if ((archive.live || archive.owner) && archive.key) {
       if (!self.key) self.db.put('!dat!key', archive.key.toString('hex'))
-      self.joinSwarm()
+      self._joinSwarm()
       self.emit('key', archive.key.toString('hex'))
     }
 
@@ -87,7 +93,7 @@ Dat.prototype.share = function (cb) {
     })
 
     importer.on('error', function (err) {
-      self.emit('error', err)
+      return cb(err)
     })
 
     importer.on('file-counted', function () {
@@ -125,7 +131,7 @@ Dat.prototype.share = function (cb) {
       if (err) return cb(err)
 
       if (self.snapshot) {
-        self.joinSwarm()
+        self._joinSwarm()
         self.emit('key', archive.key.toString('hex'))
       }
 
@@ -144,11 +150,14 @@ Dat.prototype.download = function (cb) {
   var self = this
   var archive = self.archive
 
-  self.joinSwarm()
+  cb = cb || self._emitError
+
+  self._joinSwarm()
   self.emit('key', archive.key.toString('hex'))
 
   archive.open(function (err) {
     if (err) return cb(err)
+    if (!archive.live) self.snapshot = true
     self.db.put('!dat!key', archive.key.toString('hex'))
 
     archive.metadata.once('download-finished', updateTotalStats)
@@ -156,6 +165,7 @@ Dat.prototype.download = function (cb) {
     archive.content.on('download-finished', function () {
       if (self.stats.bytesTotal === 0) updateTotalStats() // TODO: why is this getting here with 0
       self.emit('download-finished')
+      if (self.snapshot) cb(null)
     })
 
     each(archive.list({live: archive.live}), function (data, next) {
@@ -205,7 +215,7 @@ Dat.prototype.download = function (cb) {
   }
 }
 
-Dat.prototype.joinSwarm = function () {
+Dat.prototype._joinSwarm = function () {
   var self = this
   self.swarm = createSwarm(self.archive, {port: self.port})
   self.emit('connecting')
