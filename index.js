@@ -7,6 +7,7 @@ var createSwarm = require('hyperdrive-archive-swarm')
 var raf = require('random-access-file')
 var speedometer = require('speedometer')
 var each = require('stream-each')
+var extend = require('xtend')
 var importFiles = require('./lib/count-import')
 var getDb = require('./lib/db')
 
@@ -15,18 +16,36 @@ module.exports = Dat
 function Dat (opts) {
   if (!(this instanceof Dat)) return new Dat(opts)
   if (!opts) opts = {}
+  if (!opts.dir) throw new Error('dir option required')
   events.EventEmitter.call(this)
+
+  var defaultOpts = {
+    datPath: path.join(opts.dir, '.dat'),
+    snapshot: false,
+    utp: true,
+    ignore: [/\.dat\//],
+    swarm: null,
+    discovery: true,
+    watchFiles: true
+  }
+  opts = extend(defaultOpts, opts) // opts takes priority
 
   var self = this
 
+  self.opts = opts
   self.key = opts.key ? encoding.decode(opts.key) : null
   self.dir = opts.dir === '.' ? process.cwd() : path.resolve(opts.dir)
   if (opts.db) self.db = opts.db
-  else self.datPath = opts.datPath || path.join(self.dir, '.dat')
-  self.snapshot = opts.snapshot || false
+  else self.datPath = opts.datPath
+  self.snapshot = opts.snapshot
   self.port = opts.port
-  self.ignore = [/\.dat\//] || opts.ignore
-  self.swarm = null
+  self.utp = opts.utp
+  self.ignore = opts.ignore
+  self.swarm = opts.swarm
+  self.discovery = opts.discovery
+  self.watchFiles = opts.watchFiles
+  if (self.snapshot) self.watchFiles = false // Can't watch snapshot files
+
   self.stats = {
     filesTotal: 0,
     filesProgress: 0,
@@ -37,9 +56,6 @@ function Dat (opts) {
     rateUp: speedometer(),
     rateDown: speedometer()
   }
-  self.discovery = opts.discovery || true
-  if (self.snapshot) self.watchFiles = false
-  else self.watchFiles = opts.watchFiles || true
 
   getDb(self, function (err) {
     if (err) return self._emitError(err)
@@ -220,7 +236,7 @@ Dat.prototype.download = function (cb) {
 
 Dat.prototype._joinSwarm = function () {
   var self = this
-  self.swarm = createSwarm(self.archive, {port: self.port})
+  self.swarm = createSwarm(self.archive, {port: self.port, utp: self.utp})
   self.emit('connecting')
   self.swarm.on('connection', function (peer) {
     self.emit('swarm-update')

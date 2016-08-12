@@ -20,6 +20,8 @@ Dat is a decentralized data tool for distributing data and files. **dat-js** is 
 * `dat.datPath`: path to .dat folder
 * `dat.db`: database instance
 * `dat.swarm`: hyperdrive-archive-swarm instance
+* `dat.port`: port to use for discovery-swarm
+* `dat.utp`: use utp for discovery-swarm
 * `dat.archive`: hyperdrive archive
 * `dat.snapshot` (boolean): sharing snapshot archive
 * `dat.discovery` (boolean): join discovery swarm
