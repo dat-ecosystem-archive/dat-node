@@ -236,7 +236,7 @@ Dat.prototype.close = function (cb) {
     self.db.close(function () {
       closeSwarm(function () {
         closeFileWatcher()
-        cb()
+        if (cb) cb()
       })
     })
   })
