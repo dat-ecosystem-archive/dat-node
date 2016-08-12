@@ -230,10 +230,22 @@ Dat.prototype._joinSwarm = function () {
 
 Dat.prototype.close = function (cb) {
   var self = this
-  self.swarm.close(function () {
-    if (self._fileStatus) self._fileStatus.close()
-    self.archive.close(function () {
-      self.db.close(cb)
+  self.archive.close(function () {
+    self.db.close(function () {
+      closeSwarm(function () {
+        closeFileWatcher()
+        cb()
+      })
     })
   })
+
+  function closeFileWatcher () {
+    // TODO: add CB
+    if (self._fileStatus) self._fileStatus.close()
+  }
+
+  function closeSwarm (cb) {
+    if (!self.swarm) return cb()
+    self.swarm.close(cb)
+  }
 }
