@@ -38,6 +38,8 @@ function Dat (opts) {
     rateDown: speedometer()
   }
   self.discovery = opts.discovery || true
+  if (self.snapshot) self.watchFiles = false
+  else self.watchFiles = opts.watchFiles || true
 
   getDb(self, function (err) {
     if (err) return self._emitError(err)
@@ -81,7 +83,7 @@ Dat.prototype.share = function (cb) {
     }
 
     var importer = self._fileStatus = importFiles(self.archive, self.dir, {
-      live: archive.live,
+      live: self.watchFiles && archive.live,
       resume: self.resume,
       ignore: self.ignore
     }, function (err) {
