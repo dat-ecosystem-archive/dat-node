@@ -21,12 +21,10 @@ var downloadDir
 
 test('prep', function (t) {
   shareDat = Dat({dir: fixtures})
-  shareDat.once('ready', function () {
-    shareDat.share(function (err) {
-      if (err) throw err
-      testFolder(function () {
-        t.end()
-      })
+  shareDat.share(function (err) {
+    if (err) throw err
+    testFolder(function () {
+      t.end()
     })
   })
   shareDat.once('key', function (key) {
@@ -38,42 +36,40 @@ test('Download with default opts', function (t) {
   t.plan(7)
 
   var dat = Dat({dir: downloadDir, key: shareKey})
-  dat.once('ready', function () {
-    dat.download(function (err) {
-      t.error(err)
-      t.fail('live archive should not call callback')
-    })
+  dat.download(function (err) {
+    t.error(err)
+    t.fail('live archive should not call callback')
+  })
 
-    dat.once('key', function (key) {
-      t.ok(key, 'key emitted')
-    })
+  dat.once('key', function (key) {
+    t.ok(key, 'key emitted')
+  })
 
-    dat.on('file-downloaded', function () {
-      t.pass('file downloaded event')
-    })
+  dat.on('file-downloaded', function () {
+    t.pass('file downloaded event')
+  })
 
-    dat.once('download-finished', function () {
-      t.skip('TODO: why is this firing before file-downloaded')
-      t.same(dat.stats.filesTotal, stats.filesTotal, 'files total match')
-      t.same(dat.stats.bytesTotal, stats.bytesTotal, 'bytes total match')
-      t.pass('download finished event')
+  dat.once('download-finished', function () {
+    t.skip('TODO: why is this firing before file-downloaded')
+    t.same(dat.stats.filesTotal, stats.filesTotal, 'files total match')
+    t.same(dat.stats.bytesTotal, stats.bytesTotal, 'bytes total match')
+    t.pass('download finished event')
 
-      fs.readdir(downloadDir, function (_, files) {
-        var hasCsvFile = files.indexOf('all_hour.csv') > -1
-        var hasDatFolder = files.indexOf('.dat') > -1
-        t.ok(hasDatFolder, '.dat folder created')
-        t.ok(hasCsvFile, 'csv file downloaded')
+    fs.readdir(downloadDir, function (_, files) {
+      var hasCsvFile = files.indexOf('all_hour.csv') > -1
+      var hasDatFolder = files.indexOf('.dat') > -1
+      t.ok(hasDatFolder, '.dat folder created')
+      t.ok(hasCsvFile, 'csv file downloaded')
 
-        if (files.indexOf('folder') > -1) {
-          var subFiles = fs.readdirSync(path.join(downloadDir, 'folder'))
-          var hasEmtpy = subFiles.indexOf('empty.txt') > -1
-          t.skip(hasEmtpy, 'empty.txt file downloaded')
-          // TODO: known hyperdrive issue https://github.com/mafintosh/hyperdrive/issues/83
-        }
+      if (files.indexOf('folder') > -1) {
+        var subFiles = fs.readdirSync(path.join(downloadDir, 'folder'))
+        var hasEmtpy = subFiles.indexOf('empty.txt') > -1
+        t.skip(hasEmtpy, 'empty.txt file downloaded')
+        // TODO: known hyperdrive issue https://github.com/mafintosh/hyperdrive/issues/83
+      }
 
-        dat.close(function () {
-          t.pass('dat closed')
-        })
+      dat.close(function () {
+        t.pass('dat closed')
       })
     })
   })
@@ -89,9 +85,7 @@ test('placeholder to close', function (t) {
 test('download from snapshot', function (t) {
   var shareKey
   shareDat = Dat({dir: fixtures, snapshot: true})
-  shareDat.once('ready', function () {
-    shareDat.share()
-  })
+  shareDat.share()
   shareDat.once('key', function (key) {
     shareKey = key
     download()
@@ -100,20 +94,17 @@ test('download from snapshot', function (t) {
   function download () {
     testFolder(function () {
       var downDat = Dat({key: shareKey, dir: downloadDir})
-      downDat.once('ready', function (err) {
-        t.error(err, 'ready error')
-        downDat.download(function (err) {
-          t.error(err, 'download callback error')
-          t.pass('callback called for non-live archive')
-          fs.readdir(downloadDir, function (_, files) {
-            var hasCsvFile = files.indexOf('all_hour.csv') > -1
-            var hasDatFolder = files.indexOf('.dat') > -1
-            t.ok(hasDatFolder, '.dat folder created')
-            t.ok(hasCsvFile, 'csv file downloaded')
+      downDat.download(function (err) {
+        t.error(err, 'download callback error')
+        t.pass('callback called for non-live archive')
+        fs.readdir(downloadDir, function (_, files) {
+          var hasCsvFile = files.indexOf('all_hour.csv') > -1
+          var hasDatFolder = files.indexOf('.dat') > -1
+          t.ok(hasDatFolder, '.dat folder created')
+          t.ok(hasCsvFile, 'csv file downloaded')
 
-            downDat.close(function () {
-              t.end()
-            })
+          downDat.close(function () {
+            t.end()
           })
         })
       })

@@ -26,6 +26,11 @@ Dat is a decentralized data tool for distributing data and files. **dat-js** is 
 * `dat.snapshot` (boolean): sharing snapshot archive
 * `dat.discovery` (boolean): join discovery swarm
 * `dat.watchFiles` (boolean): whether to watch files live. Archive needs to be live. Defaults to same value as archive.live.
+* `dat.resume`: previous dat resumed. only populated after `dat.open`.
+
+### dat.open(cb)
+
+opens a dat. creates the .dat directory. if .dat directory exists, resumes previous dat. open is called automatically for share and resume.
 
 ### dat.download(cb)
 
@@ -38,11 +43,6 @@ share directory specified in `opts.dir`
 Swarm is automatically joined for key when it is available for share & download.
 
 ## Events
-
-### Initialization
-
-* `dat.on('ready')`: db created/read & hyperdrive archive created.
-* `dat.on('error')`: database error
 
 ### Swarm
 

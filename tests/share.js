@@ -27,8 +27,8 @@ test('Share with default opts', function (t) {
   dat = Dat({dir: fixtures})
   var fileCount = 0
 
-  dat.once('ready', function () {
-    t.pass('emits ready')
+  dat.open(function () {
+    t.pass('open okay')
     t.ok(dat.dir === fixtures, 'correct directory')
     fs.stat(path.join(fixtures, '.dat'), function (err, stat) {
       t.error(err)
@@ -73,14 +73,12 @@ test('Share with default opts', function (t) {
 
 test('Share resume with .dat folder present', function (t) {
   dat = Dat({dir: fixtures})
-  dat.once('ready', function () {
-    dat.share(function (err) {
-      t.error(err, 'share cb without error')
-      t.ok(dat.resume, 'resume flag set')
-      dat.close(cleanFixtures(function () {
-        t.end()
-      }))
-    })
+  dat.share(function (err) {
+    t.error(err, 'share cb without error')
+    t.ok(dat.resume, 'resume flag set')
+    dat.close(cleanFixtures(function () {
+      t.end()
+    }))
   })
 
   dat.once('key', function (key) {
@@ -94,12 +92,10 @@ test('Share resume with .dat folder present', function (t) {
 
 test('share snapshot', function (t) {
   dat = Dat({dir: fixtures, snapshot: true})
-  dat.once('ready', function () {
-    dat.share(function (err) {
-      t.error(err, 'share cb without error')
-      t.ok(dat.snapshot, 'snapshot flag set')
-      t.end()
-    })
+  dat.share(function (err) {
+    t.error(err, 'share cb without error')
+    t.ok(dat.snapshot, 'snapshot flag set')
+    t.end()
   })
 
   dat.once('key', function (key) {

@@ -7,6 +7,7 @@ var createSwarm = require('hyperdrive-archive-swarm')
 var raf = require('random-access-file')
 var speedometer = require('speedometer')
 var each = require('stream-each')
+var thunky = require('thunky')
 var extend = require('xtend')
 var importFiles = require('./lib/count-import')
 var getDb = require('./lib/db')
@@ -38,6 +39,7 @@ function Dat (opts) {
   if (opts.db) self.db = opts.db
   else self.datPath = opts.datPath
   self.snapshot = opts.snapshot
+  self.live = opts.key ? null : !self.snapshot
   self.port = opts.port
   self.utp = opts.utp
   self.ignore = opts.ignore
@@ -57,31 +59,47 @@ function Dat (opts) {
     rateDown: speedometer()
   }
 
-  getDb(self, function (err) {
-    if (err) return self._emitError(err)
-    var drive = hyperdrive(self.db)
-    var isLive = opts.key ? null : !self.snapshot // need opts.key here. self.key may be populated for resume share
-    self.archive = drive.createArchive(self.key, {
-      live: isLive,
-      file: function (name) {
-        return raf(path.join(self.dir, name))
-      }
-    })
-    self.emit('ready')
-  })
+  self.open = thunky(open)
 
   self._emitError = function (err) {
     if (err) self.emit('error', err)
+  }
+
+  function open (cb) {
+    self._open(cb)
   }
 }
 
 util.inherits(Dat, events.EventEmitter)
 
+Dat.prototype._open = function (cb) {
+  if (this._closed) cb('Cannot open a closed Dat')
+  var self = this
+  getDb(self, function (err) {
+    if (err) return self._emitError(err)
+    var drive = hyperdrive(self.db)
+    self.archive = drive.createArchive(self.key, {
+      live: self.live,
+      file: function (name) {
+        return raf(path.join(self.dir, name))
+      }
+    })
+    self._opened = true
+    cb()
+  })
+}
+
 Dat.prototype.share = function (cb) {
   if (!this.dir) cb(new Error('Directory required for share.'))
-  var self = this
-  var archive = self.archive
 
+  var self = this
+  if (!self._opened) {
+    return self.open(function () {
+      self.share(cb)
+    })
+  }
+
+  var archive = self.archive
   cb = cb || self._emitError
 
   archive.open(function (err) {
@@ -104,7 +122,7 @@ Dat.prototype.share = function (cb) {
       ignore: self.ignore
     }, function (err) {
       if (err) return cb(err)
-      if (!archive.live) return done()
+      if (!archive.live || !self.watchFiles) return done()
       importer.on('file imported', function (path, mode) {
         self.emit('archive-updated')
       })
@@ -166,9 +184,15 @@ Dat.prototype.share = function (cb) {
 Dat.prototype.download = function (cb) {
   if (!this.key) cb('Key required for download.')
   if (!this.dir) cb('Directory required for download.')
-  var self = this
-  var archive = self.archive
 
+  var self = this
+  if (!self._opened) {
+    return self.open(function () {
+      self.download(cb)
+    })
+  }
+
+  var archive = self.archive
   cb = cb || self._emitError
 
   if (self.discovery) self._joinSwarm()
@@ -247,7 +271,10 @@ Dat.prototype._joinSwarm = function () {
 }
 
 Dat.prototype.close = function (cb) {
+  if (!cb) cb = noop
   var self = this
+  self._closed = true
+
   self.archive.close(function () {
     self.db.close(function () {
       closeSwarm(function () {
@@ -267,3 +294,5 @@ Dat.prototype.close = function (cb) {
     self.swarm.close(cb)
   }
 }
+
+function noop () {}
