@@ -33,7 +33,7 @@ test('prep', function (t) {
 })
 
 test('Download with default opts', function (t) {
-  t.plan(7)
+  t.plan(10)
 
   var dat = Dat({dir: downloadDir, key: shareKey})
   dat.download(function (err) {
@@ -45,12 +45,12 @@ test('Download with default opts', function (t) {
     t.ok(key, 'key emitted')
   })
 
-  dat.on('file-downloaded', function () {
+  dat.on('file-downloaded', function (entry) {
     t.pass('file downloaded event')
   })
 
   dat.once('download-finished', function () {
-    t.skip('TODO: why is this firing before file-downloaded')
+    t.skip('TODO: this is firing before file-downloaded')
     t.same(dat.stats.filesTotal, stats.filesTotal, 'files total match')
     t.same(dat.stats.bytesTotal, stats.bytesTotal, 'bytes total match')
     t.pass('download finished event')
