@@ -204,19 +204,20 @@ Dat.prototype.download = function (cb) {
     archive.content.on('download-finished', function () {
       if (self.stats.bytesTotal === 0) updateTotalStats() // TODO: why is this getting here with 0
       self.emit('download-finished')
-      if (self.snapshot) cb(null)
     })
 
     each(archive.list({live: archive.live}), function (data, next) {
       var startBytes = self.stats.bytesProgress
       archive.download(data, function (err) {
         if (err) return cb(err)
-        self.stats.filesProgress += 1
         if (startBytes === self.stats.bytesProgress) {
           // TODO: better way to measure progress with existing files
           self.stats.bytesProgress += data.length
         }
-        // if (self.stats.filesProgress === self.stats.filesTotal) self.emit('download-finished')
+        if (data.type === 'file') {
+          self.stats.filesProgress++
+          self.emit('file-downloaded', data)
+        }
         next()
       })
     }, function (err) {
@@ -238,19 +239,24 @@ Dat.prototype.download = function (cb) {
   archive.on('download', function (data) {
     self.stats.bytesProgress += data.length
     self.stats.bytesDown += data.length
-    self.stats.rateDown(data.length)
     self.emit('download', data)
   })
 
   archive.on('upload', function (data) {
     self.stats.bytesUp += data.length
-    self.stats.rateUp(data.length)
     self.emit('upload', data)
   })
 
   function updateTotalStats () {
-    self.stats.filesTotal = archive.metadata.blocks - 1 // first block is header.
     self.stats.bytesTotal = archive.content ? archive.content.bytes : 0
+    var fileCount = 0
+    each(archive.list({live: false}), function (data, next) {
+      if (data.type === 'file') fileCount++
+      next()
+    }, function () {
+      self.stats.filesTotal = fileCount
+    })
+    // self.stats.filesTotal = archive.metadata.blocks - 1 // first block is header.
   }
 }
 
