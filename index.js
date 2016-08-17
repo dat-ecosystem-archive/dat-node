@@ -120,7 +120,9 @@ Dat.prototype.share = function (cb) {
     }, function (err) {
       if (err) return cb(err)
       if (!archive.live || !self.watchFiles) return done()
-      importer.on('file imported', function (path, mode) {
+      importer.on('file imported', function (file) {
+        if (file.mode === 'created') self.stats.filesTotal++
+        self.stats.bytesTotal = archive.content.bytes
         self.emit('archive-updated')
       })
       done()
@@ -139,16 +141,17 @@ Dat.prototype.share = function (cb) {
       self.stats.bytesTotal = stats.bytesTotal
     })
 
-    importer.on('file imported', function (path, mode) {
+    importer.on('file imported', function (file) {
       self.stats.filesProgress = importer.fileCount
       self.stats.bytesProgress = importer.totalSize
-      self.emit('file-added')
+      self.emit('file-added', file)
     })
 
-    importer.on('file skipped', function (path) {
+    importer.on('file skipped', function (file) {
       self.stats.filesProgress = importer.fileCount
       self.stats.bytesProgress = importer.totalSize
-      self.emit('file-added')
+      file.mode = 'skipped'
+      self.emit('file-added', file)
     })
   })
 
