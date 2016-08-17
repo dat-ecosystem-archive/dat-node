@@ -95,7 +95,9 @@ test('share snapshot', function (t) {
   dat.share(function (err) {
     t.error(err, 'share cb without error')
     t.ok(dat.snapshot, 'snapshot flag set')
-    t.end()
+    dat.close(cleanFixtures(function () {
+      t.end()
+    }))
   })
 
   dat.once('key', function (key) {
@@ -104,11 +106,54 @@ test('share snapshot', function (t) {
   })
 })
 
-test.onFinish(function () {
-  dat.close(cleanFixtures)
+test('share live - editing file', function (t) {
+  dat = Dat({dir: fixtures})
+  dat.share(function () {
+    fs.writeFileSync(path.join(fixtures, 'folder', 'empty.txt'), '')
+    dat.once('archive-updated', function () {
+      t.pass('archive update fires')
+      t.same(dat.stats.filesTotal, stats.filesTotal, 'files total correct')
+      dat.close(function () {
+        t.end()
+      })
+    })
+    dat.on('file-added', function (file) {
+      if (file.mode === 'updated') {
+        t.ok(file.path.indexOf('empty.txt') > -1, 'correct file updated')
+      }
+    })
+  })
+})
+
+test('share live - creating new file', function (t) {
+  dat = Dat({dir: fixtures})
+  var newFile = path.join(fixtures, 'new.txt')
+  dat.share(function () {
+    fs.writeFileSync(newFile, 'hello world')
+    dat.once('archive-updated', function () {
+      t.pass('archive update fires')
+      t.same(dat.stats.filesTotal, stats.filesTotal + 1, 'files total correct')
+      fs.unlink(newFile, function () {
+        dat.close(function () {
+          t.end()
+        })
+      })
+    })
+    dat.on('file-added', function (file) {
+      if (file.mode === 'created') {
+        t.ok(file.path.indexOf(newFile) > -1, 'new file with created mode')
+      }
+    })
+  })
+})
+
+test('cleanup', function (t) {
+  dat.close(cleanFixtures(function () {
+    t.end()
+  }))
 })
 
 function cleanFixtures (cb) {
-  if (!cb) cb = function () {}
+  cb = cb || function () {}
   rimraf(path.join(fixtures, '.dat'), cb)
 }
