@@ -277,11 +277,11 @@ Dat.prototype.close = function (cb) {
   var self = this
   self._closed = true
 
-  self.archive.close(function () {
-    self.db.close(function () {
-      closeSwarm(function () {
-        closeFileWatcher()
-        if (cb) cb()
+  closeSwarm(function () {
+    closeFileWatcher()
+    process.nextTick(function () {
+      self.archive.close(function () {
+        self.db.close(cb)
       })
     })
   })
