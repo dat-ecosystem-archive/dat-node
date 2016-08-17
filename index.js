@@ -5,7 +5,6 @@ var encoding = require('dat-encoding')
 var hyperdrive = require('hyperdrive')
 var createSwarm = require('hyperdrive-archive-swarm')
 var raf = require('random-access-file')
-var speedometer = require('speedometer')
 var each = require('stream-each')
 var thunky = require('thunky')
 var extend = require('xtend')
@@ -54,9 +53,7 @@ function Dat (opts) {
     bytesTotal: 0,
     bytesProgress: 0,
     bytesUp: 0,
-    bytesDown: 0,
-    rateUp: speedometer(),
-    rateDown: speedometer()
+    bytesDown: 0
   }
 
   self.open = thunky(open)
@@ -157,7 +154,6 @@ Dat.prototype.share = function (cb) {
 
   archive.on('upload', function (data) {
     self.stats.bytesUp += data.length
-    self.stats.rateUp(data.length)
     self.emit('upload', data)
   })
 

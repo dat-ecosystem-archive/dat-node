@@ -78,8 +78,6 @@ dat.stats = {
     filesTotal: 0,
     bytesTotal: 0,
     bytesUp: 0,
-    bytesDown: 0,
-    rateUp: speedometer(),
-    rateDown: speedometer()
+    bytesDown: 0
 }
 ```
