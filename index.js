@@ -20,11 +20,10 @@ function Dat (opts) {
   events.EventEmitter.call(this)
 
   var defaultOpts = {
-    datPath: path.join(opts.dir, '.dat'),
+    _datPath: path.join(opts.dir, '.dat'),
     snapshot: false,
     utp: true,
     ignore: [/\.dat\//],
-    swarm: null,
     discovery: true,
     watchFiles: true
   }
@@ -36,16 +35,9 @@ function Dat (opts) {
   self.key = opts.key ? encoding.decode(opts.key) : null
   self.dir = opts.dir === '.' ? process.cwd() : path.resolve(opts.dir)
   if (opts.db) self.db = opts.db
-  else self.datPath = opts.datPath
-  self.snapshot = opts.snapshot
-  self.live = opts.key ? null : !self.snapshot
-  self.port = opts.port
-  self.utp = opts.utp
-  self.ignore = opts.ignore
-  self.swarm = opts.swarm
-  self.discovery = opts.discovery
-  self.watchFiles = opts.watchFiles
-  if (self.snapshot) self.watchFiles = false // Can't watch snapshot files
+  else self._datPath = opts._datPath
+  self.live = opts.key ? null : !opts.snapshot
+  if (opts.snapshot) self.opts.watchFiles = false // Can't watch snapshot files
 
   self.stats = {
     filesTotal: 0,
@@ -58,19 +50,19 @@ function Dat (opts) {
 
   self.open = thunky(open)
 
-  self._emitError = function (err) {
-    if (err) self.emit('error', err)
-  }
-
   function open (cb) {
     self._open(cb)
+  }
+
+  self._emitError = function (err) {
+    if (err) self.emit('error', err)
   }
 }
 
 util.inherits(Dat, events.EventEmitter)
 
 Dat.prototype._open = function (cb) {
-  if (this._closed) cb('Cannot open a closed Dat')
+  if (this._closed) return cb('Cannot open a closed Dat')
   var self = this
   getDb(self, function (err) {
     if (err) return self._emitError(err)
@@ -87,7 +79,7 @@ Dat.prototype._open = function (cb) {
 }
 
 Dat.prototype.share = function (cb) {
-  if (!this.dir) cb(new Error('Directory required for share.'))
+  if (!this.dir) return cb(new Error('Directory required for share.'))
 
   var self = this
   if (!self._opened) {
@@ -109,17 +101,17 @@ Dat.prototype.share = function (cb) {
 
     if ((archive.live || archive.owner) && archive.key) {
       if (!self.key) self.db.put('!dat!key', archive.key.toString('hex'))
-      if (self.discovery) self._joinSwarm()
+      self._joinSwarm()
       self.emit('key', archive.key.toString('hex'))
     }
 
     var importer = self._fileStatus = importFiles(self.archive, self.dir, {
-      live: self.watchFiles && archive.live,
+      live: self.opts.watchFiles && archive.live,
       resume: self.resume,
-      ignore: self.ignore
+      ignore: self.opts.ignore
     }, function (err) {
       if (err) return cb(err)
-      if (!archive.live || !self.watchFiles) return done()
+      if (!archive.live || !self.opts.watchFiles) return done()
       importer.on('file imported', function (file) {
         if (file.mode === 'created') self.stats.filesTotal++
         self.stats.bytesTotal = archive.content.bytes
@@ -166,8 +158,8 @@ Dat.prototype.share = function (cb) {
     archive.finalize(function (err) {
       if (err) return cb(err)
 
-      if (self.snapshot) {
-        if (self.discovery) self._joinSwarm()
+      if (self.opts.snapshot) {
+        self._joinSwarm()
         self.emit('key', archive.key.toString('hex'))
       }
 
@@ -181,8 +173,8 @@ Dat.prototype.share = function (cb) {
 }
 
 Dat.prototype.download = function (cb) {
-  if (!this.key) cb('Key required for download.')
-  if (!this.dir) cb('Directory required for download.')
+  if (!this.key) return cb(new Error('Key required for download.'))
+  if (!this.dir) return cb(new Error('Directory required for download.'))
 
   var self = this
   if (!self._opened) {
@@ -194,12 +186,12 @@ Dat.prototype.download = function (cb) {
   var archive = self.archive
   cb = cb || self._emitError
 
-  if (self.discovery) self._joinSwarm()
+  self._joinSwarm()
   self.emit('key', archive.key.toString('hex'))
 
   archive.open(function (err) {
     if (err) return cb(err)
-    if (!archive.live) self.snapshot = true
+    self.live = archive.live
     self.db.put('!dat!key', archive.key.toString('hex'))
 
     archive.metadata.once('download-finished', updateTotalStats)
@@ -259,13 +251,13 @@ Dat.prototype.download = function (cb) {
     }, function () {
       self.stats.filesTotal = fileCount
     })
-    // self.stats.filesTotal = archive.metadata.blocks - 1 // first block is header.
   }
 }
 
 Dat.prototype._joinSwarm = function () {
+  if (!this.opts.discovery) return
   var self = this
-  self.swarm = createSwarm(self.archive, {port: self.port, utp: self.utp})
+  self.swarm = createSwarm(self.archive, {port: self.opts.port, utp: self.opts.utp})
   self.emit('connecting')
   self.swarm.on('connection', function (peer) {
     self.emit('swarm-update')

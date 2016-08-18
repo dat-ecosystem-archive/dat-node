@@ -94,7 +94,7 @@ test('share snapshot', function (t) {
   dat = Dat({dir: fixtures, snapshot: true})
   dat.share(function (err) {
     t.error(err, 'share cb without error')
-    t.ok(dat.snapshot, 'snapshot flag set')
+    t.ok(!dat.live, 'live false')
     dat.close(cleanFixtures(function () {
       t.end()
     }))

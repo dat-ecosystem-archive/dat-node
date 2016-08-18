@@ -133,7 +133,7 @@ test('download from snapshot', function (t) {
 
       downDat.once('download-finished', function () {
         t.pass('download finished')
-        t.ok(downDat.snapshot, 'snapshot value truthy')
+        t.ok(!downDat.live, 'live value false')
       })
     })
   }
