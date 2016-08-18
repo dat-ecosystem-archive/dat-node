@@ -10,6 +10,8 @@ var Dat = require('..')
 // os x adds this if you view the fixtures in finder and breaks the file count assertions
 try { fs.unlinkSync(path.join(__dirname, 'fixtures', '.DS_Store')) } catch (e) { /* ignore error */ }
 
+var downloadDat
+var downloadDir
 var shareDat
 var shareKey
 var fixtures = path.join(__dirname, 'fixtures')
@@ -17,7 +19,6 @@ var stats = {
   filesTotal: 2,
   bytesTotal: 1441
 }
-var downloadDir
 
 test('prep', function (t) {
   shareDat = Dat({dir: fixtures})
@@ -33,9 +34,7 @@ test('prep', function (t) {
 })
 
 test('Download with default opts', function (t) {
-  t.plan(10)
-
-  var dat = Dat({dir: downloadDir, key: shareKey})
+  var dat = downloadDat = Dat({dir: downloadDir, key: shareKey})
   dat.download(function (err) {
     t.error(err)
     t.fail('live archive should not call callback')
@@ -46,11 +45,10 @@ test('Download with default opts', function (t) {
   })
 
   dat.on('file-downloaded', function (entry) {
-    t.pass('file downloaded event')
+    t.skip('TODO: this is firing after file-downloaded')
   })
 
   dat.once('download-finished', function () {
-    t.skip('TODO: this is firing before file-downloaded')
     t.same(dat.stats.filesTotal, stats.filesTotal, 'files total match')
     t.same(dat.stats.bytesTotal, stats.bytesTotal, 'bytes total match')
     t.pass('download finished event')
@@ -67,18 +65,42 @@ test('Download with default opts', function (t) {
         t.skip(hasEmtpy, 'empty.txt file downloaded')
         // TODO: known hyperdrive issue https://github.com/mafintosh/hyperdrive/issues/83
       }
-
-      dat.close(function () {
-        t.pass('dat closed')
-      })
+      dat.removeAllListeners()
+      t.end()
     })
   })
 })
 
-test('placeholder to close', function (t) {
+test('download and live update', function (t) {
+  var dat = downloadDat // use previous test download
+
+  updateShareFile()
+
+  dat.on('archive-updated', function () {
+    t.pass('archive updated event')
+  })
+
+  dat.on('file-downloaded', function (file) {
+    t.ok(file.name.indexOf('empty.txt') > -1, 'file updated')
+    t.end()
+  })
+
+  dat.on('download-finished', function () {
+    t.skip('TODO: download finished fires again')
+    // t.end()
+  })
+
+  function updateShareFile () {
+    fs.writeFileSync(path.join(fixtures, 'folder', 'empty.txt'), '')
+  }
+})
+
+test('close first test', function (t) {
   shareDat.close(function () {
     rimraf.sync(path.join(fixtures, '.dat'))
-    t.end()
+    downloadDat.close(function () {
+      t.end()
+    })
   })
 })
 
