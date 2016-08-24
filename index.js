@@ -23,7 +23,7 @@ function Dat (opts) {
     _datPath: path.join(opts.dir, '.dat'),
     snapshot: false,
     utp: true,
-    ignore: [/\.dat\//],
+    ignore: [/\.dat\//], // TODO: always ignore .dat if opts.ignore is specified
     discovery: true,
     watchFiles: true
   }
@@ -96,7 +96,7 @@ Dat.prototype.share = function (cb) {
 
     if (archive.key && !archive.owner) {
       // TODO: allow this but change to download
-      cb('Dat previously downloaded. Run dat ' + encoding.encode(archive.key) + ' to resume')
+      return cb('Dat previously downloaded. Run dat ' + encoding.encode(archive.key) + ' to resume')
     }
 
     if ((archive.live || archive.owner) && archive.key) {
