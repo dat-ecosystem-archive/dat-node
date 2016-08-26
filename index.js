@@ -217,7 +217,7 @@ Dat.prototype.download = function (cb) {
       })
     }, function (err) {
       if (err) return cb(err)
-      cb(null)
+      return cb(null)
     })
   })
 
@@ -279,9 +279,11 @@ Dat.prototype.close = function (cb) {
     closeFileWatcher()
     self.archive.close(function () {
       console.log('archive closed')
-      self.db.close(function () {
-        console.log('db closed')
-        return cb()
+      process.nextTick(function () {
+        self.db.close(function () {
+          console.log('db closed')
+          return cb()
+        })
       })
     })
   })
