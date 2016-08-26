@@ -140,7 +140,7 @@ test('share live - creating new file', function (t) {
   dat = Dat({dir: fixtures})
   var newFile = path.join(fixtures, 'new.txt')
   dat.share(function (err) {
-    t.error(err)
+    t.error(err, 'share ok')
     dat.once('archive-updated', function () {
       t.pass('archive update fires')
       t.same(dat.stats.filesTotal, stats.filesTotal + 1, 'files total correct')
@@ -153,6 +153,8 @@ test('share live - creating new file', function (t) {
     dat.on('file-added', function (file) {
       if (file.mode === 'created') {
         t.ok(file.path.indexOf(newFile) > -1, 'new file with created mode')
+      } else {
+        t.fail('wrong file mode')
       }
     })
     fs.writeFile(newFile, 'hello world', function (err) {
