@@ -274,10 +274,8 @@ Dat.prototype.close = function (cb) {
 
   closeSwarm(function () {
     closeFileWatcher()
-    process.nextTick(function () {
-      self.archive.close(function () {
-        self.db.close(cb)
-      })
+    self.archive.close(function () {
+      self.db.close(cb)
     })
   })
 

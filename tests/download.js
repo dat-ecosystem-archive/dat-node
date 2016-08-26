@@ -126,6 +126,7 @@ test('download from snapshot', function (t) {
           t.ok(hasCsvFile, 'csv file downloaded')
 
           downDat.close(function () {
+            t.pass('close callback ok')
             t.end()
           })
         })
