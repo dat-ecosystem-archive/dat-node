@@ -139,7 +139,8 @@ test('share live - editing file', function (t) {
 test('share live - creating new file', function (t) {
   dat = Dat({dir: fixtures})
   var newFile = path.join(fixtures, 'new.txt')
-  dat.share(function () {
+  dat.share(function (err) {
+    t.error(err)
     fs.writeFileSync(newFile, 'hello world')
     dat.once('archive-updated', function () {
       t.pass('archive update fires')
