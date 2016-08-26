@@ -217,7 +217,7 @@ Dat.prototype.download = function (cb) {
       })
     }, function (err) {
       if (err) return cb(err)
-      cb(null)
+      return cb(null)
     })
   })
 
@@ -275,7 +275,7 @@ Dat.prototype.close = function (cb) {
   closeSwarm(function () {
     closeFileWatcher()
     self.archive.close(function () {
-      self.db.close(cb)
+      cb()
     })
   })
 

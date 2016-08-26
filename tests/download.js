@@ -21,6 +21,7 @@ var stats = {
 }
 
 test('prep', function (t) {
+  rimraf.sync(path.join(fixtures, '.dat')) // for previous failed tests
   shareDat = Dat({dir: fixtures})
   shareDat.share(function (err) {
     if (err) throw err
@@ -97,9 +98,11 @@ test('download and live update', function (t) {
 
 test('close first test', function (t) {
   shareDat.close(function () {
-    rimraf.sync(path.join(fixtures, '.dat'))
     downloadDat.close(function () {
-      t.end()
+      shareDat.db.close(function () {
+        rimraf.sync(path.join(fixtures, '.dat'))
+        t.end()
+      })
     })
   })
 })
@@ -142,7 +145,10 @@ test('download from snapshot', function (t) {
 
 test('finished', function (t) {
   shareDat.close(function () {
-    t.end()
+    shareDat.db.close(function () {
+      rimraf.sync(path.join(fixtures, '.dat'))
+      t.end()
+    })
   })
 })
 
