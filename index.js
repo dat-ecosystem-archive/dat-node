@@ -279,12 +279,7 @@ Dat.prototype.close = function (cb) {
     closeFileWatcher()
     self.archive.close(function () {
       console.log('archive closed')
-      process.nextTick(function () {
-        self.db.close(function () {
-          console.log('db closed')
-          return cb()
-        })
-      })
+      cb()
     })
   })
 
