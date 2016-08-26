@@ -39,7 +39,9 @@ test('Share with default opts', function (t) {
       t.error(err, 'no sharing error')
       t.pass('share callback called')
       dat.close(function () {
-        t.end()
+        dat.db.close(function () {
+          t.end()
+        })
       })
     })
   })
@@ -76,9 +78,13 @@ test('Share resume with .dat folder present', function (t) {
   dat.share(function (err) {
     t.error(err, 'share cb without error')
     t.ok(dat.resume, 'resume flag set')
-    dat.close(cleanFixtures(function () {
-      t.end()
-    }))
+    dat.close(function () {
+      dat.db.close(function () {
+        cleanFixtures(function () {
+          t.end()
+        })
+      })
+    })
   })
 
   dat.once('key', function (key) {
@@ -96,7 +102,10 @@ test('share snapshot', function (t) {
     t.error(err, 'share cb without error')
     t.ok(!dat.live, 'live false')
     dat.close(cleanFixtures(function () {
-      t.end()
+      dat.db.close(function () {
+        rimraf.sync(path.join(fixtures, '.dat'))
+        t.end()
+      })
     }))
   })
 
@@ -114,7 +123,9 @@ test('share live - editing file', function (t) {
       t.pass('archive update fires')
       t.same(dat.stats.filesTotal, stats.filesTotal, 'files total correct')
       dat.close(function () {
-        t.end()
+        dat.db.close(function () {
+          t.end()
+        })
       })
     })
     dat.on('file-added', function (file) {
