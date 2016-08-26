@@ -23,7 +23,7 @@ function Dat (opts) {
     _datPath: path.join(opts.dir, '.dat'),
     snapshot: false,
     utp: true,
-    ignore: [/\.dat\//], // TODO: always ignore .dat if opts.ignore is specified
+    ignore: [/\.dat\/+/, /\.dat$/], // TODO: always ignore .dat if opts.ignore is specified
     discovery: true,
     watchFiles: true
   }
