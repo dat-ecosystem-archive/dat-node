@@ -272,25 +272,19 @@ Dat.prototype.close = function (cb) {
   var self = this
   self._closed = true
 
-  console.log('closing dat')
-
   closeSwarm(function () {
-    console.log('swarm closed')
     closeFileWatcher()
     self.archive.close(function () {
-      console.log('archive closed')
       cb()
     })
   })
 
   function closeFileWatcher () {
     // TODO: add CB
-    console.log('closing file watcher')
     if (self._fileStatus) self._fileStatus.close()
   }
 
   function closeSwarm (cb) {
-    console.log('closing swarm')
     if (!self.swarm) return cb()
     self.swarm.close(cb)
   }
