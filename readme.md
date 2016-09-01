@@ -1,6 +1,6 @@
 # Dat-js [![Travis](https://api.travis-ci.org/joehand/dat-js.svg)](https://travis-ci.org/joehand/dat-js) [![npm](https://img.shields.io/npm/v/npm.svg?maxAge=2592000)]()
 
-[<img src="https://raw.githubusercontent.com/datproject/design/master/public/img/dat-data-logo.svg" align="right" width="140">](https://dat-data.com)
+[<img src="https://raw.githubusercontent.com/datproject/design/master/downloads/dat-data-logo.png" align="right" width="140">](http://dat-data.com)
 
 [Dat](https://dat-data.com) is a decentralized data tool for distributing data and files. **Dat-js** is a node module to help you build applications with Dat. Do you want to use Dat in the command line? Check out the command line interface at [datproject/dat](https://github.com/datproject/dat).
 
