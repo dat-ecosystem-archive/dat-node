@@ -9,10 +9,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- Change types:
   ### Added, ### Changed, ### Fixed, ### Removed, ### Deprecated
 -->
-### Fixed
-* User `opts.ignore` extends default opts.
-* Default ignore does not ignore files with .dat in them.
 
+
+## 3.1.0 - 2016-09-01
+### Added
+* User `opts.ignore` extends default opts.
+
+### Fixed
+* Default ignore does not ignore files with .dat in them.
 
 ## 3.0.2 - 2016-08-26
 ### Fixed
