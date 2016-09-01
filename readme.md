@@ -94,6 +94,7 @@ The main goal of the API is to support the Dat command line tool. The options he
   ignore: ['dir/**', 'files.**'], // ignore files. uses anymatch to check paths
   dat.snapshot: false, //: sharing snapshot archive, not used for download
   dat.watchFiles: true, // watch files for changes. Archive needs to be live. Defaults to same value as archive.live.
+  dat.upload: true, // upload data. set to false off to allow download only
   dat.discovery: true, // join discovery swarm when ready
   dat.port: 3828, // port to use for discovery-swarm
   dat.utp: true, // use utp for discovery-swarm

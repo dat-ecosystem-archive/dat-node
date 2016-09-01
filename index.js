@@ -21,11 +21,12 @@ function Dat (opts) {
 
   var defaultOpts = {
     _datPath: path.join(opts.dir, '.dat'),
-    snapshot: false,
-    utp: true,
     ignore: [/\/\.dat\/.*/, /\/\.dat\/?.*$/, /^\.dat\/?.*$/],
+    snapshot: false,
+    watchFiles: true,
+    upload: true,
     discovery: true,
-    watchFiles: true
+    utp: true
   }
   if (opts.ignore && Array.isArray(opts.ignore)) opts.ignore = opts.ignore.concat(defaultOpts.ignore)
   else if (opts.ignore) opts.ignore = [opts.ignore].concat(defaultOpts.ignore)
@@ -259,7 +260,11 @@ Dat.prototype.download = function (cb) {
 Dat.prototype._joinSwarm = function () {
   if (!this.opts.discovery) return
   var self = this
-  self.swarm = createSwarm(self.archive, {port: self.opts.port, utp: self.opts.utp})
+  self.swarm = createSwarm(self.archive, {
+    port: self.opts.port,
+    utp: self.opts.utp,
+    upload: self.opts.upload
+  })
   self.emit('connecting')
   self.swarm.on('connection', function (peer) {
     self.emit('swarm-update')
