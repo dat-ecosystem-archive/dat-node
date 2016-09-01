@@ -23,10 +23,12 @@ function Dat (opts) {
     _datPath: path.join(opts.dir, '.dat'),
     snapshot: false,
     utp: true,
-    ignore: [/\.dat\/+/, /\.dat$/], // TODO: always ignore .dat if opts.ignore is specified
+    ignore: [/\/\.dat\/.*/, /\/\.dat\/?.*$/, /^\.dat\/?.*$/],
     discovery: true,
     watchFiles: true
   }
+  if (opts.ignore && Array.isArray(opts.ignore)) opts.ignore = opts.ignore.concat(defaultOpts.ignore)
+  else if (opts.ignore) opts.ignore = [opts.ignore].concat(defaultOpts.ignore)
   opts = extend(defaultOpts, opts) // opts takes priority
 
   var self = this
