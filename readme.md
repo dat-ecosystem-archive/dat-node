@@ -1,4 +1,4 @@
-# Dat-js [![Travis](https://api.travis-ci.org/joehand/dat-js.svg)](https://travis-ci.org/joehand/dat-js) [![npm](https://img.shields.io/npm/v/npm.svg?maxAge=2592000)]()
+# Dat-js [![Travis](https://api.travis-ci.org/joehand/dat-js.svg)](https://travis-ci.org/joehand/dat-js) [![npm](https://img.shields.io/npm/v/dat-js.svg?style=flat-square)](https://npmjs.org/package/dat-js)
 
 [<img src="https://raw.githubusercontent.com/datproject/design/master/downloads/dat-data-logo.png" align="right" width="140">](http://dat-data.com)
 
@@ -174,4 +174,4 @@ Read about contribution and node module development tips in the [dat repository]
 
 ## License
 
-[MIT © Joe Hand](../LICENSE)
+MIT © Joe Hand
