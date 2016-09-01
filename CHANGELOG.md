@@ -9,9 +9,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- Change types:
   ### Added, ### Changed, ### Fixed, ### Removed, ### Deprecated
 -->
+
+
+## 3.2.0 - 2016-09-01
 ### Added
 * Upload option. `upload=false` will not upload data (allows download only option)
-
 
 ## 3.1.0 - 2016-09-01
 ### Added
