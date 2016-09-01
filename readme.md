@@ -1,11 +1,22 @@
-# Dat-js [![Travis](https://api.travis-ci.org/joehand/dat-js.svg)](https://travis-ci.org/joehand/dat-js)
+# Dat-js [![Travis](https://api.travis-ci.org/joehand/dat-js.svg)](https://travis-ci.org/joehand/dat-js) [![npm](https://img.shields.io/npm/v/npm.svg?maxAge=2592000)]()
 
-[<img src="http://dat-data.com/static/img/dat-data.png" align="right" width="140">](https://dat-data.com)
+[<img src="https://raw.githubusercontent.com/datproject/design/master/public/img/dat-data-logo.svg" align="right" width="140">](https://dat-data.com)
 
-[Dat](https://dat-data.com) is a decentralized data tool for distributing data and files. **Dat-js** is a node module to help you build applications with Dat. Do you want to use Dat in the command line? Check out the command line interface at [maxogden/dat](https://github.com/maxogden/dat).
+[Dat](https://dat-data.com) is a decentralized data tool for distributing data and files. **Dat-js** is a node module to help you build applications with Dat. Do you want to use Dat in the command line? Check out the command line interface at [datproject/dat](https://github.com/datproject/dat).
 
-**Chat with us!** [![#dat IRC channel on freenode](https://img.shields.io/badge/irc%20channel-%23dat%20on%20freenode-blue.svg)](http://webchat.freenode.net/?channels=dat)
+**Chat with us!**   [![#dat IRC channel on freenode](https://img.shields.io/badge/irc%20channel-%23dat%20on%20freenode-blue.svg)](http://webchat.freenode.net/?channels=dat)
 [![datproject/discussions](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/datproject/discussions?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
+[![JavaScript Style Guide](https://cdn.rawgit.com/feross/standard/master/badge.svg)](https://github.com/feross/standard)
+
+## Table of Contents
+
+- [Examples](#examples)
+- [Installation](#installation)
+- [Usage](#usage)
+- [API](#api)
+- [Contribute](#contribute)
+- [License](#license)
 
 ## Examples
 
@@ -37,17 +48,15 @@ dat.on('download-finished', function (err) {
 })
 ```
 
-## Getting Started
-
-Dat-js provides an interface for sharing and downloading files, like we do in the Dat command line tool. Dat-js works great if you want to manage Dat folders in a way that is compatible with the Dat CLI and other Dat tools.
-
-### Installation
+## Installation
 
 ```
 npm install dat-js
 ```
 
-### Usage
+## Usage
+
+Dat-js provides an interface for sharing and downloading files, like we do in the Dat command line tool. Dat-js works great if you want to manage Dat folders in a way that is compatible with the Dat CLI and other Dat tools.
 
 Dat-js works the same way as the command line tool. There are two basic operations:
 
@@ -76,7 +85,7 @@ From there, you can either share or download: `dat.share(cb)` or `dat.download(c
 
 The main goal of the API is to support the Dat command line tool. The options here should be familiar if you use the command line tool. 
 
-## Options
+### Options
 
 ```js
 {
@@ -115,9 +124,9 @@ Dat is live. When downloading, this will be set to the true if the remote Dat is
 
 Previous dat resumed. Populated after `dat.open`.
 
-## Events
+### Events
 
-### Share Events
+#### Share Events
 
 * `dat.on('key')`: key is available (this is at archive-finalized for snapshots)
 * `dat.on('file-counted', file)`: file counted
@@ -127,7 +136,7 @@ Previous dat resumed. Populated after `dat.open`.
 * `dat.on('archive-finalized')`: archive finalized, all files appended
 * `dat.on('archive-updated')`: live archive changed
 
-### Download Events
+#### Download Events
 
 * `dat.on('key')`: key is available
 * `dat.on('file-downloaded', file)`: file downloaded
@@ -135,7 +144,7 @@ Previous dat resumed. Populated after `dat.open`.
 * `dat.on('upload', data)`: piece of data uploaded
 * `dat.on('download-finished')`: archive download finished
 
-### Swarm Events
+#### Swarm Events
 
 Swarm events and stats are available from `dat.swarm`.
 
@@ -157,6 +166,12 @@ dat.stats = {
 }
 ```
 
+## Contribute
+
+Contributions are welcome! Currently we plan to limit the feature set to features used in the [Dat CLI](https://github.com/datproject/dat).
+
+Read about contribution and node module development tips in the [dat repository](https://github.com/datproject/dat/blob/master/CONTRIBUTING.md).
+
 ## License
 
-MIT
+[MIT © Joe Hand](../LICENSE)
