@@ -127,6 +127,10 @@ Dat is live. When downloading, this will be set to the true if the remote Dat is
 
 Previous dat resumed. Populated after `dat.open`.
 
+### `dat.options`
+
+Options passed on initialization and default options set.
+
 ### Events
 
 #### Share Events
