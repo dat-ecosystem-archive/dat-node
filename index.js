@@ -26,7 +26,8 @@ function Dat (opts) {
     watchFiles: true,
     upload: true,
     discovery: true,
-    utp: true
+    utp: true,
+    webrtc: undefined // false would turn off wrtc even if supported
   }
   if (opts.ignore && Array.isArray(opts.ignore)) opts.ignore = opts.ignore.concat(defaultOpts.ignore)
   else if (opts.ignore) opts.ignore = [opts.ignore].concat(defaultOpts.ignore)
@@ -34,13 +35,13 @@ function Dat (opts) {
 
   var self = this
 
-  self.opts = opts
+  self.options = opts
   self.key = opts.key ? encoding.decode(opts.key) : null
   self.dir = opts.dir === '.' ? process.cwd() : path.resolve(opts.dir)
   if (opts.db) self.db = opts.db
   else self._datPath = opts._datPath
   self.live = opts.key ? null : !opts.snapshot
-  if (opts.snapshot) self.opts.watchFiles = false // Can't watch snapshot files
+  if (opts.snapshot) self.options.watchFiles = false // Can't watch snapshot files
 
   self.stats = {
     filesTotal: 0,
@@ -109,12 +110,12 @@ Dat.prototype.share = function (cb) {
     }
 
     var importer = self._fileStatus = importFiles(self.archive, self.dir, {
-      live: self.opts.watchFiles && archive.live,
+      live: self.options.watchFiles && archive.live,
       resume: self.resume,
-      ignore: self.opts.ignore
+      ignore: self.options.ignore
     }, function (err) {
       if (err) return cb(err)
-      if (!archive.live || !self.opts.watchFiles) return done()
+      if (!archive.live || !self.options.watchFiles) return done()
       importer.on('file imported', function (file) {
         if (file.mode === 'created') self.stats.filesTotal++
         self.stats.bytesTotal = archive.content.bytes
@@ -161,7 +162,7 @@ Dat.prototype.share = function (cb) {
     archive.finalize(function (err) {
       if (err) return cb(err)
 
-      if (self.opts.snapshot) {
+      if (self.options.snapshot) {
         self._joinSwarm()
         self.emit('key', archive.key.toString('hex'))
       }
@@ -258,12 +259,13 @@ Dat.prototype.download = function (cb) {
 }
 
 Dat.prototype._joinSwarm = function () {
-  if (!this.opts.discovery) return
+  if (!this.options.discovery) return
   var self = this
   self.swarm = createSwarm(self.archive, {
-    port: self.opts.port,
-    utp: self.opts.utp,
-    upload: self.opts.upload
+    port: self.options.port,
+    utp: self.options.utp,
+    upload: self.options.upload,
+    wrtc: self.options.webrtc
   })
   self.emit('connecting')
   self.swarm.on('connection', function (peer) {
