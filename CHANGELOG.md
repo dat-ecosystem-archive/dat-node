@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   ### Added, ### Changed, ### Fixed, ### Removed, ### Deprecated
 -->
 
+## 3.3.1 - 2016-09-06
+### Fixed
+* Emit `files-counted` event on Dat instance
+* Include `stats` object on `file-counted` event
+
 ## 3.3.0 - 2016-09-06
 ### Added
 * Add `webrtc` option

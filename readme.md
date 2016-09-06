@@ -132,7 +132,7 @@ Previous dat resumed. Populated after `dat.open`.
 #### Share Events
 
 * `dat.on('key')`: key is available (this is at archive-finalized for snapshots)
-* `dat.on('file-counted', file)`: file counted
+* `dat.on('file-counted', stats)`: file counted, stats is progress file stats
 * `dat.on('files-counted', stats)`: total file count available, this fires before files are added to archive
 * `dat.on('file-added', file)`: file added to archive
 * `dat.on('upload', data)`: piece of data uploaded

@@ -128,13 +128,14 @@ Dat.prototype.share = function (cb) {
       return cb(err)
     })
 
-    importer.on('file-counted', function () {
-      self.emit('file-counted')
+    importer.on('file-counted', function (stats) {
+      self.emit('file-counted', stats)
     })
 
     importer.on('files-counted', function (stats) {
       self.stats.filesTotal = stats.filesTotal
       self.stats.bytesTotal = stats.bytesTotal
+      self.emit('files-counted', stats)
     })
 
     importer.on('file imported', function (file) {
