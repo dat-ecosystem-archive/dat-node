@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   ### Added, ### Changed, ### Fixed, ### Removed, ### Deprecated
 -->
 
+## 3.3.0 - 2016-09-06
+### Added
+* Add `webrtc` option
 
 ## 3.2.0 - 2016-09-01
 ### Added

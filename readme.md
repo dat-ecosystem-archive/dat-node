@@ -92,13 +92,14 @@ The main goal of the API is to support the Dat command line tool. The options he
   dir: 'downloads/path-to-dir/', // path to share or download to. always required
   key: '64characterDatkey', // required for downloads
   ignore: ['dir/**', 'files.**'], // ignore files. uses anymatch to check paths
-  dat.snapshot: false, //: sharing snapshot archive, not used for download
-  dat.watchFiles: true, // watch files for changes. Archive needs to be live. Defaults to same value as archive.live.
-  dat.upload: true, // upload data. set to false off to allow download only
-  dat.discovery: true, // join discovery swarm when ready
-  dat.port: 3828, // port to use for discovery-swarm
-  dat.utp: true, // use utp for discovery-swarm
-  dat.db: level('.dat') // hyperdrive compatible database, uses levelDB .dat folder by default
+  snapshot: false, //: sharing snapshot archive, not used for download
+  watchFiles: true, // watch files for changes. Archive needs to be live. Defaults to same value as archive.live.
+  upload: true, // upload data. set to false off to allow download only
+  discovery: true, // join discovery swarm when ready
+  port: 3828, // port to use for discovery-swarm
+  utp: true, // use utp for discovery-swarm
+  webrtc: undefined, // false to turn off webrtc, if supported. if not supported, instance of electron-webrtc (or another way to support webrtc)
+  db: level('.dat') // hyperdrive compatible database, uses levelDB .dat folder by default
 }
 ```
 
