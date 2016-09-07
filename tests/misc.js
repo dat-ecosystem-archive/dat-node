@@ -1,5 +1,8 @@
+var path = require('path')
 var test = require('tape')
 var anymatch = require('anymatch')
+var rimraf = require('rimraf')
+var memdb = require('memdb')
 
 var Dat = require('..')
 
@@ -35,4 +38,64 @@ test('custom ignore extends default (array)', function (t) {
   t.ok(anymatch(matchers, 'super_secret_stuff/file.js'), 'secret stuff stays secret')
   t.notOk(anymatch(matchers, 'foo/bar.js'), 'js file joins the party =)')
   t.end()
+})
+
+test('custom db option', function (t) {
+  var dat = Dat({db: memdb(), dir: process.cwd()})
+  dat.open(function (err) {
+    t.error(err)
+    t.ok(dat.db.db instanceof require('memdown'), 'db is memdown')
+
+    dat.close(function () {
+      t.end()
+    })
+  })
+})
+
+test('snapshot option', function (t) {
+  var dat = Dat({snapshot: true, dir: process.cwd()})
+  dat.open(function (err) {
+    t.error(err)
+    t.ok(dat.options.snapshot, 'snapshot true')
+    t.ok(!dat.live, 'dat not live')
+    t.ok(!dat.archive.live, 'archive not live')
+    t.ok(!dat.options.watchFiles, 'watch files false')
+
+    dat.close(function () {
+      dat.db.close(function () {
+        rimraf(path.join(process.cwd(), '.dat'), function () {
+          t.end()
+        })
+      })
+    })
+  })
+})
+
+test('swarm options', function (t) {
+  var dat = Dat({utp: false, port: 1234, upload: false, webrtc: false, dir: process.cwd()})
+  dat.open(function (err) {
+    t.error(err)
+    dat.once('connecting', function () {
+      var swarm = dat.swarm
+
+      t.ok(!swarm.opts.discovery.utp, 'utp discovery false')
+      t.ok(!swarm.node._utp, 'No utp discovery')
+
+      t.same(swarm.opts.port, 1234, 'port option set on swarm')
+      t.same(swarm.node.address().port, 1234, 'port on node swarm okay')
+
+      t.ok(!swarm.uploading, 'Upload false set on swarm')
+
+      t.ok(!swarm.opts.wrtc, 'Swarm webrtc option false')
+
+      dat.close(function () {
+        dat.db.close(function () {
+          rimraf(path.join(process.cwd(), '.dat'), function () {
+            t.end()
+          })
+        })
+      })
+    })
+    dat._joinSwarm()
+  })
 })
