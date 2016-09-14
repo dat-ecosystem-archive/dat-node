@@ -72,7 +72,7 @@ test('snapshot option', function (t) {
 })
 
 test('swarm options', function (t) {
-  var dat = Dat({utp: false, port: 1234, upload: false, webrtc: false, dir: process.cwd()})
+  var dat = Dat({utp: false, port: 1234, discovery: {upload: false}, webrtc: false, dir: process.cwd()})
   dat.open(function (err) {
     t.error(err)
     dat.once('connecting', function () {
@@ -87,6 +87,26 @@ test('swarm options', function (t) {
       t.ok(!swarm.uploading, 'Upload false set on swarm')
 
       t.ok(!swarm.opts.wrtc, 'Swarm webrtc option false')
+
+      dat.close(function () {
+        dat.db.close(function () {
+          rimraf(path.join(process.cwd(), '.dat'), function () {
+            t.end()
+          })
+        })
+      })
+    })
+    dat._joinSwarm()
+  })
+})
+
+test('swarm options 3.2.x compat', function (t) {
+  var dat = Dat({upload: false, dir: process.cwd()})
+  dat.open(function (err) {
+    t.error(err)
+    dat.once('connecting', function () {
+      var swarm = dat.swarm
+      t.ok(!swarm.uploading, 'Upload false set on swarm')
 
       dat.close(function () {
         dat.db.close(function () {

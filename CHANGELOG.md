@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- Change types:
   ### Added, ### Changed, ### Fixed, ### Removed, ### Deprecated
 -->
+### Changed
+* Accept object for discovery: `{upload: true, download: true}`.
+
+### Deprecated
+* `upload` option (moved to `discovery.upload`). Will be removed in 4.0.0.
 
 ## 3.3.1 - 2016-09-06
 ### Fixed

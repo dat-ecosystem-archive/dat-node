@@ -24,13 +24,13 @@ function Dat (opts) {
     ignore: [/\/\.dat\/.*/, /\/\.dat\/?.*$/, /^\.dat\/?.*$/],
     snapshot: false,
     watchFiles: true,
-    upload: true,
     discovery: true,
     utp: true,
     webrtc: undefined // false would turn off wrtc even if supported
   }
   if (opts.ignore && Array.isArray(opts.ignore)) opts.ignore = opts.ignore.concat(defaultOpts.ignore)
   else if (opts.ignore) opts.ignore = [opts.ignore].concat(defaultOpts.ignore)
+  if (typeof opts.upload !== 'undefined' && typeof opts.discovery === 'undefined') opts.discovery = {upload: opts.upload, download: true} // 3.2.0 backwards compat
   opts = extend(defaultOpts, opts) // opts takes priority
 
   var self = this
@@ -260,12 +260,16 @@ Dat.prototype.download = function (cb) {
 }
 
 Dat.prototype._joinSwarm = function () {
-  if (!this.options.discovery) return
   var self = this
+  if (!self.options.discovery) return
+  var discovery = self.options.discovery || {}
+  if (typeof self.options.discovery !== 'object') discovery = {upload: true, download: true}
+
   self.swarm = createSwarm(self.archive, {
     port: self.options.port,
     utp: self.options.utp,
-    upload: self.options.upload,
+    upload: discovery.upload,
+    download: discovery.download,
     wrtc: self.options.webrtc
   })
   self.emit('connecting')

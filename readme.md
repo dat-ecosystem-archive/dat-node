@@ -94,8 +94,7 @@ The main goal of the API is to support the Dat command line tool. The options he
   ignore: ['dir/**', 'files.**'], // ignore files. uses anymatch to check paths
   snapshot: false, //: sharing snapshot archive, not used for download
   watchFiles: true, // watch files for changes. Archive needs to be live. Defaults to same value as archive.live.
-  upload: true, // upload data. set to false off to allow download only
-  discovery: true, // join discovery swarm when ready
+  discovery: {upload: true, download: true}, // Join swarm and upload/download data. Set to false to disable discovery
   port: 3828, // port to use for discovery-swarm. port value is saved in database for subsequent uses
   utp: true, // use utp for discovery-swarm
   webrtc: undefined, // false to turn off webrtc, if supported. if not supported, instance of electron-webrtc (or another way to support webrtc)
