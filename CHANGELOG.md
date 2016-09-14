@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- Change types:
   ### Added, ### Changed, ### Fixed, ### Removed, ### Deprecated
 -->
+
+## 3.4.0 - 2016-09-14
 ### Changed
 * Accept object for discovery: `{upload: true, download: true}`.
 
