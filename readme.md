@@ -163,12 +163,14 @@ Stats we track internally for progress displays. It is not recommended to use th
 
 ```js
 dat.stats = {
-    filesProgress: 0,
-    bytesProgress: 0,
     filesTotal: 0,
-    bytesTotal: 0,
-    bytesUp: 0,
-    bytesDown: 0
+    filesProgress: 0,
+    bytesTotal: 0, // archive.content.bytes
+    bytesProgress: 0, // file import progress
+    blocksTotal: 0, // archive.content.blocks
+    blocksProgress: 0, // download progress
+    bytesUp: 0, // archive.on('upload', data.length)
+    bytesDown: 0 // archive.on('download', data.length)
 }
 ```
 
