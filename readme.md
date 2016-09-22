@@ -92,6 +92,7 @@ The main goal of the API is to support the Dat command line tool. The options he
   dir: 'downloads/path-to-dir/', // path to share or download to. always required
   key: '64characterDatkey', // required for downloads
   ignore: ['dir/**', 'files.**'], // ignore files. uses anymatch to check paths
+  ignoreHidden: true, // by default ignore all hidden files
   snapshot: false, //: sharing snapshot archive, not used for download
   watchFiles: true, // watch files for changes. Archive needs to be live. Defaults to same value as archive.live.
   discovery: {upload: true, download: true}, // Join swarm and upload/download data. Set to false to disable discovery
