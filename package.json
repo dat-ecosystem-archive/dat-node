@@ -1,6 +1,6 @@
 {
   "name": "dat-js",
-  "version": "3.4.0",
+  "version": "3.5.0",
   "description": "Share datasets on the Internet",
   "main": "index.js",
   "scripts": {

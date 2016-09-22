@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   ### Added, ### Changed, ### Fixed, ### Removed, ### Deprecated
 -->
 
+## 3.5.0 - 2016-09-22
+### Added
+* `opts.ignoreHidden` ignores hidden directories by default.
+
 ## 3.4.0 - 2016-09-14
 ### Changed
 * Accept object for discovery: `{upload: true, download: true}`.
