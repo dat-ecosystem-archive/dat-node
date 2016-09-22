@@ -28,7 +28,7 @@ function Dat (opts) {
     utp: true,
     webrtc: undefined // false would turn off wrtc even if supported
   }
-  if (opts.ignoreHidden !== false) defaultOpts.ignore.push(/[\/\\]\./)
+  if (opts.ignoreHidden !== false) defaultOpts.ignore.push(/^[\.|.*\/\.]/)
   if (opts.ignore && Array.isArray(opts.ignore)) opts.ignore = opts.ignore.concat(defaultOpts.ignore)
   else if (opts.ignore) opts.ignore = [opts.ignore].concat(defaultOpts.ignore)
   if (typeof opts.upload !== 'undefined' && typeof opts.discovery === 'undefined') opts.discovery = {upload: opts.upload, download: true} // 3.2.0 backwards compat
