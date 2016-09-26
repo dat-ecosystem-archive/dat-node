@@ -271,6 +271,7 @@ Dat.prototype._joinSwarm = function () {
     utp: self.options.utp,
     upload: discovery.upload,
     download: discovery.download,
+    signalhub: self.options.signalhub,
     wrtc: self.options.webrtc
   })
   self.emit('connecting')
