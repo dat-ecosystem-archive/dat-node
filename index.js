@@ -47,10 +47,12 @@ function Dat (opts) {
   self.stats = {
     filesTotal: 0,
     filesProgress: 0,
-    bytesTotal: 0,
-    bytesProgress: 0,
-    bytesUp: 0,
-    bytesDown: 0
+    bytesTotal: 0, // archive.content.bytes
+    bytesProgress: 0, // file import progress
+    blocksTotal: 0, // archive.content.blocks
+    blocksProgress: 0, // download progress
+    bytesUp: 0, // archive.on('upload', data.length)
+    bytesDown: 0 // archive.on('download', data.length)
   }
 
   self.open = thunky(open)
@@ -199,28 +201,36 @@ Dat.prototype.download = function (cb) {
     if (err) return cb(err)
     self.live = archive.live
     self.db.put('!dat!key', archive.key.toString('hex'))
+    updateTotalStats() //  Call once for downloads previously started
 
     archive.metadata.once('download-finished', updateTotalStats)
 
     archive.content.on('download-finished', function () {
-      if (self.stats.bytesTotal === 0) updateTotalStats() // TODO: why is this getting here with 0
+      updateTotalStats()
       self.emit('download-finished')
     })
 
-    each(archive.list({live: archive.live}), function (data, next) {
-      var startBytes = self.stats.bytesProgress
-      archive.download(data, function (err) {
+    each(archive.list({live: archive.live}), function (entry, next) {
+      if (archive.isEntryDownloaded(entry)) {
+        self.stats.blocksProgress += entry.blocks
+        return entryDone()
+      }
+      var downloaded = archive.countDownloadedBlocks(entry)
+      self.stats.blocksProgress += downloaded
+      archive.download(entry, function (err) {
+        // Other blocks are added to stats.blocksProgress with archive.on('download')
         if (err) return cb(err)
-        if (startBytes === self.stats.bytesProgress) {
-          // TODO: better way to measure progress with existing files
-          self.stats.bytesProgress += data.length
-        }
-        if (data.type === 'file') {
+        entryDone()
+      })
+
+      function entryDone () {
+        if (entry.type === 'file') {
           self.stats.filesProgress++
-          self.emit('file-downloaded', data)
+          self.stats.bytesProgress += entry.length // TODO: this is not really accurate, not sure we should even set it
+          self.emit('file-downloaded', entry)
         }
         next()
-      })
+      }
     }, function (err) {
       if (err) return cb(err)
       return cb(null)
@@ -228,17 +238,12 @@ Dat.prototype.download = function (cb) {
   })
 
   archive.metadata.on('update', function () {
-    updateTotalStats()
+    updateTotalStats() // Updates total on live sync
     self.emit('archive-updated')
   })
 
-  archive.once('download', function () {
-    // TODO: fix https://github.com/maxogden/dat/issues/502
-    if (self.stats.bytesTotal === 0) updateTotalStats()
-  })
-
   archive.on('download', function (data) {
-    self.stats.bytesProgress += data.length
+    self.stats.blocksProgress++
     self.stats.bytesDown += data.length
     self.emit('download', data)
   })
@@ -249,14 +254,18 @@ Dat.prototype.download = function (cb) {
   })
 
   function updateTotalStats () {
+    var updateFileCount = archive.content && archive.content.blocks !== self.stats.blocksTotal
     self.stats.bytesTotal = archive.content ? archive.content.bytes : 0
-    var fileCount = 0
-    each(archive.list({live: false}), function (data, next) {
-      if (data.type === 'file') fileCount++
-      next()
-    }, function () {
-      self.stats.filesTotal = fileCount
-    })
+    self.stats.blocksTotal = archive.content ? archive.content.blocks : 0
+    if (updateFileCount || !self.stats.filesTotal) {
+      var fileCount = 0
+      each(archive.list({live: false}), function (data, next) {
+        if (data.type === 'file') fileCount++
+        next()
+      }, function () {
+        self.stats.filesTotal = fileCount
+      })
+    }
   }
 }
 
