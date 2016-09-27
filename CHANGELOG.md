@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- Change types:
   ### Added, ### Changed, ### Fixed, ### Removed, ### Deprecated
 -->
+
+## 3.6.0 - 2016-09-27
 ### Added
 * `signalhub` option.
 
