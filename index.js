@@ -4,8 +4,10 @@ var util = require('util')
 var encoding = require('dat-encoding')
 var hyperdrive = require('hyperdrive')
 var createSwarm = require('hyperdrive-archive-swarm')
+var entryEncoding = require('hyperdrive-encoding')
+var index = require('hypercore-index')
+var Stats = require('hyperdrive-stats')
 var raf = require('random-access-file')
-var each = require('stream-each')
 var thunky = require('thunky')
 var extend = require('xtend')
 var importFiles = require('./lib/count-import')
@@ -47,6 +49,8 @@ function Dat (opts) {
   self.stats = {
     filesTotal: 0,
     filesProgress: 0,
+    blocksTotal: 0,
+    blocksProgress: 0,
     bytesTotal: 0,
     bytesProgress: 0,
     bytesUp: 0,
@@ -192,6 +196,7 @@ Dat.prototype.download = function (cb) {
   var archive = self.archive
   cb = cb || self._emitError
 
+  self._stats = Stats({archive: self.archive, db: self.db})
   self._joinSwarm()
   self.emit('key', archive.key.toString('hex'))
 
@@ -200,45 +205,38 @@ Dat.prototype.download = function (cb) {
     self.live = archive.live
     self.db.put('!dat!key', archive.key.toString('hex'))
 
-    archive.metadata.once('download-finished', updateTotalStats)
-
     archive.content.on('download-finished', function () {
-      if (self.stats.bytesTotal === 0) updateTotalStats() // TODO: why is this getting here with 0
       self.emit('download-finished')
     })
 
-    each(archive.list({live: archive.live}), function (data, next) {
-      var startBytes = self.stats.bytesProgress
-      archive.download(data, function (err) {
+    index({
+      start: 0,
+      feed: self.archive.metadata,
+      db: self.db,
+      live: self.live
+    }, function onentry (buf, next) {
+      var entry = entryEncoding.decode(buf)
+      if (entry.type !== 'file') return next()
+      if (archive.isEntryDownloaded(entry)) return done()
+      archive.download(entry, done)
+
+      function done (err) {
         if (err) return cb(err)
-        if (startBytes === self.stats.bytesProgress) {
-          // TODO: better way to measure progress with existing files
-          self.stats.bytesProgress += data.length
-        }
-        if (data.type === 'file') {
-          self.stats.filesProgress++
-          self.emit('file-downloaded', data)
-        }
+        self.stats.filesProgress++
+        self.emit('file-downloaded', entry)
         next()
-      })
-    }, function (err) {
+      }
+    }, function ondone (err) {
       if (err) return cb(err)
-      return cb(null)
+      cb()
     })
   })
 
   archive.metadata.on('update', function () {
-    updateTotalStats()
     self.emit('archive-updated')
   })
 
-  archive.once('download', function () {
-    // TODO: fix https://github.com/maxogden/dat/issues/502
-    if (self.stats.bytesTotal === 0) updateTotalStats()
-  })
-
   archive.on('download', function (data) {
-    self.stats.bytesProgress += data.length
     self.stats.bytesDown += data.length
     self.emit('download', data)
   })
@@ -248,16 +246,9 @@ Dat.prototype.download = function (cb) {
     self.emit('upload', data)
   })
 
-  function updateTotalStats () {
-    self.stats.bytesTotal = archive.content ? archive.content.bytes : 0
-    var fileCount = 0
-    each(archive.list({live: false}), function (data, next) {
-      if (data.type === 'file') fileCount++
-      next()
-    }, function () {
-      self.stats.filesTotal = fileCount
-    })
-  }
+  self._stats.on('update', function () {
+    self.stats = extend(self.stats, self._stats.get())
+  })
 }
 
 Dat.prototype._joinSwarm = function () {
