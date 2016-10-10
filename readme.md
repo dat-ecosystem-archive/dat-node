@@ -161,14 +161,16 @@ Swarm events and stats are available from `dat.swarm`.
 
 #### Internal Stats
 
-Stats we track internally for progress displays. It is not recommended to use these currently.
+We track stats using [hyperdrive-stats](https://github.com/juliangruber/hyperdrive-stats).
 
 ```js
 dat.stats = {
     filesProgress: 0,
-    bytesProgress: 0,
     filesTotal: 0,
     bytesTotal: 0,
+    bytesProgress: 0, // Note: this is unreliable for downloads, use blocks
+    blocksTotal: 0,
+    blocksProgress: 0,
     bytesUp: 0,
     bytesDown: 0
 }
