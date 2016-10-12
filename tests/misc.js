@@ -9,13 +9,16 @@ var Dat = require('..')
 test('default ignore', function (t) {
   var dat = Dat({ dir: process.cwd() })
   var matchers = dat.options.ignore
+
   t.ok(anymatch(matchers, '.dat'), '.dat folder ignored')
   t.ok(anymatch(matchers, '.dat/'), '.dat folder with slash ignored')
   t.ok(anymatch(matchers, '.dat/foo.bar'), 'files in .dat folder ignored')
   t.ok(anymatch(matchers, 'dir/.git'), 'hidden folders with dir ignored')
   t.ok(anymatch(matchers, 'dir/.git/test.txt'), 'files inside hidden dir with dir ignored')
-  t.notOk(anymatch(matchers, 'file.dat'), 'does not ignore files with .dat in it')
   t.notOk(anymatch(matchers, 'folder/asdf.data/file.txt'), 'weird data folder is ok')
+  t.notOk(
+    ['file.dat', '.dat.jpg', '.dat-thing'].filter(anymatch(matchers)).length !== 0,
+    'does not ignore files/folders with .dat in it')
   t.end()
 })
 

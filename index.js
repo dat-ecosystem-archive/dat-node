@@ -21,7 +21,7 @@ function Dat (opts) {
 
   var defaultOpts = {
     _datPath: path.join(opts.dir, '.dat'),
-    ignore: [/\/\.dat\/.*/, /\/\.dat\/?.*$/, /^\.dat\/?.*$/],
+    ignore: [/^(?:\/.*)?\.dat(?:\/.*)?$/],
     snapshot: false,
     watchFiles: true,
     discovery: true,
