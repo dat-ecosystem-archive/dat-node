@@ -100,8 +100,7 @@ Dat.prototype.share = function (cb) {
     if (err) return cb(err)
 
     if (archive.key && !archive.owner) {
-      // TODO: allow this but change to download
-      return cb('Dat previously downloaded. Run dat ' + encoding.encode(archive.key) + ' to resume')
+      return self.download()
     }
 
     if ((archive.live || archive.owner) && archive.key) {
