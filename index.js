@@ -6,21 +6,27 @@ var hyperdrive = require('hyperdrive')
 var createSwarm = require('hyperdrive-archive-swarm')
 var raf = require('random-access-file')
 var each = require('stream-each')
-var thunky = require('thunky')
 var extend = require('xtend')
 var importFiles = require('./lib/count-import')
 var getDb = require('./lib/db')
 
-module.exports = Dat
+module.exports = function (dir, opts, cb) {
+  if (!dir) throw new Error('dir option required')
+  if (typeof opts === 'function') {
+    cb = opts
+    opts = {}
+  }
+  return new Dat(dir, opts, cb)
+}
 
-function Dat (opts) {
-  if (!(this instanceof Dat)) return new Dat(opts)
+function Dat (dir, opts, cb) {
+  var self = this
   if (!opts) opts = {}
-  if (!opts.dir) throw new Error('dir option required')
+
   events.EventEmitter.call(this)
 
   var defaultOpts = {
-    _datPath: path.join(opts.dir, '.dat'),
+    _datPath: path.join(dir, '.dat'),
     ignore: [/^(?:\/.*)?\.dat(?:\/.*)?$/],
     snapshot: false,
     watchFiles: true,
@@ -28,20 +34,18 @@ function Dat (opts) {
     utp: true,
     webrtc: undefined // false would turn off wrtc even if supported
   }
+  this.live = opts.key ? null : !opts.snapshot
   if (opts.ignoreHidden !== false) defaultOpts.ignore.push(/[\/\\]\./)
   if (opts.ignore && Array.isArray(opts.ignore)) opts.ignore = opts.ignore.concat(defaultOpts.ignore)
   else if (opts.ignore) opts.ignore = [opts.ignore].concat(defaultOpts.ignore)
   if (typeof opts.upload !== 'undefined' && typeof opts.discovery === 'undefined') opts.discovery = {upload: opts.upload, download: true} // 3.2.0 backwards compat
   opts = extend(defaultOpts, opts) // opts takes priority
 
-  var self = this
-
   self.options = opts
   self.key = opts.key ? encoding.decode(opts.key) : null
-  self.dir = opts.dir === '.' ? process.cwd() : path.resolve(opts.dir)
+  self.dir = dir === '.' ? process.cwd() : path.resolve(dir)
   if (opts.db) self.db = opts.db
   else self._datPath = opts._datPath
-  self.live = opts.key ? null : !opts.snapshot
   if (opts.snapshot) self.options.watchFiles = false // Can't watch snapshot files
 
   self.stats = {
@@ -55,12 +59,9 @@ function Dat (opts) {
     bytesDown: 0 // archive.on('download', data.length)
   }
 
-  self.open = thunky(open)
-
-  function open (cb) {
-    self._open(cb)
-  }
-
+  self._open(function () {
+    cb(null, self)
+  })
   self._emitError = function (err) {
     if (err) self.emit('error', err)
   }
@@ -81,78 +82,71 @@ Dat.prototype._open = function (cb) {
       }
     })
     self._opened = true
-    cb()
+    self.archive.open(cb)
   })
 }
 
-Dat.prototype.share = function (cb) {
-  if (!this.dir) return cb(new Error('Directory required for share.'))
-
+Dat.prototype.share = function (opts, cb) {
   var self = this
-  if (!self._opened) {
-    return self.open(function () {
-      self.share(cb)
-    })
-  }
+  if (typeof opts === 'function') return this.share(null, opts)
+  if (!opts) opts = {}
 
   var archive = self.archive
   cb = cb || self._emitError
+  if (archive.key && !archive.owner) {
+    // TODO: allow this but change to download
+    return cb('Dat previously downloaded. Run dat ' + encoding.encode(archive.key) + ' to resume')
+  }
 
-  archive.open(function (err) {
+  if ((archive.live || archive.owner) && archive.key) {
+    if (!self.key) {
+      self.db.put('!dat!key', self.key)
+      self.key = archive.key.toString('hex')
+    }
+    self._joinSwarm()
+    self.emit('key', self.key)
+  }
+
+  var importer = self._fileStatus = importFiles(self.archive, self.dir, {
+    live: self.options.watchFiles && archive.live,
+    resume: self.resume,
+    ignore: self.options.ignore
+  }, function (err) {
     if (err) return cb(err)
-
-    if (archive.key && !archive.owner) {
-      // TODO: allow this but change to download
-      return cb('Dat previously downloaded. Run dat ' + encoding.encode(archive.key) + ' to resume')
-    }
-
-    if ((archive.live || archive.owner) && archive.key) {
-      if (!self.key) self.db.put('!dat!key', archive.key.toString('hex'))
-      self._joinSwarm()
-      self.emit('key', archive.key.toString('hex'))
-    }
-
-    var importer = self._fileStatus = importFiles(self.archive, self.dir, {
-      live: self.options.watchFiles && archive.live,
-      resume: self.resume,
-      ignore: self.options.ignore
-    }, function (err) {
-      if (err) return cb(err)
-      if (!archive.live || !self.options.watchFiles) return done()
-      importer.on('file imported', function (file) {
-        if (file.mode === 'created') self.stats.filesTotal++
-        self.stats.bytesTotal = archive.content.bytes
-        self.emit('archive-updated')
-      })
-      done()
-    })
-
-    importer.on('error', function (err) {
-      return cb(err)
-    })
-
-    importer.on('file-counted', function (stats) {
-      self.emit('file-counted', stats)
-    })
-
-    importer.on('files-counted', function (stats) {
-      self.stats.filesTotal = stats.filesTotal
-      self.stats.bytesTotal = stats.bytesTotal
-      self.emit('files-counted', stats)
-    })
-
+    if (!archive.live || !self.options.watchFiles) return done()
     importer.on('file imported', function (file) {
-      self.stats.filesProgress = importer.fileCount
-      self.stats.bytesProgress = importer.totalSize
-      self.emit('file-added', file)
+      if (file.mode === 'created') self.stats.filesTotal++
+      self.stats.bytesTotal = archive.content.bytes
+      self.emit('archive-updated')
     })
+    done()
+  })
 
-    importer.on('file skipped', function (file) {
-      self.stats.filesProgress = importer.fileCount
-      self.stats.bytesProgress = importer.totalSize
-      file.mode = 'skipped'
-      self.emit('file-added', file)
-    })
+  importer.on('error', function (err) {
+    return cb(err)
+  })
+
+  importer.on('file-counted', function (stats) {
+    self.emit('file-counted', stats)
+  })
+
+  importer.on('files-counted', function (stats) {
+    self.stats.filesTotal = stats.filesTotal
+    self.stats.bytesTotal = stats.bytesTotal
+    self.emit('files-counted', stats)
+  })
+
+  importer.on('file imported', function (file) {
+    self.stats.filesProgress = importer.fileCount
+    self.stats.bytesProgress = importer.totalSize
+    self.emit('file-added', file)
+  })
+
+  importer.on('file skipped', function (file) {
+    self.stats.filesProgress = importer.fileCount
+    self.stats.bytesProgress = importer.totalSize
+    file.mode = 'skipped'
+    self.emit('file-added', file)
   })
 
   archive.on('upload', function (data) {
@@ -166,7 +160,7 @@ Dat.prototype.share = function (cb) {
     archive.finalize(function (err) {
       if (err) return cb(err)
 
-      if (self.options.snapshot) {
+      if (opts.snapshot) {
         self._joinSwarm()
         self.emit('key', archive.key.toString('hex'))
       }
@@ -182,14 +176,8 @@ Dat.prototype.share = function (cb) {
 
 Dat.prototype.download = function (cb) {
   if (!this.key) return cb(new Error('Key required for download.'))
-  if (!this.dir) return cb(new Error('Directory required for download.'))
 
   var self = this
-  if (!self._opened) {
-    return self.open(function () {
-      self.download(cb)
-    })
-  }
 
   var archive = self.archive
   cb = cb || self._emitError
@@ -242,7 +230,6 @@ Dat.prototype.download = function (cb) {
       if (err) return cb(err)
       return cb(null)
     })
-
     function entryDone (entry, cb) {
       if (entry.type === 'file') {
         self.stats.filesProgress++
@@ -277,6 +264,7 @@ Dat.prototype._joinSwarm = function () {
   if (!self.options.discovery) return
   var discovery = self.options.discovery || {}
   if (typeof self.options.discovery !== 'object') discovery = {upload: true, download: true}
+  console.log('created swarm')
 
   self.swarm = createSwarm(self.archive, {
     port: self.options.port,
