@@ -25,12 +25,11 @@ test('prep', function (t) {
   dat(fixtures, function (err, node) {
     t.error(err, 'no error')
     shareDat = node
-    shareDat.share(function (err, key) {
+    shareDat.share(function (err) {
       t.error(err, 'no share error')
-      testFolder(function () {
-      })
     })
-    shareDat.once('key', function (key) {
+    shareDat.on('key', function (key) {
+      console.log('key is', key)
       shareKey = key
       t.end()
     })
@@ -38,44 +37,46 @@ test('prep', function (t) {
 })
 
 test('Download with default opts', function (t) {
-  dat(downloadDir, {key: shareKey}, function (err, node) {
-    t.error(err)
-    downloadDat = node
-    downloadDat.download(function (err) {
+  testFolder(function () {
+    dat(downloadDir, {key: shareKey}, function (err, node) {
       t.error(err)
-      t.fail('live archive should not call callback')
-    })
+      downloadDat = node
+      downloadDat.download(function (err) {
+        t.error(err)
+        t.fail('live archive should not call callback')
+      })
 
-    downloadDat.once('key', function (key) {
-      t.ok(key, 'key emitted')
-    })
+      downloadDat.once('key', function (key) {
+        t.ok(key, 'key emitted')
+      })
 
-    downloadDat.on('file-downloaded', function (entry) {
-      t.skip('TODO: this is firing after file-downloaded')
-    })
+      downloadDat.on('file-downloaded', function (entry) {
+        t.skip('TODO: this is firing after file-downloaded')
+      })
 
-    downloadDat.once('download-finished', function () {
-      t.same(downloadDat.stats.filesTotal, stats.filesTotal, 'files total match')
-      t.same(downloadDat.stats.bytesTotal, stats.bytesTotal, 'bytes total match')
-      // These are wrong b/c download-finished fires before the last download events
-      t.skip(dat.stats.filesTotal, dat.stats.filesProgress, 'TODO: file total matches progress')
-      t.skip(dat.stats.blocksTotal, dat.stats.blockProgress, 'TODO: block total matches progress')
-      t.pass('download finished event')
+      downloadDat.once('download-finished', function () {
+        t.same(downloadDat.stats.filesTotal, stats.filesTotal, 'files total match')
+        t.same(downloadDat.stats.bytesTotal, stats.bytesTotal, 'bytes total match')
+        // These are wrong b/c download-finished fires before the last download events
+        t.skip(dat.stats.filesTotal, dat.stats.filesProgress, 'TODO: file total matches progress')
+        t.skip(dat.stats.blocksTotal, dat.stats.blockProgress, 'TODO: block total matches progress')
+        t.pass('download finished event')
 
-      fs.readdir(downloadDir, function (_, files) {
-        var hasCsvFile = files.indexOf('all_hour.csv') > -1
-        var hasDatFolder = files.indexOf('.dat') > -1
-        t.ok(hasDatFolder, '.dat folder created')
-        t.ok(hasCsvFile, 'csv file downloaded')
+        fs.readdir(downloadDir, function (_, files) {
+          var hasCsvFile = files.indexOf('all_hour.csv') > -1
+          var hasDatFolder = files.indexOf('.dat') > -1
+          t.ok(hasDatFolder, '.dat folder created')
+          t.ok(hasCsvFile, 'csv file downloaded')
 
-        if (files.indexOf('folder') > -1) {
-          var subFiles = fs.readdirSync(path.join(downloadDir, 'folder'))
-          var hasEmtpy = subFiles.indexOf('empty.txt') > -1
-          t.skip(hasEmtpy, 'empty.txt file downloaded')
-          // TODO: known hyperdrive issue https://github.com/mafintosh/hyperdrive/issues/83
-        }
-        downloadDat.removeAllListeners()
-        t.end()
+          if (files.indexOf('folder') > -1) {
+            var subFiles = fs.readdirSync(path.join(downloadDir, 'folder'))
+            var hasEmtpy = subFiles.indexOf('empty.txt') > -1
+            t.skip(hasEmtpy, 'empty.txt file downloaded')
+            // TODO: known hyperdrive issue https://github.com/mafintosh/hyperdrive/issues/83
+          }
+          downloadDat.removeAllListeners()
+          t.end()
+        })
       })
     })
   })
@@ -166,7 +167,7 @@ test('finished', function (t) {
 })
 
 test.onFinish(function () {
-  rimraf.sync(downloadDir)
+  if (downloadDir) rimraf.sync(downloadDir)
 })
 
 function testFolder (cb) {

@@ -1,6 +1,7 @@
 var events = require('events')
 var path = require('path')
 var util = require('util')
+var thunky = require('thunky')
 var encoding = require('dat-encoding')
 var hyperdrive = require('hyperdrive')
 var createSwarm = require('hyperdrive-archive-swarm')
@@ -11,19 +12,21 @@ var importFiles = require('./lib/count-import')
 var getDb = require('./lib/db')
 
 module.exports = function (dir, opts, cb) {
-  if (!dir) throw new Error('dir option required')
   if (typeof opts === 'function') {
     cb = opts
     opts = {}
   }
-  return new Dat(dir, opts, cb)
+  var dat = Dat(dir, opts)
+  dat.open(function () {
+    cb(null, dat)
+  })
 }
 
-function Dat (dir, opts, cb) {
+function Dat (dir, opts) {
+  if (!(this instanceof Dat)) return new Dat(dir, opts)
+  if (!dir) throw new Error('dir option required')
   var self = this
   if (!opts) opts = {}
-
-  events.EventEmitter.call(this)
 
   var defaultOpts = {
     _datPath: path.join(dir, '.dat'),
@@ -58,13 +61,17 @@ function Dat (dir, opts, cb) {
     bytesUp: 0, // archive.on('upload', data.length)
     bytesDown: 0 // archive.on('download', data.length)
   }
+  self.open = thunky(open)
 
-  self._open(function () {
-    cb(null, self)
-  })
+  function open (cb) {
+    self._open(cb)
+  }
+
   self._emitError = function (err) {
     if (err) self.emit('error', err)
   }
+
+  events.EventEmitter.call(this)
 }
 
 util.inherits(Dat, events.EventEmitter)
@@ -105,6 +112,7 @@ Dat.prototype.share = function (opts, cb) {
     }
     self._joinSwarm()
     self.emit('key', self.key)
+    console.log('emitting key')
   }
 
   var importer = self._fileStatus = importFiles(self.archive, self.dir, {
