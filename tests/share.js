@@ -33,24 +33,9 @@ test('Share with default opts', function (t) {
       t.pass('creates .dat dir')
     })
 
-    node.share(function (err) {
-      t.error(err, 'no sharing error')
-      t.pass('share callback called')
-      node.close(function () {
-        node.db.close(function () {
-          t.end()
-        })
-      })
-    })
-
     node.once('append-ready', function () {
       t.pass('append ready emits')
       t.ok(node.stats.filesTotal > 0, 'append ready stats')
-    })
-
-    node.once('key', function (key) {
-      liveKey = key
-      t.ok(key && key.length === 64, 'emits key')
     })
 
     node.once('append-ready', function () {
@@ -67,6 +52,18 @@ test('Share with default opts', function (t) {
       t.same(stats.filesTotal, fileCount, 'file-added emitted correct # times')
       t.same(node.stats.filesProgress, stats.filesTotal, 'progress file count')
       t.same(node.stats.bytesProgress, stats.bytesTotal, 'progress byte count')
+      node.close(function () {
+        node.db.close(function () {
+          t.end()
+        })
+      })
+    })
+
+    node.share(function (err, key) {
+      t.error(err, 'no sharing error')
+      t.pass('share callback called')
+      liveKey = key
+      t.ok(key && key.length === 64, 'emits key')
     })
   })
 })
@@ -74,9 +71,9 @@ test('Share with default opts', function (t) {
 test('Share resume with .dat folder present', function (t) {
   dat(fixtures, function (err, node) {
     t.error(err, 'no init error')
-    node.share(function (err) {
-      t.error(err, 'share cb without error')
-      t.ok(node.resume, 'resume flag set')
+
+    node.once('archive-finalized', function () {
+      t.skip('TODO: check that files are skipped')
       node.close(function () {
         node.db.close(function () {
           cleanFixtures(function () {
@@ -86,22 +83,25 @@ test('Share resume with .dat folder present', function (t) {
       })
     })
 
-    node.once('key', function (key) {
+    node.share(function (err, key) {
+      t.error(err, 'share cb without error')
+      t.ok(node.resume, 'resume flag set')
       t.same(liveKey, key, 'key matches previous key')
-    })
-
-    node.once('archive-finalized', function () {
-      t.skip('TODO: check that files are skipped')
     })
   })
 })
 
 test('share snapshot', function (t) {
-  dat(fixtures, {snapshot: true}, function (err, node) {
+  dat(fixtures, function (err, node) {
     t.error(err, 'no init error')
-    node.share(function (err) {
+
+    node.snapshot(function (err, key) {
       t.error(err, 'share cb without error')
       t.ok(!node.live, 'live false')
+
+      // TODO: saving mtime breaks this
+      t.skip(fixturesKey, key, 'TODO: key matches snapshot key')
+
       node.close(cleanFixtures(function () {
         node.db.close(function () {
           rimraf.sync(path.join(fixtures, '.dat'))
@@ -109,32 +109,29 @@ test('share snapshot', function (t) {
         })
       }))
     })
-
-    node.once('key', function (key) {
-      // TODO: saving mtime breaks this
-      t.skip(fixturesKey, key, 'TODO: key matches snapshot key')
-    })
   })
 })
 
 test('share live - editing file', function (t) {
   dat(fixtures, function (err, node) {
     t.error(err, 'no error')
+    node.on('file-added', function (file) {
+      if (file.mode === 'updated') {
+        t.ok(file.path.indexOf('empty.txt') > -1, 'correct file updated')
+      }
+    })
+    node.on('archive-finalized', function () {
+      node.close(function () {
+        node.db.close(function () {
+          t.end()
+        })
+      })
+    })
     node.share(function () {
       fs.writeFileSync(path.join(fixtures, 'folder', 'empty.txt'), '')
       node.once('archive-updated', function () {
         t.pass('archive update fires')
         t.same(node.stats.filesTotal, stats.filesTotal, 'files total correct')
-        node.close(function () {
-          node.db.close(function () {
-            t.end()
-          })
-        })
-      })
-      node.on('file-added', function (file) {
-        if (file.mode === 'updated') {
-          t.ok(file.path.indexOf('empty.txt') > -1, 'correct file updated')
-        }
       })
     })
   })

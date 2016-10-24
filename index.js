@@ -1,8 +1,8 @@
 var events = require('events')
 var path = require('path')
 var util = require('util')
-var thunky = require('thunky')
 var encoding = require('dat-encoding')
+var thunky = require('thunky')
 var hyperdrive = require('hyperdrive')
 var createSwarm = require('hyperdrive-archive-swarm')
 var raf = require('random-access-file')
@@ -17,10 +17,11 @@ module.exports = function (dir, opts, cb) {
     opts = {}
   }
   var dat = Dat(dir, opts)
-  dat.open(done)
+  if (cb) dat.open(done)
   function done () {
     cb(null, dat)
   }
+  return dat
 }
 
 function Dat (dir, opts) {
@@ -95,6 +96,17 @@ Dat.prototype._open = function (cb) {
   })
 }
 
+Dat.prototype.snapshot = function (opts, cb) {
+  var self = this
+  self.on('archive-finalized', function () {
+    self._joinSwarm()
+    cb(null, self.archive.key.toString('hex'))
+  })
+  self.share(opts, function (err, key) {
+    if (err) return cb(err)
+  })
+}
+
 Dat.prototype.share = function (opts, cb) {
   var self = this
   if (typeof opts === 'function') return this.share(null, opts)
@@ -112,7 +124,7 @@ Dat.prototype.share = function (opts, cb) {
       self.db.put('!dat!key', self.key)
       self.key = archive.key.toString('hex')
     }
-    self.emit('key', self.key)
+    cb(null, self.key)
   }
 
   var importer = self._fileStatus = importFiles(self.archive, self.dir, {
@@ -168,14 +180,9 @@ Dat.prototype.share = function (opts, cb) {
     archive.finalize(function (err) {
       if (err) return cb(err)
 
-      if (opts.snapshot) {
-        self.emit('key', archive.key.toString('hex'))
-      }
-
       self.db.put('!dat!finalized', true, function (err) {
         if (err) return cb(err)
         self.emit('archive-finalized')
-        cb(null)
       })
     })
   }
@@ -269,14 +276,13 @@ Dat.prototype._joinSwarm = function () {
   var self = this
   if (!self.options.discovery) return
   var discovery = self.options.discovery || {}
-  if (typeof self.options.discovery !== 'object') discovery = {upload: true, download: true}
-  console.log('created swarm')
+  console.log('joinign swarm')
 
   self.swarm = createSwarm(self.archive, {
     port: self.options.port,
     utp: self.options.utp,
-    upload: discovery.upload,
-    download: discovery.download,
+    upload: discovery.upload || true,
+    download: discovery.download || true,
     signalhub: self.options.signalhub,
     wrtc: self.options.webrtc
   })

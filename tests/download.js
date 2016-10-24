@@ -25,13 +25,11 @@ test('prep', function (t) {
   dat(fixtures, function (err, node) {
     t.error(err, 'no error')
     shareDat = node
-    shareDat.once('key', function (key) {
+    shareDat.share(function (err, key) {
+      t.error(err, 'no share error')
       shareKey = key
       t.equal(key.length, 64, 'key event')
       t.end()
-    })
-    shareDat.share(function (err) {
-      t.error(err, 'no share error')
     })
   })
 })
