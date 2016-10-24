@@ -17,9 +17,10 @@ module.exports = function (dir, opts, cb) {
     opts = {}
   }
   var dat = Dat(dir, opts)
-  dat.open(function () {
+  dat.open(done)
+  function done () {
     cb(null, dat)
-  })
+  }
 }
 
 function Dat (dir, opts) {
@@ -89,6 +90,7 @@ Dat.prototype._open = function (cb) {
       }
     })
     self._opened = true
+    self._joinSwarm()
     self.archive.open(cb)
   })
 }
@@ -110,9 +112,7 @@ Dat.prototype.share = function (opts, cb) {
       self.db.put('!dat!key', self.key)
       self.key = archive.key.toString('hex')
     }
-    self._joinSwarm()
     self.emit('key', self.key)
-    console.log('emitting key')
   }
 
   var importer = self._fileStatus = importFiles(self.archive, self.dir, {
@@ -169,7 +169,6 @@ Dat.prototype.share = function (opts, cb) {
       if (err) return cb(err)
 
       if (opts.snapshot) {
-        self._joinSwarm()
         self.emit('key', archive.key.toString('hex'))
       }
 
@@ -190,7 +189,6 @@ Dat.prototype.download = function (cb) {
   var archive = self.archive
   cb = cb || self._emitError
 
-  self._joinSwarm()
   self.emit('key', archive.key.toString('hex'))
 
   archive.open(function (err) {

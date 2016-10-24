@@ -25,13 +25,13 @@ test('prep', function (t) {
   dat(fixtures, function (err, node) {
     t.error(err, 'no error')
     shareDat = node
+    shareDat.once('key', function (key) {
+      shareKey = key
+      t.equal(key.length, 64, 'key event')
+      t.end()
+    })
     shareDat.share(function (err) {
       t.error(err, 'no share error')
-    })
-    shareDat.on('key', function (key) {
-      console.log('key is', key)
-      shareKey = key
-      t.end()
     })
   })
 })
@@ -39,7 +39,7 @@ test('prep', function (t) {
 test('Download with default opts', function (t) {
   testFolder(function () {
     dat(downloadDir, {key: shareKey}, function (err, node) {
-      t.error(err)
+      t.error(err, 'no node error')
       downloadDat = node
       downloadDat.download(function (err) {
         t.error(err)
