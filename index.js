@@ -229,27 +229,27 @@ Dat.prototype.download = function (cb) {
     each(archive.list({live: archive.live}), function (entry, next) {
       if (archive.isEntryDownloaded(entry)) {
         self.stats.blocksProgress += entry.blocks
-        return entryDone()
+        return entryDone(entry, next)
       }
       var downloaded = archive.countDownloadedBlocks(entry)
       self.stats.blocksProgress += downloaded
       archive.download(entry, function (err) {
         // Other blocks are added to stats.blocksProgress with archive.on('download')
         if (err) return cb(err)
-        entryDone()
+        entryDone(entry, next)
       })
-
-      function entryDone () {
-        if (entry.type === 'file') {
-          self.stats.filesProgress++
-          self.emit('file-downloaded', entry)
-        }
-        next()
-      }
     }, function (err) {
       if (err) return cb(err)
       return cb(null)
     })
+
+    function entryDone (entry, cb) {
+      if (entry.type === 'file') {
+        self.stats.filesProgress++
+        self.emit('file-downloaded', entry)
+      }
+      cb()
+    }
   })
 
   function updateTotalStats () {
