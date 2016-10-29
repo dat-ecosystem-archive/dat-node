@@ -259,15 +259,13 @@ Dat.prototype.download = function (cb) {
     if (updateFileCount || !self.stats.filesTotal) {
       var fileCount = 0
       var entries = {}
-      console.log('doing file count')
       each(archive.list({live: false}), function (data, next) {
-        if (data.type !== 'file') return next()
-        if (!entries[data.name]) {
-          entries[data.name] = {}
-          fileCount++
-        }
+        // TODO: remove this when we have a "latest" list function w/out duplicates
+        if (data.type !== 'file' || entries[data.name]) return next()
+        entries[data.name] = {}
+        fileCount++
+        next()
       }, function () {
-        console.log('done file count', fileCount)
         self.stats.filesTotal = fileCount
       })
     }
