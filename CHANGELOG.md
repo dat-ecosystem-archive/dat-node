@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   ### Added, ### Changed, ### Fixed, ### Removed, ### Deprecated
 -->
 
+## 3.7.1 - 2016-10-29
+### Fixed
+* Create entryDone function once for downloads
+
 ## 3.7.0 - 2016-10-29
 ### Fixed
 * Download file count for duplicate files
