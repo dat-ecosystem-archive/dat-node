@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- Change types:
   ### Added, ### Changed, ### Fixed, ### Removed, ### Deprecated
 -->
+### Fixed
+* Download file count for duplicate files
+
+### Removed
+* `stats.bytesProgress` on downloads
+
+### Changed
+* Upgrade to hyperdrive 7.5.0
+* Use archive.blocks for stats on download with new hyperdrive functions.
 
 ## 3.6.0 - 2016-09-27
 ### Added
