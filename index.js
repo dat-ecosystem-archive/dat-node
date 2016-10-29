@@ -205,9 +205,25 @@ Dat.prototype.download = function (cb) {
 
     archive.metadata.once('download-finished', updateTotalStats)
 
+    archive.metadata.on('update', function () {
+      updateTotalStats() // Updates total on live sync
+      self.emit('archive-updated')
+    })
+
     archive.content.on('download-finished', function () {
       updateTotalStats()
       self.emit('download-finished')
+    })
+
+    archive.on('download', function (data) {
+      self.stats.blocksProgress++
+      self.stats.bytesDown += data.length
+      self.emit('download', data)
+    })
+
+    archive.on('upload', function (data) {
+      self.stats.bytesUp += data.length
+      self.emit('upload', data)
     })
 
     each(archive.list({live: archive.live}), function (entry, next) {
@@ -226,7 +242,6 @@ Dat.prototype.download = function (cb) {
       function entryDone () {
         if (entry.type === 'file') {
           self.stats.filesProgress++
-          self.stats.bytesProgress += entry.length // TODO: this is not really accurate, not sure we should even set it
           self.emit('file-downloaded', entry)
         }
         next()
@@ -237,32 +252,22 @@ Dat.prototype.download = function (cb) {
     })
   })
 
-  archive.metadata.on('update', function () {
-    updateTotalStats() // Updates total on live sync
-    self.emit('archive-updated')
-  })
-
-  archive.on('download', function (data) {
-    self.stats.blocksProgress++
-    self.stats.bytesDown += data.length
-    self.emit('download', data)
-  })
-
-  archive.on('upload', function (data) {
-    self.stats.bytesUp += data.length
-    self.emit('upload', data)
-  })
-
   function updateTotalStats () {
     var updateFileCount = archive.content && archive.content.blocks !== self.stats.blocksTotal
     self.stats.bytesTotal = archive.content ? archive.content.bytes : 0
     self.stats.blocksTotal = archive.content ? archive.content.blocks : 0
     if (updateFileCount || !self.stats.filesTotal) {
       var fileCount = 0
+      var entries = {}
+      console.log('doing file count')
       each(archive.list({live: false}), function (data, next) {
-        if (data.type === 'file') fileCount++
-        next()
+        if (data.type !== 'file') return next()
+        if (!entries[data.name]) {
+          entries[data.name] = {}
+          fileCount++
+        }
       }, function () {
+        console.log('done file count', fileCount)
         self.stats.filesTotal = fileCount
       })
     }
