@@ -23,28 +23,30 @@
 Share files with Dat:
 
 ```js
-var Dat = require('dat-js')
+var dat = require('dat-js')
 
-var dat = Dat({dir: process.cwd()})
-dat.share(function (err) {
-  if (err) throw err
-  // This may take awhile for large directories
-  console.log('Current directory being shared via Dat!')
-  console.log('Download via: ', dat.key.toString('hex'))
-})
+dat(process.cwd(), function (err, node) {
+  node.share(function (err) {
+    if (err) throw err
+    // This may take awhile for large directories
+    console.log('Current directory being shared via Dat!')
+    console.log('Download via: ', node.key.toString('hex'))
+  })
+}
 ```
 
 Download files with Dat:
 
 ```js
-var Dat = require('dat-js')
+var dat = require('dat-js')
 
 // Add download key as the second argument
-var dat = Dat({dir: process.cwd(), key: process.argv[2]})
-dat.download()
-dat.on('download-finished', function (err) {
-  if (err) throw err
-  console.log('Finished downloading!')
+dat(process.cwd(), {key: process.argv[2]}, function (err, node) {
+  node.download()
+  node.on('download-finished', function (err) {
+    if (err) throw err
+    console.log('Finished downloading!')
+  })
 })
 ```
 
@@ -67,23 +69,15 @@ Dat-js will create a `.dat` folder in the directory you specify with the `dir` o
 
 Whenever you initiate Dat you need to specify at least the directory.
 
-```js
-var Dat = require('dat-js')
-var dat = Dat({dir: 'some-path'})
-```
-
 By default, Dat-js assumes you are creating a new Dat. If you are using a dat created by other user, you need to specify the key too:
 
 ```js
 var Dat = require('dat-js')
-var dat = Dat({dir: 'some-path', key:'some64characterdatkey'})
+Dat('/path/to/a/folder', {key:'some64characterdatkey'}, done)
 ```
-
-From there, you can either share or download: `dat.share(cb)` or `dat.download(cb)`. That's it! Read below for the full API and options.
-
 ## API
 
-The main goal of the API is to support the Dat command line tool. The options here should be familiar if you use the command line tool. 
+The main goal of the API is to support the Dat command line tool. The options here should be familiar if you use the command line tool.
 
 ### Options
 
@@ -108,13 +102,13 @@ The main goal of the API is to support the Dat command line tool. The options he
 
 Download `dat.key` to `dat.dir`. Does not callback for live archives.
 
-### dat.share(cb) 
+### dat.share(cb)
 
 Share directory specified in `opts.dir`. Callback fired when all files are added to the drive (files will start being shared as they are added for live archives). The swarm is automatically joined for key when it is available for share & download, specify `discovery: false` to not join the swarm automatically.
 
 ### dat.open(cb)
 
-Open is called automatically for share and resume. It may be helpful to call it manually if you want to check for an existing Dat before sharing/downloading. Opens a Dat in the directory. This looks for an existing `.dat` directory. If `.dat` directory exists, resumes previous Dat. If not, it will create a new Dat.
+Opens a Dat in the directory. This looks for an existing `.dat` directory. If `.dat` directory exists, resumes previous Dat. If not, it will create a new Dat.
 
 ### `dat.archive`
 

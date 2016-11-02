@@ -22,74 +22,79 @@ var stats = {
 
 test('prep', function (t) {
   rimraf.sync(path.join(fixtures, '.dat')) // for previous failed tests
-  shareDat = Dat({dir: fixtures})
-  shareDat.share(function (err) {
-    if (err) throw err
-    testFolder(function () {
+  var dat = Dat(fixtures, function (err, node) {
+    t.error(err, 'no error')
+    shareDat = node
+    dat.once('key', function (key) {
+      t.equal(key.length, 64, 'key event')
+      shareKey = key
       t.end()
     })
-  })
-  shareDat.once('key', function (key) {
-    shareKey = key
+    shareDat.share(function (err, key) {
+      t.error(err, 'no share error')
+    })
   })
 })
 
 test('Download with default opts', function (t) {
-  var dat = downloadDat = Dat({dir: downloadDir, key: shareKey})
-  dat.download(function (err) {
-    t.error(err)
-    t.fail('live archive should not call callback')
-  })
+  testFolder(function () {
+    var dat = Dat(downloadDir, {key: shareKey}, function (err, node) {
+      t.error(err, 'no node error')
+      downloadDat = node
+      downloadDat.download(function (err) {
+        t.error(err)
+        t.fail('live archive should not call callback')
+      })
 
-  dat.once('key', function (key) {
-    t.ok(key, 'key emitted')
-  })
+      dat.once('key', function (key) {
+        t.ok(key, 'key emitted')
+      })
 
-  dat.on('file-downloaded', function (entry) {
-    t.skip('TODO: this is firing after file-downloaded')
-  })
+      dat.on('file-downloaded', function (entry) {
+        t.skip('TODO: this is firing after file-downloaded')
+      })
 
-  dat.once('download-finished', function () {
-    t.same(dat.stats.filesTotal, stats.filesTotal, 'files total match')
-    t.same(dat.stats.bytesTotal, stats.bytesTotal, 'bytes total match')
-    // These are wrong b/c download-finished fires before the last download events
-    t.skip(dat.stats.filesTotal, dat.stats.filesProgress, 'TODO: file total matches progress')
-    t.skip(dat.stats.blocksTotal, dat.stats.blockProgress, 'TODO: block total matches progress')
-    t.pass('download finished event')
+      dat.once('download-finished', function () {
+        t.same(downloadDat.stats.filesTotal, stats.filesTotal, 'files total match')
+        t.same(downloadDat.stats.bytesTotal, stats.bytesTotal, 'bytes total match')
+        // These are wrong b/c download-finished fires before the last download events
+        t.skip(dat.stats.filesTotal, dat.stats.filesProgress, 'TODO: file total matches progress')
+        t.skip(dat.stats.blocksTotal, dat.stats.blockProgress, 'TODO: block total matches progress')
+        t.pass('download finished event')
 
-    fs.readdir(downloadDir, function (_, files) {
-      var hasCsvFile = files.indexOf('all_hour.csv') > -1
-      var hasDatFolder = files.indexOf('.dat') > -1
-      t.ok(hasDatFolder, '.dat folder created')
-      t.ok(hasCsvFile, 'csv file downloaded')
+        fs.readdir(downloadDir, function (_, files) {
+          var hasCsvFile = files.indexOf('all_hour.csv') > -1
+          var hasDatFolder = files.indexOf('.dat') > -1
+          t.ok(hasDatFolder, '.dat folder created')
+          t.ok(hasCsvFile, 'csv file downloaded')
 
-      if (files.indexOf('folder') > -1) {
-        var subFiles = fs.readdirSync(path.join(downloadDir, 'folder'))
-        var hasEmtpy = subFiles.indexOf('empty.txt') > -1
-        t.skip(hasEmtpy, 'empty.txt file downloaded')
-        // TODO: known hyperdrive issue https://github.com/mafintosh/hyperdrive/issues/83
-      }
-      dat.removeAllListeners()
-      t.end()
+          if (files.indexOf('folder') > -1) {
+            var subFiles = fs.readdirSync(path.join(downloadDir, 'folder'))
+            var hasEmtpy = subFiles.indexOf('empty.txt') > -1
+            t.skip(hasEmtpy, 'empty.txt file downloaded')
+            // TODO: known hyperdrive issue https://github.com/mafintosh/hyperdrive/issues/83
+          }
+          downloadDat.removeAllListeners()
+          t.end()
+        })
+      })
     })
   })
 })
 
 test('download and live update', function (t) {
-  var dat = downloadDat // use previous test download
-
   updateShareFile()
 
-  dat.on('archive-updated', function () {
+  downloadDat.on('archive-updated', function () {
     t.pass('archive updated event')
   })
 
-  dat.on('file-downloaded', function (file) {
+  downloadDat.on('file-downloaded', function (file) {
     t.ok(file.name.indexOf('empty.txt') > -1, 'file updated')
     t.end()
   })
 
-  dat.on('download-finished', function () {
+  downloadDat.on('download-finished', function () {
     t.skip('TODO: download finished fires again')
     // t.end()
   })
@@ -112,35 +117,41 @@ test('close first test', function (t) {
 
 test('download from snapshot', function (t) {
   var shareKey
-  shareDat = Dat({dir: fixtures, snapshot: true})
-  shareDat.share()
-  shareDat.once('key', function (key) {
-    shareKey = key
-    download()
+  var dat = Dat(fixtures, {snapshot: true}, function (err, node) {
+    t.error(err, 'no error')
+    shareDat.share(function (err) {
+      t.erro(err, 'no share errors')
+    })
+    dat.once('key', function (key) {
+      shareKey = key
+      download()
+    })
   })
 
   function download () {
     testFolder(function () {
-      var downDat = Dat({key: shareKey, dir: downloadDir})
-      downDat.download(function (err) {
-        t.error(err, 'download callback error')
-        t.pass('callback called for non-live archive')
-        fs.readdir(downloadDir, function (_, files) {
-          var hasCsvFile = files.indexOf('all_hour.csv') > -1
-          var hasDatFolder = files.indexOf('.dat') > -1
-          t.ok(hasDatFolder, '.dat folder created')
-          t.ok(hasCsvFile, 'csv file downloaded')
+      var dat = Dat(downloadDir, {key: shareKey}, function (err, downDat) {
+        t.error(err, 'no error')
+        downDat.download(function (err) {
+          t.error(err, 'download callback error')
+          t.pass('callback called for non-live archive')
+          fs.readdir(downloadDir, function (_, files) {
+            var hasCsvFile = files.indexOf('all_hour.csv') > -1
+            var hasDatFolder = files.indexOf('.dat') > -1
+            t.ok(hasDatFolder, '.dat folder created')
+            t.ok(hasCsvFile, 'csv file downloaded')
 
-          downDat.close(function () {
-            t.pass('close callback ok')
-            t.end()
+            downDat.close(function () {
+              t.pass('close callback ok')
+              t.end()
+            })
           })
         })
-      })
 
-      downDat.once('download-finished', function () {
-        t.pass('download finished')
-        t.ok(!downDat.live, 'live value false')
+        dat.once('download-finished', function () {
+          t.pass('download finished')
+          t.ok(!downDat.live, 'live value false')
+        })
       })
     })
   }
@@ -156,7 +167,7 @@ test('finished', function (t) {
 })
 
 test.onFinish(function () {
-  rimraf.sync(downloadDir)
+  if (downloadDir) rimraf.sync(downloadDir)
 })
 
 function testFolder (cb) {

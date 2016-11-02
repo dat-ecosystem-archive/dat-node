@@ -11,16 +11,27 @@ var extend = require('xtend')
 var importFiles = require('./lib/count-import')
 var getDb = require('./lib/db')
 
-module.exports = Dat
+module.exports = function (dir, opts, cb) {
+  if (typeof opts === 'function') {
+    cb = opts
+    opts = {}
+  }
+  var dat = Dat(dir, opts)
+  if (cb) dat.open(done)
+  function done () {
+    cb(null, dat)
+  }
+  return dat
+}
 
-function Dat (opts) {
-  if (!(this instanceof Dat)) return new Dat(opts)
+function Dat (dir, opts) {
+  if (!(this instanceof Dat)) return new Dat(dir, opts)
   if (!opts) opts = {}
-  if (!opts.dir) throw new Error('dir option required')
+  if (!dir) throw new Error('dir option required')
   events.EventEmitter.call(this)
 
   var defaultOpts = {
-    _datPath: path.join(opts.dir, '.dat'),
+    _datPath: path.join(dir, '.dat'),
     ignore: [/^(?:\/.*)?\.dat(?:\/.*)?$/],
     snapshot: false,
     watchFiles: true,
@@ -38,7 +49,7 @@ function Dat (opts) {
 
   self.options = opts
   self.key = opts.key ? encoding.decode(opts.key) : null
-  self.dir = opts.dir === '.' ? process.cwd() : path.resolve(opts.dir)
+  self.dir = dir === '.' ? process.cwd() : path.resolve(dir)
   if (opts.db) self.db = opts.db
   else self._datPath = opts._datPath
   self.live = opts.key ? null : !opts.snapshot
