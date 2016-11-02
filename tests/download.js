@@ -5,7 +5,7 @@ var test = require('tape')
 var rimraf = require('rimraf')
 var mkdirp = require('mkdirp')
 
-var dat = require('..')
+var Dat = require('..')
 
 // os x adds this if you view the fixtures in finder and breaks the file count assertions
 try { fs.unlinkSync(path.join(__dirname, 'fixtures', '.DS_Store')) } catch (e) { /* ignore error */ }
@@ -22,21 +22,23 @@ var stats = {
 
 test('prep', function (t) {
   rimraf.sync(path.join(fixtures, '.dat')) // for previous failed tests
-  dat(fixtures, function (err, node) {
+  var dat = Dat(fixtures, function (err, node) {
     t.error(err, 'no error')
     shareDat = node
+    dat.once('key', function (key) {
+      t.equal(key.length, 64, 'key event')
+      shareKey = key
+      t.end()
+    })
     shareDat.share(function (err, key) {
       t.error(err, 'no share error')
-      shareKey = key
-      t.equal(key.length, 64, 'key event')
-      t.end()
     })
   })
 })
 
 test('Download with default opts', function (t) {
   testFolder(function () {
-    dat(downloadDir, {key: shareKey}, function (err, node) {
+    var dat = Dat(downloadDir, {key: shareKey}, function (err, node) {
       t.error(err, 'no node error')
       downloadDat = node
       downloadDat.download(function (err) {
@@ -44,15 +46,15 @@ test('Download with default opts', function (t) {
         t.fail('live archive should not call callback')
       })
 
-      downloadDat.once('key', function (key) {
+      dat.once('key', function (key) {
         t.ok(key, 'key emitted')
       })
 
-      downloadDat.on('file-downloaded', function (entry) {
+      dat.on('file-downloaded', function (entry) {
         t.skip('TODO: this is firing after file-downloaded')
       })
 
-      downloadDat.once('download-finished', function () {
+      dat.once('download-finished', function () {
         t.same(downloadDat.stats.filesTotal, stats.filesTotal, 'files total match')
         t.same(downloadDat.stats.bytesTotal, stats.bytesTotal, 'bytes total match')
         // These are wrong b/c download-finished fires before the last download events
@@ -115,12 +117,12 @@ test('close first test', function (t) {
 
 test('download from snapshot', function (t) {
   var shareKey
-  dat(fixtures, {snapshot: true}, function (err, node) {
+  var dat = Dat(fixtures, {snapshot: true}, function (err, node) {
     t.error(err, 'no error')
     shareDat.share(function (err) {
       t.erro(err, 'no share errors')
     })
-    shareDat.once('key', function (key) {
+    dat.once('key', function (key) {
       shareKey = key
       download()
     })
@@ -128,7 +130,7 @@ test('download from snapshot', function (t) {
 
   function download () {
     testFolder(function () {
-      dat(downloadDir, {key: shareKey}, function (err, downDat) {
+      var dat = Dat(downloadDir, {key: shareKey}, function (err, downDat) {
         t.error(err, 'no error')
         downDat.download(function (err) {
           t.error(err, 'download callback error')
@@ -146,7 +148,7 @@ test('download from snapshot', function (t) {
           })
         })
 
-        downDat.once('download-finished', function () {
+        dat.once('download-finished', function () {
           t.pass('download finished')
           t.ok(!downDat.live, 'live value false')
         })

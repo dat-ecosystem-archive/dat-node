@@ -4,10 +4,10 @@ var anymatch = require('anymatch')
 var rimraf = require('rimraf')
 var memdb = require('memdb')
 
-var dat = require('..')
+var Dat = require('..')
 
 test('default ignore', function (t) {
-  dat(process.cwd(), function (err, node) {
+  Dat(process.cwd(), function (err, node) {
     t.error(err, 'no init error')
     var matchers = node.options.ignore
     t.ok(anymatch(matchers, '.dat'), '.dat folder ignored')
@@ -28,7 +28,7 @@ test('default ignore', function (t) {
 })
 
 test('custom ignore extends default (string)', function (t) {
-  dat(process.cwd(), {ignore: '**/*.js'}, function (err, node) {
+  Dat(process.cwd(), {ignore: '**/*.js'}, function (err, node) {
     t.error(err, 'no init error')
     var matchers = node.options.ignore
     t.ok(Array.isArray(node.options.ignore), 'ignore extended correctly')
@@ -44,7 +44,7 @@ test('custom ignore extends default (string)', function (t) {
 })
 
 test('custom ignore extends default (array)', function (t) {
-  dat(process.cwd(), {ignore: ['super_secret_stuff/*', '**/*.txt']}, function (err, node) {
+  Dat(process.cwd(), {ignore: ['super_secret_stuff/*', '**/*.txt']}, function (err, node) {
     t.error(err, 'no init error')
     var matchers = node.options.ignore
 
@@ -62,7 +62,7 @@ test('custom ignore extends default (array)', function (t) {
 })
 
 test('custom db option', function (t) {
-  dat(process.cwd(), {db: memdb()}, function (err, node) {
+  Dat(process.cwd(), {db: memdb()}, function (err, node) {
     t.error(err, 'no init error')
     t.ok(node.db.db instanceof require('memdown'), 'db is memdown')
 
@@ -76,7 +76,7 @@ test('custom db option', function (t) {
 
 test('swarm options', function (t) {
   var opts = {utp: false, port: 1234, discovery: {upload: false}, webrtc: false}
-  dat(process.cwd(), opts, function (err, node) {
+  Dat(process.cwd(), opts, function (err, node) {
     t.error(err)
     node.once('connecting', function () {
       var swarm = node.swarm
@@ -104,7 +104,7 @@ test('swarm options', function (t) {
 })
 
 test('swarm options 3.2.x compat', function (t) {
-  dat(process.cwd(), {upload: false}, function (err, node) {
+  Dat(process.cwd(), {upload: false}, function (err, node) {
     t.error(err)
     node.once('connecting', function () {
       var swarm = node.swarm

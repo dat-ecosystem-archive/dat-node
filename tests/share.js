@@ -2,7 +2,7 @@ var fs = require('fs')
 var path = require('path')
 var test = require('tape')
 var rimraf = require('rimraf')
-var dat = require('..')
+var Dat = require('..')
 
 // os x adds this if you view the fixtures in finder and breaks the file count assertions
 try { fs.unlinkSync(path.join(__dirname, 'fixtures', '.DS_Store')) } catch (e) { /* ignore error */ }
@@ -24,7 +24,7 @@ test('prep', function (t) {
 test('Share with default opts', function (t) {
   var fileCount = 0
 
-  dat(fixtures, function (err, node) {
+  var dat = Dat(fixtures, function (err, node) {
     t.error(err, 'no error')
     t.pass('open okay')
     t.ok(node.dir === fixtures, 'correct directory')
@@ -33,21 +33,21 @@ test('Share with default opts', function (t) {
       t.pass('creates .dat dir')
     })
 
-    node.once('append-ready', function () {
+    dat.once('append-ready', function () {
       t.pass('append ready emits')
       t.ok(node.stats.filesTotal > 0, 'append ready stats')
     })
 
-    node.once('append-ready', function () {
+    dat.once('append-ready', function () {
       t.same(stats.filesTotal, node.stats.filesTotal, 'total files')
       t.same(stats.bytesTotal, node.stats.bytesTotal, 'total bytes')
     })
 
-    node.on('file-added', function () {
+    dat.on('file-added', function () {
       fileCount++
     })
 
-    node.once('archive-finalized', function () {
+    dat.once('archive-finalized', function () {
       t.pass('emits archive-finalized')
       t.same(stats.filesTotal, fileCount, 'file-added emitted correct # times')
       t.same(node.stats.filesProgress, stats.filesTotal, 'progress file count')
@@ -59,20 +59,29 @@ test('Share with default opts', function (t) {
       })
     })
 
-    node.share(function (err, key) {
+    dat.on('key', function (key) {
+      t.ok(key && key.length === 64, 'emits key')
+    })
+
+    dat.share(function (err, key) {
       t.error(err, 'no sharing error')
       t.pass('share callback called')
       liveKey = key
-      t.ok(key && key.length === 64, 'emits key')
     })
   })
 })
 
 test('Share resume with .dat folder present', function (t) {
-  dat(fixtures, function (err, node) {
+  var dat = Dat(fixtures, function (err, node) {
     t.error(err, 'no init error')
 
-    node.once('archive-finalized', function () {
+    node.share(function (err, key) {
+      t.error(err, 'share cb without error')
+      t.ok(node.resume, 'resume flag set')
+      t.same(liveKey, key, 'key matches previous key')
+    })
+
+    dat.once('archive-finalized', function () {
       t.skip('TODO: check that files are skipped')
       node.close(function () {
         node.db.close(function () {
@@ -82,23 +91,14 @@ test('Share resume with .dat folder present', function (t) {
         })
       })
     })
-
-    node.share(function (err, key) {
-      t.error(err, 'share cb without error')
-      t.ok(node.resume, 'resume flag set')
-      t.same(liveKey, key, 'key matches previous key')
-    })
   })
 })
 
 test('share snapshot', function (t) {
-  dat(fixtures, function (err, node) {
+  var dat = Dat(fixtures, {snapshot: true}, function (err, node) {
     t.error(err, 'no init error')
 
-    node.snapshot(function (err, key) {
-      t.error(err, 'share cb without error')
-      t.ok(!node.live, 'live false')
-
+    dat.once('key', function (key) {
       // TODO: saving mtime breaks this
       t.skip(fixturesKey, key, 'TODO: key matches snapshot key')
 
@@ -109,18 +109,23 @@ test('share snapshot', function (t) {
         })
       }))
     })
+
+    node.share(function (err) {
+      t.error(err, 'share cb without error')
+      t.ok(!node.live, 'live false')
+    })
   })
 })
 
 test('share live - editing file', function (t) {
-  dat(fixtures, function (err, node) {
+  var dat = Dat(fixtures, function (err, node) {
     t.error(err, 'no error')
-    node.on('file-added', function (file) {
+    dat.on('file-added', function (file) {
       if (file.mode === 'updated') {
         t.ok(file.path.indexOf('empty.txt') > -1, 'correct file updated')
       }
     })
-    node.on('archive-finalized', function () {
+    dat.on('archive-finalized', function () {
       node.close(function () {
         node.db.close(function () {
           t.end()
@@ -129,7 +134,7 @@ test('share live - editing file', function (t) {
     })
     node.share(function () {
       fs.writeFileSync(path.join(fixtures, 'folder', 'empty.txt'), '')
-      node.once('archive-updated', function () {
+      dat.once('archive-updated', function () {
         t.pass('archive update fires')
         t.same(node.stats.filesTotal, stats.filesTotal, 'files total correct')
       })
@@ -139,7 +144,7 @@ test('share live - editing file', function (t) {
 
 if (!process.env.TRAVIS) {
   test('share live - creating new file', function (t) {
-    dat(fixtures, function (err, node) {
+    var dat = Dat(fixtures, function (err, node) {
       t.error(err, 'no init error')
       var newFile = path.join(fixtures, 'new.txt')
       node.share(function (err) {
@@ -148,7 +153,7 @@ if (!process.env.TRAVIS) {
           if (err) throw err
           t.pass('file write ok')
         })
-        node.once('archive-updated', function () {
+        dat.once('archive-updated', function () {
           t.pass('archive update fires')
           t.same(node.stats.filesTotal, stats.filesTotal + 1, 'files total correct')
           fs.unlink(newFile, function () {
