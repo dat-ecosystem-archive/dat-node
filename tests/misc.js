@@ -3,6 +3,7 @@ var test = require('tape')
 var anymatch = require('anymatch')
 var rimraf = require('rimraf')
 var memdb = require('memdb')
+var encoding = require('dat-encoding')
 
 var Dat = require('..')
 
@@ -122,6 +123,33 @@ test('swarm options 3.2.x compat', function (t) {
       })
     })
     dat._joinSwarm()
+  })
+})
+
+test('string or buffer .key', function (t) {
+  var buf = new Buffer(32)
+  var dat = Dat({key: buf, dir: process.cwd()})
+  dat.open(function (err) {
+    t.error(err)
+    t.deepEqual(dat.archive.key, buf)
+
+    dat.close(function (err) {
+      t.error(err)
+      dat.db.close(function (err) {
+        t.error(err)
+
+        dat = Dat({key: encoding.encode(buf), dir: process.cwd()})
+        dat.open(function (err) {
+          t.error(err)
+          t.deepEqual(dat.archive.key, buf)
+          dat.close(function () {
+            dat.db.close(function () {
+              t.end()
+            })
+          })
+        })
+      })
+    })
   })
 })
 

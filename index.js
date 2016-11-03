@@ -37,7 +37,11 @@ function Dat (opts) {
   var self = this
 
   self.options = opts
-  self.key = opts.key ? encoding.decode(opts.key) : null
+  self.key = opts.key
+    ? typeof key === 'string'
+      ? encoding.decode(opts.key)
+      : opts.key
+    : null
   self.dir = opts.dir === '.' ? process.cwd() : path.resolve(opts.dir)
   if (opts.db) self.db = opts.db
   else self._datPath = opts._datPath
