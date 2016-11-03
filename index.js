@@ -76,7 +76,7 @@ Dat.prototype._open = function (cb) {
   if (this._closed) return cb('Cannot open a closed Dat')
   var self = this
   getDb(self, function (err) {
-    if (err) return self._emitError(err)
+    if (err) return cb(err)
     var drive = hyperdrive(self.db)
     self.archive = drive.createArchive(self.key, {
       live: self.live,
@@ -306,6 +306,7 @@ Dat.prototype.close = function (cb) {
 
   closeSwarm(function () {
     closeFileWatcher()
+    if (!self.archive) return cb()
     self.archive.close(function () {
       cb()
     })

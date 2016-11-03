@@ -142,7 +142,29 @@ test('string or buffer .key', function (t) {
         dat.open(function (err) {
           t.error(err)
           t.deepEqual(dat.archive.key, buf)
-          t.end()
+          dat.close(function () {
+            dat.db.close(function () {
+              t.end()
+            })
+          })
+        })
+      })
+    })
+  })
+})
+
+test('leveldb open error', function (t) {
+  var a = Dat({ dir: process.cwd() })
+  var b = Dat({ dir: process.cwd() })
+  a.open(function (err) {
+    t.error(err)
+    b.open(function (err) {
+      t.ok(err)
+      a.close(function () {
+        a.db.close(function () {
+          rimraf(path.join(process.cwd(), '.dat'), function () {
+            t.end()
+          })
         })
       })
     })
