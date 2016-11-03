@@ -109,10 +109,12 @@ Dat.prototype.share = function (cb) {
       // TODO: allow this but change to download
       return cb('Dat previously downloaded. Run dat ' + encoding.encode(archive.key) + ' to resume')
     }
+    self.owner = archive.owner
 
     if ((archive.live || archive.owner) && archive.key) {
       if (!self.key) self.db.put('!dat!key', archive.key.toString('hex'))
       self._joinSwarm()
+      self.key = archive.key
       self.emit('key', archive.key.toString('hex'))
     }
 
@@ -172,6 +174,7 @@ Dat.prototype.share = function (cb) {
 
       if (self.options.snapshot) {
         self._joinSwarm()
+        self.key = archive.key
         self.emit('key', archive.key.toString('hex'))
       }
 
@@ -199,11 +202,13 @@ Dat.prototype.download = function (cb) {
   cb = cb || self._emitError
 
   self._joinSwarm()
+  self.key = archive.key
   self.emit('key', archive.key.toString('hex'))
 
   archive.open(function (err) {
     if (err) return cb(err)
     self.live = archive.live
+    self.owner = archive.owner
     self.db.put('!dat!key', archive.key.toString('hex'))
     updateTotalStats() //  Call once for downloads previously started
 
@@ -290,6 +295,7 @@ Dat.prototype._joinSwarm = function () {
     signalhub: self.options.signalhub,
     wrtc: self.options.webrtc
   })
+  self.stats.peers = self.swarm.connections
   self.emit('connecting')
   self.swarm.on('connection', function (peer) {
     self.emit('swarm-update')
