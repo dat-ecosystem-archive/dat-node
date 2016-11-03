@@ -137,7 +137,7 @@ test('string or buffer .key', function (t) {
       t.error(err)
       dat.db.close(function (err) {
         t.error(err)
-        
+
         dat = Dat({key: encoding.encode(buf), dir: process.cwd()})
         dat.open(function (err) {
           t.error(err)
