@@ -306,6 +306,7 @@ Dat.prototype.close = function (cb) {
 
   closeSwarm(function () {
     closeFileWatcher()
+    if (!self.archive) return cb()
     self.archive.close(function () {
       cb()
     })
