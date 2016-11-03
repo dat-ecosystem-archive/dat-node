@@ -83,14 +83,14 @@ From there, you can either share or download: `dat.share(cb)` or `dat.download(c
 
 ## API
 
-The main goal of the API is to support the Dat command line tool. The options here should be familiar if you use the command line tool. 
+The main goal of the API is to support the Dat command line tool. The options here should be familiar if you use the command line tool.
 
 ### Options
 
 ```js
 {
   dir: 'downloads/path-to-dir/', // path to share or download to. always required
-  key: '64characterDatkey', // required for downloads
+  key: 'Datkey', // required for downloads
   ignore: ['dir/**', 'files.**'], // ignore files. uses anymatch to check paths
   ignoreHidden: true, // by default ignore all hidden files
   snapshot: false, //: sharing snapshot archive, not used for download
@@ -108,7 +108,7 @@ The main goal of the API is to support the Dat command line tool. The options he
 
 Download `dat.key` to `dat.dir`. Does not callback for live archives.
 
-### dat.share(cb) 
+### dat.share(cb)
 
 Share directory specified in `opts.dir`. Callback fired when all files are added to the drive (files will start being shared as they are added for live archives). The swarm is automatically joined for key when it is available for share & download, specify `discovery: false` to not join the swarm automatically.
 
