@@ -8,12 +8,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/joehand/dat-js.git"
+    "url": "git://github.com/datproject/dat-js.git"
   },
   "bugs": {
-    "url": "https://github.com/joehand/dat-js/issues"
+    "url": "https://github.com/datproject/dat-js/issues"
   },
-  "homepage": "https://dat-data.com",
+  "homepage": "http://datproject.org",
   "author": "Joe Hand <joe@hand.email> (https://joeahand.com/)",
   "license": "MIT",
   "dependencies": {
