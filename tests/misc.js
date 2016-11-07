@@ -226,13 +226,7 @@ test('expose stats.peers', function (t) {
 
   shareDat.once('swarm-update', function () {
     t.ok(shareDat.stats.peers >= 1, '>=1 peer')
-    shareDat.once('swarm-update', function () {
-      t.ok(shareDat.stats.peers >= 1, '>=1 peers')
-      shareDat.once('swarm-update', function () {
-        t.equal(shareDat.stats.peers, 2, '2 peers')
-        t.end()
-      })
-    })
+    t.end()
   })
 
   shareDat.share(function (err) {
