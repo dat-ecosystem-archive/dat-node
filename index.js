@@ -203,7 +203,6 @@ Dat.prototype.download = function (cb) {
   cb = cb || self._emitError
 
   self._joinSwarm()
-  self.key = archive.key
   self.emit('key', archive.key.toString('hex'))
 
   archive.open(function (err) {
