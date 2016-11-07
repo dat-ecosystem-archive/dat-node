@@ -56,7 +56,8 @@ function Dat (opts) {
     blocksTotal: 0, // archive.content.blocks
     blocksProgress: 0, // download progress
     bytesUp: 0, // archive.on('upload', data.length)
-    bytesDown: 0 // archive.on('download', data.length)
+    bytesDown: 0, // archive.on('download', data.length)
+    peers: 0 // swarm connections
   }
 
   self.open = thunky(open)
@@ -295,13 +296,14 @@ Dat.prototype._joinSwarm = function () {
     signalhub: self.options.signalhub,
     wrtc: self.options.webrtc
   })
-  self.stats.peers = self.swarm.connections
+  function updatePeers () {
+    self.stats.peers = self.swarm.connections
+    self.emit('swarm-update')
+  }
   self.emit('connecting')
   self.swarm.on('connection', function (peer) {
-    self.emit('swarm-update')
-    peer.on('close', function () {
-      self.emit('swarm-update')
-    })
+    updatePeers()
+    peer.on('close', updatePeers)
   })
 }
 
