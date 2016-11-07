@@ -4,8 +4,11 @@ var anymatch = require('anymatch')
 var rimraf = require('rimraf')
 var memdb = require('memdb')
 var encoding = require('dat-encoding')
+var fs = require('fs')
+var os = require('os')
 
 var Dat = require('..')
+var shareFolder = path.join(__dirname, 'fixtures', 'folder')
 
 test('default ignore', function (t) {
   var dat = Dat({ dir: process.cwd() })
@@ -165,6 +168,83 @@ test('leveldb open error', function (t) {
           rimraf(path.join(process.cwd(), '.dat'), function () {
             t.end()
           })
+        })
+      })
+    })
+  })
+})
+
+test('expose .key', function (t) {
+  var folder = path.join(__dirname, 'fixtures', 'folder')
+  var key = new Buffer(32)
+  var dat = Dat({ dir: process.cwd(), key: key, db: memdb() })
+  t.deepEqual(dat.key, key)
+  dat = Dat({ dir: folder, db: memdb() })
+  dat.share(function (err) {
+    t.error(err)
+    t.notDeepEqual(dat.key, key)
+    dat.close(function (err) {
+      t.error(err)
+      t.end()
+    })
+  })
+})
+
+test('expose .owner', function (t) {
+  rimraf.sync(path.join(shareFolder, '.dat'))
+  var downFolder = path.join(os.tmpdir(), 'dat-' + Math.random().toString(16).slice(2))
+  fs.mkdirSync(downFolder)
+
+  var shareDat = Dat({ dir: shareFolder, snapshot: true })
+  shareDat.share(function (err) {
+    t.error(err, 'dat shared')
+    t.ok(shareDat.owner, 'is owner')
+
+    var downDat = Dat({ dir: downFolder, key: shareDat.key })
+    downDat.download(function (err) {
+      t.error(err, 'dat downloaded')
+      t.notOk(downDat.owner, 'not owner')
+
+      shareDat.close(function (err) {
+        t.error(err, 'share dat closed')
+        downDat.close(function (err) {
+          t.error(err, 'download dat closed')
+          t.end()
+        })
+      })
+    })
+  })
+})
+
+test('expose stats.peers', function (t) {
+  rimraf.sync(path.join(shareFolder, '.dat'))
+  var downFolder = path.join(os.tmpdir(), 'dat-' + Math.random().toString(16).slice(2))
+  fs.mkdirSync(downFolder)
+
+  var shareDat = Dat({ dir: shareFolder, snapshot: true, db: memdb() })
+  t.equal(shareDat.stats.peers, 0, '0 peers')
+
+  shareDat.once('swarm-update', function () {
+    t.ok(shareDat.stats.peers >= 1, '>=1 peer')
+    shareDat.once('swarm-update', function () {
+      t.ok(shareDat.stats.peers >= 1, '>=1 peers')
+      shareDat.once('swarm-update', function () {
+        t.equal(shareDat.stats.peers, 2, '2 peers')
+        t.end()
+      })
+    })
+  })
+
+  shareDat.share(function (err) {
+    t.error(err, 'dat shared')
+
+    var downDat = Dat({ dir: downFolder, key: shareDat.key })
+    downDat.download(function (err) {
+      t.error(err, 'dat downloaded')
+      downDat.close(function (err) {
+        t.error(err, 'download dat closed')
+        shareDat.close(function (err) {
+          t.error(err, 'share dat closed')
         })
       })
     })
