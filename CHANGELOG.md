@@ -10,6 +10,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   ### Added, ### Changed, ### Fixed, ### Removed, ### Deprecated
 -->
 
+## 3.8.0 - 2016-11-07
+### Added
+* Expose `dat.owner`, `dat.key`, `dat.peers`
+* Support buffer keys
+* Forward `db.open` errors
+
+### Fixed
+* Guard `archive.close` on `dat.close`
+
 ## 3.7.1 - 2016-10-29
 ### Fixed
 * Create entryDone function once for downloads
