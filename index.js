@@ -47,6 +47,7 @@ function Dat (opts) {
   else self._datPath = opts._datPath
   self.live = opts.key ? null : !opts.snapshot
   if (opts.snapshot) self.options.watchFiles = false // Can't watch snapshot files
+  self.downloaded = undefined
 
   self.stats = {
     filesTotal: 0,
@@ -249,6 +250,7 @@ Dat.prototype.download = function (cb) {
       })
     }, function (err) {
       if (err) return cb(err)
+      self.downloaded = true
       return cb(null)
     })
 

@@ -244,3 +244,30 @@ test('expose stats.peers', function (t) {
     })
   })
 })
+
+test('expose .downloaded', function (t) {
+  rimraf.sync(path.join(shareFolder, '.dat'))
+  var downFolder = path.join(os.tmpdir(), 'dat-' + Math.random().toString(16).slice(2))
+  fs.mkdirSync(downFolder)
+
+  var shareDat = Dat({ dir: shareFolder, snapshot: true, db: memdb() })
+  shareDat.share(function (err) {
+    t.error(err, 'dat shared')
+
+    var downDat = Dat({ dir: downFolder, key: shareDat.key })
+    t.notOk(downDat.downloaded, 'not downloaded')
+
+    downDat.download(function (err) {
+      t.error(err, 'dat downloaded')
+      t.ok(downDat.downloaded, 'dat downloaded')
+
+      downDat.close(function (err) {
+        t.error(err, 'download dat closed')
+        shareDat.close(function (err) {
+          t.error(err, 'share dat closed')
+          t.end()
+        })
+      })
+    })
+  })
+})
