@@ -214,6 +214,11 @@ Dat.prototype.download = function (cb) {
 
     archive.metadata.once('download-finished', updateTotalStats)
 
+    archive.once('download', function () {
+      // bytesTotal can be zero even when we have metadata downloaded ^
+      updateTotalStats()
+    })
+
     archive.metadata.on('update', function () {
       updateTotalStats() // Updates total on live sync
       self.emit('archive-updated')
