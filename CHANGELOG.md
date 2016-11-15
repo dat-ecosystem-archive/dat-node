@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   ### Added, ### Changed, ### Fixed, ### Removed, ### Deprecated
 -->
 
+## 3.8.1 - 2016-11-15
+### Fixed
+* Progress incorrectly showing 100% with 0 bytes
+
 ## 3.8.0 - 2016-11-07
 ### Added
 * Expose `dat.owner`, `dat.key`, `dat.peers`
