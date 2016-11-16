@@ -1,8 +1,8 @@
-# Dat-js [![Travis](https://api.travis-ci.org/datproject/dat-js.svg)](https://travis-ci.org/datproject/dat-js) [![npm](https://img.shields.io/npm/v/dat-js.svg?style=flat-square)](https://npmjs.org/package/dat-js)
+# dat-node [![Travis](https://api.travis-ci.org/joehand/dat-node.svg)](https://travis-ci.org/joehand/dat-node) [![npm](https://img.shields.io/npm/v/dat-node.svg?style=flat-square)](https://npmjs.org/package/dat-node)
 
 [<img src="https://raw.githubusercontent.com/datproject/design/master/downloads/dat-data-logo.png" align="right" width="140">](http://datproject.org)
 
-[Dat](https://datproject.org) is a decentralized data tool for distributing data and files. **Dat-js** is a node module to help you build applications with Dat. Do you want to use Dat in the command line? Check out the command line interface at [datproject/dat](https://github.com/datproject/dat).
+[Dat](https://datproject.org) is a decentralized data tool for distributing data and files. **dat-node** is a node module to help you build applications with Dat. Do you want to use Dat in the command line? Check out the command line interface at [datproject/dat](https://github.com/datproject/dat).
 
 **Chat with us!**   [![#dat IRC channel on freenode](https://img.shields.io/badge/irc%20channel-%23dat%20on%20freenode-blue.svg)](http://webchat.freenode.net/?channels=dat)
 [![datproject/discussions](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/datproject/discussions?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
@@ -23,7 +23,7 @@
 Share files with Dat:
 
 ```js
-var Dat = require('dat-js')
+var Dat = require('dat-node')
 
 var dat = Dat({dir: process.cwd()})
 dat.share(function (err) {
@@ -37,7 +37,7 @@ dat.share(function (err) {
 Download files with Dat:
 
 ```js
-var Dat = require('dat-js')
+var Dat = require('dat-node')
 
 // Add download key as the second argument
 var dat = Dat({dir: process.cwd(), key: process.argv[2]})
@@ -51,31 +51,31 @@ dat.on('download-finished', function (err) {
 ## Installation
 
 ```
-npm install dat-js
+npm install dat-node
 ```
 
 ## Usage
 
-Dat-js provides an interface for sharing and downloading files, like we do in the Dat command line tool. Dat-js works great if you want to manage Dat folders in a way that is compatible with the Dat CLI and other Dat tools.
+Dat-node provides an interface for sharing and downloading files, like we do in the Dat command line tool. Dat-node works great if you want to manage Dat folders in a way that is compatible with the Dat CLI and other Dat tools.
 
-Dat-js works the same way as the command line tool. There are two basic operations:
+Dat-node works the same way as the command line tool. There are two basic operations:
 
 * Sharing: share a directory to a key
 * Downloading: download files from a key into a directory
 
-Dat-js will create a `.dat` folder in the directory you specify with the `dir` option. This allows you to resume the share or download later using the Dat command line tool, or another Dat-compatible application.
+Dat-node will create a `.dat` folder in the directory you specify with the `dir` option. This allows you to resume the share or download later using the Dat command line tool, or another Dat-compatible application.
 
 Whenever you initiate Dat you need to specify at least the directory.
 
 ```js
-var Dat = require('dat-js')
+var Dat = require('dat-node')
 var dat = Dat({dir: 'some-path'})
 ```
 
-By default, Dat-js assumes you are creating a new Dat. If you are using a dat created by other user, you need to specify the key too:
+By default, Dat-node assumes you are creating a new Dat. If you are using a dat created by other user, you need to specify the key too:
 
 ```js
-var Dat = require('dat-js')
+var Dat = require('dat-node')
 var dat = Dat({dir: 'some-path', key:'some64characterdatkey'})
 ```
 
