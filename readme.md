@@ -98,8 +98,6 @@ The main goal of the API is to support the Dat command line tool. The options he
   discovery: {upload: true, download: true}, // Join swarm and upload/download data. Set to false to disable discovery
   port: 3828, // port to use for discovery-swarm. port value is saved in database for subsequent uses
   utp: true, // use utp for discovery-swarm
-  webrtc: undefined, // false to turn off webrtc, if supported. if not supported, instance of electron-webrtc (or another way to support webrtc)
-  signalhub: 'signalhub.dat.land', // signalhub URL for webrtc
   db: level('.dat') // hyperdrive compatible database, uses levelDB .dat folder by default
 }
 ```

@@ -294,8 +294,7 @@ Dat.prototype._joinSwarm = function () {
     port: self.options.port,
     utp: self.options.utp,
     upload: discovery.upload,
-    download: discovery.download,
-    signalhub: self.options.signalhub
+    download: discovery.download
   })
   function updatePeers () {
     self.stats.peers = self.swarm.connections.length

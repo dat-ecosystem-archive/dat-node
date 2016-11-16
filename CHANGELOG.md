@@ -10,6 +10,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   ### Added, ### Changed, ### Fixed, ### Removed, ### Deprecated
 -->
 
+## 4.0.0 - 2016-11-16
+*This will be the last major version of dat-js. This library will be moving to dat-fs, with a similar API.*
+
+### Removed
+* webrtc support (`opts.webrtc`, `opts.signalhub`)
+* `opts.upload` changed to `opts.discovery.upload` (deprecated in 3.4.0)
+
+### Fixed
+* Error message for trying to download a dat to folder with existing dat.
+
+
 ## 3.8.2 - 2016-11-15
 ### Fixed
 * Check type of keys on db resume
