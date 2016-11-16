@@ -81,21 +81,18 @@ test('snapshot option', function (t) {
 })
 
 test('swarm options', function (t) {
-  var dat = Dat({utp: false, port: 1234, discovery: {upload: false}, webrtc: false, dir: process.cwd()})
+  var dat = Dat({utp: false, port: 1234, discovery: {upload: false}, dir: process.cwd()})
   dat.open(function (err) {
     t.error(err)
     dat.once('connecting', function () {
       var swarm = dat.swarm
 
-      t.ok(!swarm.opts.discovery.utp, 'utp discovery false')
-      t.ok(!swarm.node._utp, 'No utp discovery')
+      t.ok(!swarm._options.utp, 'utp discovery false')
+      t.ok(!swarm._utp, 'No utp discovery')
 
-      t.same(swarm.opts.port, 1234, 'port option set on swarm')
-      t.same(swarm.node.address().port, 1234, 'port on node swarm okay')
+      t.same(swarm.address().port, 1234, 'port on node swarm okay')
 
       t.ok(!swarm.uploading, 'Upload false set on swarm')
-
-      t.ok(!swarm.opts.wrtc, 'Swarm webrtc option false')
 
       dat.close(function () {
         dat.db.close(function () {

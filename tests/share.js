@@ -168,9 +168,9 @@ if (!process.env.TRAVIS) {
 }
 
 test('cleanup', function (t) {
-  dat.close(cleanFixtures(function () {
+  cleanFixtures(function () {
     t.end()
-  }))
+  })
 })
 
 function cleanFixtures (cb) {
