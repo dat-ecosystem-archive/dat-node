@@ -11,4 +11,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 -->
 
 ## 0.1.0 - 2016-11-17
-Released `dat-js` as `dat-node` 0.1.
+Released `dat-js` 4.0.0 as `dat-node` 0.1.
