@@ -30,7 +30,6 @@ function Dat (opts) {
   if (opts.ignoreHidden !== false) defaultOpts.ignore.push(/[\/\\]\./)
   if (opts.ignore && Array.isArray(opts.ignore)) opts.ignore = opts.ignore.concat(defaultOpts.ignore)
   else if (opts.ignore) opts.ignore = [opts.ignore].concat(defaultOpts.ignore)
-  if (typeof opts.upload !== 'undefined' && typeof opts.discovery === 'undefined') opts.discovery = {upload: opts.upload, download: true} // 3.2.0 backwards compat
   opts = extend(defaultOpts, opts) // opts takes priority
 
   var self = this
