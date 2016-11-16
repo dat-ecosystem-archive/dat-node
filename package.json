@@ -21,7 +21,7 @@
     "dat-encoding": "^3.0.1",
     "folder-walker": "^3.0.0",
     "hyperdrive": "^7.5.0",
-    "hyperdrive-archive-swarm": "^4.1.4",
+    "hyperdrive-archive-swarm": "^5.0.4",
     "hyperdrive-import-files": "^2.2.1",
     "level": "^1.4.0",
     "random-access-file": "^1.3.0",

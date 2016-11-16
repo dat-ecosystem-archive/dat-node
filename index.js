@@ -25,8 +25,7 @@ function Dat (opts) {
     snapshot: false,
     watchFiles: true,
     discovery: true,
-    utp: true,
-    webrtc: undefined // false would turn off wrtc even if supported
+    utp: true
   }
   if (opts.ignoreHidden !== false) defaultOpts.ignore.push(/[\/\\]\./)
   if (opts.ignore && Array.isArray(opts.ignore)) opts.ignore = opts.ignore.concat(defaultOpts.ignore)
@@ -297,11 +296,10 @@ Dat.prototype._joinSwarm = function () {
     utp: self.options.utp,
     upload: discovery.upload,
     download: discovery.download,
-    signalhub: self.options.signalhub,
-    wrtc: self.options.webrtc
+    signalhub: self.options.signalhub
   })
   function updatePeers () {
-    self.stats.peers = self.swarm.connections
+    self.stats.peers = self.swarm.connections.length
     self.emit('swarm-update')
   }
   self.emit('connecting')
