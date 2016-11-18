@@ -1,10 +1,18 @@
+var assert = require('assert')
+var path = require('path')
 var initArchive = require('./lib/initArchive')
 var importFiles = require('./lib/importFiles')
 var network = require('./lib/network')
 var stats = require('./lib/stats')
 
 module.exports = function (dir, opts, cb) {
-  var dat = {}
+  assert.ok(dir, 'directory required')
+  if (typeof opts === 'function') cb = opts
+
+  var dat = {
+    path: path.resolve(dir)
+    options: opts
+  }
 
   initArchive(dir, opts, function (err, archive, db) {
     dat.archive = archive
