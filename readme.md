@@ -38,13 +38,11 @@ Dat(dir, opts, function (err, dat) {
 
 ## API
 
-### Dat(dir, [opts], cb)
+### `Dat(dir, [opts], cb)``
 
-Initialize a Dat Archive in `dir`. If `dir` contains a `.dat` folder, the archive will be resumed.
+Initialize a Dat Archive in `dir`. If there is an existing Dat Archive, the archive will be resumed.
 
-Initial `opts` are passed to `lib/init-archive`, `dat-folder-db`, and `drive.createArchive()`. Other options can be passed to the network and importer individually.
-
-`opts` can include:
+Initial `opts` can include:
 
 ```js
 opts = {
@@ -61,19 +59,17 @@ opts = {
 }
 ```
 
-***Note on `opts.db`: `dat-node` will not try to resume archives or save the key to the database if you pass your own database.***
+The callback includes a `dat` object that has the following properties:
 
-The callback returns a `dat` object that has the following properties:
-
-#### dat.archive
+#### `dat.archive`
 
 Hyperdrive archive instance.
 
-#### dat.db
+#### `dat.db`
 
 `.dat` folder database
 
-#### dat.path
+#### `dat.path`
 
 Path of the Dat Archive
 
@@ -81,17 +77,17 @@ Path of the Dat Archive
 
 **`dat-node` provides an easy interface to common Dat modules for the created Dat Archive on the `dat` object provided in the callback:**
 
-#### var network = dat.network([opts])
+#### `var network = dat.network([opts])`
 
 Join the Dat Network for your Dat Archive.
 
 `opts` are passed to the swarm module. See [hyperdrive-archive-swarm](https://github.com/karissa/hyperdrive-archive-swarm) for options.
 
-##### network.peers()
+##### `network.peers()`
 
 Get number of peers connected to you.
 
-#### var importer = dat.importFiles([opts], [cb])
+#### `var importer = dat.importFiles([opts], [cb])`
 
 Import files to your Dat Archive from the directory using [hyperdrive-import-files](https://github.com/juliangruber/hyperdrive-import-files/). Options are passed to the importer module. `cb` is called when import is finished.
 
@@ -99,6 +95,6 @@ Import files to your Dat Archive from the directory using [hyperdrive-import-fil
 
 Returns the importer event emitter.
 
-#### var stats = dat.stats()
+#### `var stats = dat.stats()`
 
 [hyperdrive-stats](https://github.com/juliangruber/hyperdrive-stats) instance for the Dat Archive. Stats are stored in a sublevel database in the `.dat` folder.
