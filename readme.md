@@ -83,6 +83,10 @@ Join the Dat Network for your Dat Archive.
 
 `opts` are passed to the swarm module. See [hyperdrive-archive-swarm](https://github.com/karissa/hyperdrive-archive-swarm) for options.
 
+##### `network.swarm`
+
+[discovery-swarm](https://github.com/mafintosh/discovery-swarm) instance.
+
 ##### `network.peers()`
 
 Get number of peers connected to you.
