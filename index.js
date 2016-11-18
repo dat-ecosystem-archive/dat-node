@@ -1,7 +1,7 @@
 var assert = require('assert')
 var path = require('path')
-var initArchive = require('./lib/initArchive')
-var importFiles = require('./lib/importFiles')
+var initArchive = require('./lib/init-archive')
+var importFiles = require('./lib/import-files')
 var network = require('./lib/network')
 var stats = require('./lib/stats')
 
@@ -10,7 +10,7 @@ module.exports = function (dir, opts, cb) {
   if (typeof opts === 'function') cb = opts
 
   var dat = {
-    path: path.resolve(dir)
+    path: path.resolve(dir),
     options: opts
   }
 
