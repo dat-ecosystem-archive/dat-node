@@ -32,7 +32,39 @@ Dat(dir, opts, function (err, dat) {
   var stats = dat.stats() // hyperdrive-stats
 
   // Import Files
-  var importer = dat.importFiles(opts, cb) // hyperdrive-count-import
+  if (archive.owner) {
+    var importer = dat.importFiles(opts, cb) // hyperdrive-count-import
+  }
+})
+```
+
+### Moving from *dat-js*:
+
+Archives are created with a callback function. Once the archive is created, you can join the network directly without choosing to share or download. If the user owns the archive, they will be able to import files.
+
+For example, previously to share files with dat-js we would write:
+
+```js
+// dat-js OLD API
+var dat = Dat({dir: dir, key: link})
+dat.share(function () {
+   // import files
+   // join network
+  console.log('now sharing:', dat.key.toString())
+})
+```
+
+In dat-node this would be:
+
+```js
+// dat-node v1 NEW API
+Dat(dir, {key: link}, function (err, dat) {
+  var network = dat.network(opts) // join network
+  console.log('now sharing:', dat.key.toString())
+
+  var importer = dat.importFiles(opts, function () {
+    console.log('done importing files')
+  })
 })
 ```
 
