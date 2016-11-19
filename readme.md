@@ -22,7 +22,7 @@ Dat(dir, opts, function (err, dat) {
   console.log(dat.path) // dat is created here with a .dat folder
 
   var db = dat.db // level db in .dat folder
-  var archive = dat.archive // Dat Archive
+  var archive = dat.archive // hyperdrive archive
 
   // Join the network
   var network = dat.network(opts) 
@@ -73,8 +73,6 @@ Hyperdrive archive instance.
 
 Path of the Dat Archive
 
----
-
 **`dat-node` provides an easy interface to common Dat modules for the created Dat Archive on the `dat` object provided in the callback:**
 
 #### `var network = dat.network([opts])`
@@ -92,6 +90,8 @@ Join the Dat Network for your Dat Archive.
 Get number of peers connected to you.
 
 #### `var importer = dat.importFiles([opts], [cb])`
+
+(must be the archive owner)
 
 Import files to your Dat Archive from the directory using [hyperdrive-import-files](https://github.com/juliangruber/hyperdrive-import-files/). Options are passed to the importer module. `cb` is called when import is finished.
 

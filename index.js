@@ -17,6 +17,7 @@ module.exports = function (dir, opts, cb) {
   initArchive(dir, opts, function (err, archive, db) {
     if (err) return cb(err)
 
+    if (archive.key) dat.key = archive.key // only live archives will have keys here
     dat.archive = archive
     dat.db = db
     dat.network = function (opts) {
