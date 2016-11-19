@@ -19,6 +19,7 @@ module.exports = function (dir, opts, cb) {
 
     if (archive.key) dat.key = archive.key // only live archives will have keys here
     dat.archive = archive
+    dat.owner = archive.owner
     dat.db = db
     dat.network = function (opts) {
       return network(archive, opts)
@@ -31,7 +32,31 @@ module.exports = function (dir, opts, cb) {
         return importFiles(archive, dir, opts, cb)
       }
     }
+    dat.close = function (cb) {
+      closeNet(function () {
+        closeFileWatch()
+        // TODO: do we want to close db? can't remember what was recommended...
+        // if (!opts.db) db.close()
+        dat.archive.close(cb)
+      })
+    }
 
     cb(null, dat)
+
+    function closeDb (cb) {
+      if (!dat.db) return cb()
+      dat.db.close(cb)
+    }
+
+    function closeNet (cb) {
+      if (!dat.network) return cb()
+      dat.network.swarm.close(cb)
+    }
+
+    function closeFileWatch () {
+      // TODO: add CB
+      if (!dat.importFiles) return
+      dat.importFiles.close()
+    }
   })
 }
