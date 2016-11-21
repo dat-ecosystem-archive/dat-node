@@ -83,6 +83,8 @@ Dat.prototype._open = function (cb) {
         return raf(path.join(self.dir, name))
       }
     })
+    self.key = self.archive.key
+    self.emit('key', self.key)
     self._opened = true
     cb()
   })
