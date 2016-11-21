@@ -52,11 +52,20 @@ test('custom ignore extends default (array)', function (t) {
 test('custom db option', function (t) {
   var dat = Dat({db: memdb(), dir: process.cwd()})
   dat.open(function (err) {
-    t.ok(dat.archive instanceof require('hyperdrive/archive'), 'archive is hyperdrive archive')
-    t.deepEqual(dat.archive.key, dat.key)
     t.error(err)
     t.ok(dat.db.db instanceof require('memdown'), 'db is memdown')
 
+    dat.close(function () {
+      t.end()
+    })
+  })
+})
+
+test('.key on live archive', function (t) {
+  var dat = Dat({db: memdb(), dir: process.cwd()})
+  dat.open(function (err) {
+    t.error(err)
+    t.deepEqual(dat.key, dat.archive.key)
     dat.close(function () {
       t.end()
     })
