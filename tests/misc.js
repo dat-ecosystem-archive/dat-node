@@ -65,7 +65,7 @@ test('.key on live archive', function (t) {
   var dat = Dat({db: memdb(), dir: process.cwd()})
   dat.open(function (err) {
     t.error(err)
-    t.deepEqual(dat.key, dat.archive.key)
+    t.deepEqual(dat.key, dat.archive.key.toString('hex'))
     dat.close(function () {
       t.end()
     })
