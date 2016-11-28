@@ -27,7 +27,7 @@ function Dat (opts) {
     discovery: true,
     utp: true
   }
-  if (opts.ignoreHidden !== false) defaultOpts.ignore.push(/[\/\\]\./)
+  if (opts.ignoreHidden !== false) defaultOpts.ignore.push(/[/\\]\./)
   if (opts.ignore && Array.isArray(opts.ignore)) opts.ignore = opts.ignore.concat(defaultOpts.ignore)
   else if (opts.ignore) opts.ignore = [opts.ignore].concat(defaultOpts.ignore)
   opts = extend(defaultOpts, opts) // opts takes priority
