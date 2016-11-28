@@ -1,13 +1,15 @@
-# dat-node [![Travis](https://api.travis-ci.org/joehand/dat-node.svg)](https://travis-ci.org/joehand/dat-node) [![npm](https://img.shields.io/npm/v/dat-node.svg?style=flat-square)](https://npmjs.org/package/dat-node)
+# dat-node [![Travis](https://img.shields.io/travis/datproject/dat-node.svg?style=flat-square)](https://travis-ci.org/datproject/dat-node) [![npm](https://img.shields.io/npm/v/dat-node.svg?style=flat-square)](https://npmjs.org/package/dat-node)
 
 [<img src="https://raw.githubusercontent.com/datproject/design/master/downloads/dat-data-logo.png" align="right" width="140">](http://datproject.org)
 
-[Dat](https://datproject.org) is a decentralized data tool for distributing data and files. **dat-node** is a node module to help you build applications with Dat. Do you want to use Dat in the command line? Check out the command line interface at [datproject/dat](https://github.com/datproject/dat).
+[Dat](https://datproject.org) is a decentralized data tool for distributing data and files. **dat-node** is a node module to help you build node applications with Dat. Do you want to use Dat in the command line? Check out the command line interface at [datproject/dat](https://github.com/datproject/dat).
 
 **Chat with us!**   [![#dat IRC channel on freenode](https://img.shields.io/badge/irc%20channel-%23dat%20on%20freenode-blue.svg)](http://webchat.freenode.net/?channels=dat)
 [![datproject/discussions](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/datproject/discussions?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 [![JavaScript Style Guide](https://cdn.rawgit.com/feross/standard/master/badge.svg)](https://github.com/feross/standard)
+
+**Note: dat-node was previously dat-js**
 
 ## Table of Contents
 
