@@ -10,9 +10,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   ### Added, ### Changed, ### Fixed, ### Removed, ### Deprecated
 -->
 
-## 4.0.1 - 2016-11-28
-### Added
-* Deprecation note to readme
+## 0.1.0 - 2016-11-17
+Released `dat-js` 4.0 as `dat-node` 0.1.
+
+## Moved to dat-node.
+*dat-node 0.1.0 === dat-js 4.0.0*
 
 ## 4.0.0 - 2016-11-16
 *This will be the last major version of dat-js. This library will be moving to dat-fs, with a similar API.*

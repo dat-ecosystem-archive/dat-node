@@ -1,6 +1,6 @@
 {
-  "name": "dat-js",
-  "version": "4.0.1",
+  "name": "dat-node",
+  "version": "0.1.0",
   "description": "Share datasets on the Internet",
   "main": "index.js",
   "scripts": {
@@ -8,13 +8,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/datproject/dat-js.git"
+    "url": "git://github.com/datproject/dat-node.git"
   },
   "bugs": {
-    "url": "https://github.com/datproject/dat-js/issues"
+    "url": "https://github.com/datproject/dat-node/issues"
   },
   "homepage": "http://datproject.org",
-  "author": "Joe Hand <joe@hand.email> (https://joeahand.com/)",
+  "author": "Joe Hand <joe@hand.email>",
   "license": "MIT",
   "dependencies": {
     "anymatch": "^1.3.0",
@@ -34,7 +34,7 @@
     "memdown": "^1.2.0",
     "mkdirp": "^0.5.1",
     "rimraf": "^2.5.3",
-    "standard": "^7.1.2",
+    "standard": "^8.5.0",
     "tap-spec": "^4.1.1",
     "tape": "^4.6.0"
   },
