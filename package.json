@@ -8,10 +8,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/joehand/dat-node.git"
+    "url": "git://github.com/datproject/dat-node.git"
   },
   "bugs": {
-    "url": "https://github.com/joehand/dat-node/issues"
+    "url": "https://github.com/datproject/dat-node/issues"
   },
   "homepage": "http://datproject.org",
   "author": "Joe Hand <joe@hand.email>",
