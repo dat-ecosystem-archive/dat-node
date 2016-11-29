@@ -10,6 +10,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   ### Added, ### Changed, ### Fixed, ### Removed, ### Deprecated
 -->
 
+### Fixed
+* Populate `dat.key` after archive opened ([#43](https://github.com/datproject/dat-node/pull/43))
+
+### Changed
+* Use hyperdiscovery instead of hyperdrive-archive-swarm ([#45](https://github.com/datproject/dat-node/pull/45))
+
 ## 0.1.0 - 2016-11-17
 Released `dat-js` 4.0 as `dat-node` 0.1.
 
