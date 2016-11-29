@@ -25,11 +25,11 @@ Dat(dir, opts, function (err, dat) {
   var archive = dat.archive // hyperdrive archive
 
   // Join the network
-  var network = dat.network(opts) 
+  var network = dat.joinNetwork(opts)
   network.swarm // hyperdrive-archive-swarm
 
   // Track stats
-  var stats = dat.stats() // hyperdrive-stats
+  var stats = dat.trackStats() // hyperdrive-stats
 
   // Import Files
   if (archive.owner) {
@@ -59,7 +59,7 @@ In dat-node this would be:
 ```js
 // dat-node v1 NEW API
 Dat(dir, {key: link}, function (err, dat) {
-  var network = dat.network(opts) // join network
+  var network = dat.joinNetwork(opts) // join network
   console.log('now sharing:', dat.key.toString())
 
   var importer = dat.importFiles(opts, function () {
@@ -107,7 +107,7 @@ Path of the Dat Archive
 
 **`dat-node` provides an easy interface to common Dat modules for the created Dat Archive on the `dat` object provided in the callback:**
 
-#### `var network = dat.network([opts])`
+#### `var network = dat.joinNetwork([opts])`
 
 Join the Dat Network for your Dat Archive.
 
@@ -131,6 +131,6 @@ Import files to your Dat Archive from the directory using [hyperdrive-import-fil
 
 Returns the importer event emitter.
 
-#### `var stats = dat.stats()`
+#### `var stats = dat.trackStats()`
 
 [hyperdrive-stats](https://github.com/juliangruber/hyperdrive-stats) instance for the Dat Archive. Stats are stored in a sublevel database in the `.dat` folder.

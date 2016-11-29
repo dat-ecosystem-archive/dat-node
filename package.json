@@ -20,8 +20,10 @@
     "dat-folder-archive": "^1.0.1",
     "dat-key-as": "^1.0.0",
     "hyperdiscovery": "^1.0.1",
+    "hyperdrive": "^7.9.0",
     "hyperdrive-count-import": "^1.0.0",
     "hyperdrive-stats": "^2.2.6",
+    "random-access-file": "^1.3.1",
     "subleveldown": "^2.1.0"
   },
   "devDependencies": {},

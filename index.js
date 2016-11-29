@@ -7,7 +7,10 @@ var stats = require('./lib/stats')
 
 module.exports = function (dir, opts, cb) {
   assert.ok(dir, 'directory required')
-  if (typeof opts === 'function') cb = opts
+  if (typeof opts === 'function') {
+    cb = opts
+    opts = {}
+  }
 
   var dat = {
     path: path.resolve(dir),
@@ -21,23 +24,30 @@ module.exports = function (dir, opts, cb) {
     dat.archive = archive
     dat.owner = archive.owner
     dat.db = db
-    dat.network = function (opts) {
-      return network(archive, opts)
+    dat.joinNetwork = function (opts) {
+      dat.network = network(archive, opts)
+      dat.options.network = dat.network.options
+      return dat.network
     }
-    dat.stats = function () {
-      return stats(archive, db)
+    dat.trackStats = function () {
+      dat.stats = stats(archive, db)
+      return dat.stats
     }
     if (archive.owner) {
       dat.importFiles = function (opts, cb) {
-        return importFiles(archive, dir, opts, cb)
+        dat.importer = importFiles(archive, dir, opts, cb)
+        dat.options.importer = dat.importer.options
+        return dat.importer
       }
     }
     dat.close = function (cb) {
       closeNet(function () {
         closeFileWatch()
+        if (opts.db) return dat.archive.close(cb)
         // TODO: do we want to close db? can't remember what was recommended...
-        // if (!opts.db) db.close()
-        dat.archive.close(cb)
+        dat.archive.close(function () {
+          closeDb(cb)
+        })
       })
     }
 
@@ -55,8 +65,8 @@ module.exports = function (dir, opts, cb) {
 
     function closeFileWatch () {
       // TODO: add CB
-      if (!dat.importFiles) return
-      dat.importFiles.close()
+      if (!dat.importer) return
+      dat.importer.close()
     }
   })
 }
