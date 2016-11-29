@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   ### Added, ### Changed, ### Fixed, ### Removed, ### Deprecated
 -->
 
+## 0.1.1 - 2016-11-29
 ### Fixed
 * Populate `dat.key` after archive opened ([#43](https://github.com/datproject/dat-node/pull/43))
 
