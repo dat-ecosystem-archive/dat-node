@@ -151,7 +151,9 @@ if (!process.env.TRAVIS) {
         t.same(dat.stats.filesTotal, stats.filesTotal + 1, 'files total correct')
         fs.unlink(newFile, function () {
           dat.close(function () {
-            t.end()
+            dat.db.close(function () {
+              t.end()
+            })
           })
         })
       })
@@ -166,6 +168,50 @@ if (!process.env.TRAVIS) {
     })
   })
 }
+
+test('dat should resume if dir is already a dat', function (t) {
+  t.plan(6)
+
+  dat = Dat({dir: fixtures})
+
+  setup(function (err) {
+    t.error(err, 'no errors on setup')
+
+    dat = Dat({dir: fixtures})
+    dat.open(function () {
+      fs.stat(path.join(fixtures, '.dat'), function (err, stat) {
+        t.error(err, 'no errors opening')
+      })
+
+      dat.share(function (err) {
+        t.error(err, 'no errors sharing')
+        dat.close(function () {
+          dat.db.close(function () {
+            cleanFixtures(function () {
+              t.pass('all done!')
+            })
+          })
+        })
+      })
+    })
+  })
+
+  // setup dat once, then close and call cb
+  function setup (cb) {
+    dat.open(function () {
+      fs.stat(path.join(fixtures, '.dat'), function (err, stat) {
+        t.error(err, 'no errors opening')
+      })
+
+      dat.share(function (err) {
+        t.error(err, 'no errors sharing')
+        dat.close(function () {
+          dat.db.close(cb)
+        })
+      })
+    })
+  }
+})
 
 test('cleanup', function (t) {
   cleanFixtures(function () {
