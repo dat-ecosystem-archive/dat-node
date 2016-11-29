@@ -17,7 +17,7 @@ module.exports = function (dir, opts, cb) {
   initArchive(dir, opts, function (err, archive, db) {
     if (err) return cb(err)
 
-    if (archive.key) dat.key = archive.key // only live archives will have keys here
+    dat.key = archive.key // only resumed/owned archives will have keys here
     dat.archive = archive
     dat.owner = archive.owner
     dat.db = db
