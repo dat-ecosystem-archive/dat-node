@@ -83,6 +83,15 @@ Dat.prototype._open = function (cb) {
         return raf(path.join(self.dir, name))
       }
     })
+    if (!self.key) {
+      self.on('key', function (key) {
+        self.key = key
+        self.db.put('!dat!key', key)
+      })
+      if (!self.options.snapshot) {
+        self.emit('key', self.archive.key.toString('hex'))
+      }
+    }
     self._opened = true
     cb()
   })
@@ -111,10 +120,7 @@ Dat.prototype.share = function (cb) {
     self.owner = archive.owner
 
     if ((archive.live || archive.owner) && archive.key) {
-      if (!self.key) self.db.put('!dat!key', archive.key.toString('hex'))
       self._joinSwarm()
-      self.key = archive.key
-      self.emit('key', archive.key.toString('hex'))
     }
 
     var importer = self._fileStatus = importFiles(self.archive, self.dir, {
@@ -173,7 +179,6 @@ Dat.prototype.share = function (cb) {
 
       if (self.options.snapshot) {
         self._joinSwarm()
-        self.key = archive.key
         self.emit('key', archive.key.toString('hex'))
       }
 

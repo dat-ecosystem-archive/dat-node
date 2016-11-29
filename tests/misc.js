@@ -61,6 +61,17 @@ test('custom db option', function (t) {
   })
 })
 
+test('.key on live archive', function (t) {
+  var dat = Dat({db: memdb(), dir: process.cwd()})
+  dat.open(function (err) {
+    t.error(err)
+    t.deepEqual(dat.key, dat.archive.key.toString('hex'))
+    dat.close(function () {
+      t.end()
+    })
+  })
+})
+
 test('snapshot option', function (t) {
   var dat = Dat({snapshot: true, dir: process.cwd()})
   dat.open(function (err) {
