@@ -20,19 +20,24 @@ module.exports = function (dir, opts, cb) {
   initArchive(dir, opts, function (err, archive, db) {
     if (err) return cb(err)
 
-    dat.key = archive.key // only resumed/owned archives will have keys here
     dat.archive = archive
-    dat.owner = archive.owner
     dat.db = db
+    dat.key = archive.key // only resumed/owned archives will have keys here
+    dat.live = archive.live
+    dat.owner = archive.owner
+    dat.resumed = archive.resumed
+
     dat.joinNetwork = function (opts) {
       dat.network = network(archive, opts)
       dat.options.network = dat.network.options
       return dat.network
     }
+
     dat.trackStats = function () {
       dat.stats = stats(archive, db)
       return dat.stats
     }
+
     if (archive.owner) {
       dat.importFiles = function (opts, cb) {
         dat.importer = importFiles(archive, dir, opts, cb)
@@ -40,6 +45,7 @@ module.exports = function (dir, opts, cb) {
         return dat.importer
       }
     }
+
     dat.close = function (cb) {
       closeNet(function () {
         closeFileWatch()
