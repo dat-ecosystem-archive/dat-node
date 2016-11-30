@@ -180,7 +180,7 @@ test('expose .owner', function (t) {
     t.ok(shareDat.owner, 'is owner')
     shareDat.joinNetwork()
 
-    Dat(downFolder, {key: shareDat.key }, function (err, downDat) {
+    Dat(downFolder, {key: shareDat.key}, function (err, downDat) {
       t.error(err, 'dat downloaded')
       t.notOk(downDat.owner, 'not owner')
 
