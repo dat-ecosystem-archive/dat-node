@@ -119,10 +119,12 @@ test('download and live update (new file)', function (t) {
 
   function done () {
     shareDat.close(function () {
-      fs.unlink(newFile, function () {
-        dat.close(function () {
-          rimraf.sync(path.join(fixtures, '.dat'))
-          t.end()
+      process.nextTick(function () {
+        fs.unlink(newFile, function () {
+          dat.close(function () {
+            rimraf.sync(path.join(fixtures, '.dat'))
+            t.end()
+          })
         })
       })
     })
