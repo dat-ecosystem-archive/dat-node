@@ -118,19 +118,20 @@ test('download and live update (new file)', function (t) {
   }
 
   function done () {
-    fs.unlinkSync(newFile)
-    t.end()
+    dat.close(function () {
+      shareDat.importer.close()
+      fs.unlinkSync(newFile)
+      t.end()
+    })
   }
 })
 
 test('close first test', function (t) {
-  shareDat.close(function () {
-    downloadDat.close(function (err) {
-      t.error(err, 'no close error')
-      t.pass('close')
-      rimraf.sync(path.join(fixtures, '.dat'))
-      t.end()
-    })
+  shareDat.close(function (err) {
+    t.error(err, 'no close error')
+    t.pass('close')
+    rimraf.sync(path.join(fixtures, '.dat'))
+    t.end()
   })
 })
 
