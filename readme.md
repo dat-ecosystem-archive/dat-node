@@ -134,3 +134,9 @@ Returns the importer event emitter.
 #### `var stats = dat.trackStats()`
 
 [hyperdrive-stats](https://github.com/juliangruber/hyperdrive-stats) instance for the Dat Archive. Stats are stored in a sublevel database in the `.dat` folder.
+
+Transfer speeds are tracked using [hyperdrive-network-speed](https://github.com/joehand/hyperdrive-network-speed/) and exposed to `stats.network`..
+
+##### `stats.network`
+
+Get upload and download speeds: `stats.network.uploadSpeed` or `stats.network.downloadSpeed`.
