@@ -119,9 +119,9 @@ test('download and live update (new file)', function (t) {
 
   function done () {
     dat.close(function () {
-      shareDat.importer.close()
-      fs.unlinkSync(newFile)
-      t.end()
+      fs.unlink(newFile, function () {
+        t.end()
+      })
     })
   }
 })
