@@ -118,21 +118,15 @@ test('download and live update (new file)', function (t) {
   }
 
   function done () {
-    dat.close(function () {
+    shareDat.close(function () {
       fs.unlink(newFile, function () {
-        t.end()
+        dat.close(function () {
+          rimraf.sync(path.join(fixtures, '.dat'))
+          t.end()
+        })
       })
     })
   }
-})
-
-test('close first test', function (t) {
-  shareDat.close(function (err) {
-    t.error(err, 'no close error')
-    t.pass('close')
-    rimraf.sync(path.join(fixtures, '.dat'))
-    t.end()
-  })
 })
 
 test('download from snapshot', function (t) {
