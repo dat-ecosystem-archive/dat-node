@@ -27,6 +27,8 @@
     "subleveldown": "^2.1.0"
   },
   "devDependencies": {
+    "memdb": "^1.3.1",
+    "memdown": "^1.2.4",
     "mkdirp": "^0.5.1",
     "rimraf": "^2.5.4",
     "standard": "^8.6.0",
