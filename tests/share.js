@@ -26,10 +26,12 @@ test('create dat with default ops', function (t) {
   Dat(fixtures, function (err, dat) {
     t.error(err, 'cb err okay')
     t.ok(dat.path === fixtures, 'correct directory')
-    t.ok(dat.key, 'has key')
     t.ok(dat.archive, 'has archive')
     t.ok(dat.db, 'has db')
+    t.ok(dat.key, 'has key')
+    t.ok(dat.live, 'is live')
     t.ok(dat.owner, 'is owner')
+    t.ok(!dat.resumed, 'is not resumed')
 
     fs.stat(path.join(fixtures, '.dat'), function (err, stat) {
       t.error(err)

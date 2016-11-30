@@ -30,6 +30,14 @@ module.exports = function (dir, opts, cb) {
     dat.joinNetwork = function (opts) {
       dat.network = network(archive, opts)
       dat.options.network = dat.network.options
+      if (dat.owner) return dat.network
+
+      dat.network.swarm.once('connection', function () {
+        archive.open(function () {
+          // dat.owner = archive.owner // For future multi-writer?
+          dat.live = archive.live
+        })
+      })
       return dat.network
     }
 
@@ -40,7 +48,20 @@ module.exports = function (dir, opts, cb) {
 
     if (archive.owner) {
       dat.importFiles = function (opts, cb) {
-        dat.importer = importFiles(archive, dir, opts, cb)
+        if (typeof opts === 'function') return dat.importFiles({}, opts)
+        if (archive.live) {
+          dat.importer = importFiles(archive, dir, opts, cb)
+        } else {
+          dat.importer = importFiles(archive, dir, opts, function (err) {
+            if (err) return cb(err)
+            // Sets dat.key for snapshot
+            archive.finalize(function (err) {
+              if (err) return cb(err)
+              dat.key = archive.key
+              cb()
+            })
+          })
+        }
         dat.options.importer = dat.importer.options
         return dat.importer
       }
