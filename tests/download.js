@@ -119,20 +119,24 @@ if (!process.env.TRAVIS) {
     }
 
     function done () {
-      // file watching is closing without callback and causing trouble
-      shareDat.close(function () {
-        process.nextTick(function () {
-          fs.unlink(newFile, function () {
-            dat.close(function () {
-              rimraf.sync(path.join(fixtures, '.dat'))
-              t.end()
-            })
-          })
+      // shareDat file watching is closing without callback and causing trouble
+      dat.close(function () {
+        fs.unlink(newFile, function () {
+          t.end()
         })
       })
     }
   })
 }
+
+test('close first test', function (t) {
+  shareDat.close(function (err) {
+    t.error(err, 'no close error')
+    t.pass('close')
+    rimraf.sync(path.join(fixtures, '.dat'))
+    t.end()
+  })
+})
 
 test('download from snapshot', function (t) {
   var shareKey
