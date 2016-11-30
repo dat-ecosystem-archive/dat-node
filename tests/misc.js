@@ -116,26 +116,21 @@ test('custom db option', function (t) {
 // })
 
 test('string or buffer .key', function (t) {
+  rimraf.sync(path.join(process.cwd(), '.dat')) // for failed tests
   var buf = new Buffer(32)
-  var dat = Dat({key: buf, dir: process.cwd()})
-  dat.open(function (err) {
-    t.error(err)
-    t.deepEqual(dat.archive.key, buf)
+  Dat(process.cwd(), { key: buf }, function (err, dat) {
+    t.error(err, 'no callback error')
+    t.deepEqual(dat.archive.key, buf, 'keys match')
 
     dat.close(function (err) {
-      t.error(err)
-      dat.db.close(function (err) {
-        t.error(err)
+      t.error(err, 'no close error')
 
-        dat = Dat({key: encoding.encode(buf), dir: process.cwd()})
-        dat.open(function (err) {
-          t.error(err)
-          t.deepEqual(dat.archive.key, buf)
-          dat.close(function () {
-            dat.db.close(function () {
-              t.end()
-            })
-          })
+      Dat(process.cwd(), {key: encoding.encode(buf)}, function (err, dat) {
+        t.error(err, 'no callback error')
+        t.deepEqual(dat.archive.key, buf, 'keys match still')
+        dat.close(function () {
+          rimraf.sync(path.join(process.cwd(), '.dat'))
+          t.end()
         })
       })
     })
@@ -143,17 +138,13 @@ test('string or buffer .key', function (t) {
 })
 
 test('leveldb open error', function (t) {
-  var a = Dat({ dir: process.cwd() })
-  var b = Dat({ dir: process.cwd() })
-  a.open(function (err) {
+  Dat(process.cwd(), function (err, datA) {
     t.error(err)
-    b.open(function (err) {
+    Dat(process.cwd(), function (err, datB) {
       t.ok(err)
-      a.close(function () {
-        a.db.close(function () {
-          rimraf(path.join(process.cwd(), '.dat'), function () {
-            t.end()
-          })
+      datA.close(function () {
+        rimraf(path.join(process.cwd(), '.dat'), function () {
+          t.end()
         })
       })
     })
@@ -163,15 +154,18 @@ test('leveldb open error', function (t) {
 test('expose .key', function (t) {
   var folder = path.join(__dirname, 'fixtures', 'folder')
   var key = new Buffer(32)
-  var dat = Dat({ dir: process.cwd(), key: key, db: memdb() })
-  t.deepEqual(dat.key, key)
-  dat = Dat({ dir: folder, db: memdb() })
-  dat.share(function (err) {
+  Dat(process.cwd(), { key: key, db: memdb() }, function (err, dat) {
     t.error(err)
-    t.notDeepEqual(dat.key, key)
-    dat.close(function (err) {
+    t.deepEqual(dat.key, key)
+
+    Dat(folder, { db: memdb() }, function (err, dat) {
       t.error(err)
-      t.end()
+      t.notDeepEqual(dat.key, key)
+      dat.close(function (err) {
+        t.error(err)
+        rimraf.sync(path.join(folder, '.dat'))
+        t.end()
+      })
     })
   })
 })
@@ -181,13 +175,12 @@ test('expose .owner', function (t) {
   var downFolder = path.join(os.tmpdir(), 'dat-' + Math.random().toString(16).slice(2))
   fs.mkdirSync(downFolder)
 
-  var shareDat = Dat({ dir: shareFolder, snapshot: true })
-  shareDat.share(function (err) {
+  Dat(shareFolder, function (err, shareDat) {
     t.error(err, 'dat shared')
     t.ok(shareDat.owner, 'is owner')
+    shareDat.joinNetwork()
 
-    var downDat = Dat({ dir: downFolder, key: shareDat.key })
-    downDat.download(function (err) {
+    Dat(downFolder, {key: shareDat.key }, function (err, downDat) {
       t.error(err, 'dat downloaded')
       t.notOk(downDat.owner, 'not owner')
 
@@ -195,6 +188,7 @@ test('expose .owner', function (t) {
         t.error(err, 'share dat closed')
         downDat.close(function (err) {
           t.error(err, 'download dat closed')
+          rimraf.sync(downFolder)
           t.end()
         })
       })
@@ -204,29 +198,32 @@ test('expose .owner', function (t) {
 
 test('expose stats.peers', function (t) {
   rimraf.sync(path.join(shareFolder, '.dat'))
+  var downDat
   var downFolder = path.join(os.tmpdir(), 'dat-' + Math.random().toString(16).slice(2))
   fs.mkdirSync(downFolder)
 
-  var shareDat = Dat({ dir: shareFolder, snapshot: true, db: memdb() })
-  t.equal(shareDat.stats.peers, 0, '0 peers')
+  Dat(shareFolder, { db: memdb() }, function (err, shareDat) {
+    t.error(err, 'dat share err')
 
-  shareDat.once('swarm-update', function () {
-    t.ok(shareDat.stats.peers >= 1, '>=1 peer')
-    t.end()
-  })
+    var network = shareDat.joinNetwork()
+    t.equal(network.peers(), 0, '0 peers')
 
-  shareDat.share(function (err) {
-    t.error(err, 'dat shared')
+    network.swarm.once('connection', function () {
+      t.ok(network.peers() >= 1, '>=1 peer')
 
-    var downDat = Dat({ dir: downFolder, key: shareDat.key })
-    downDat.download(function (err) {
-      t.error(err, 'dat downloaded')
       downDat.close(function (err) {
         t.error(err, 'download dat closed')
         shareDat.close(function (err) {
           t.error(err, 'share dat closed')
+          t.end()
         })
       })
+    })
+
+    Dat(downFolder, { key: shareDat.key }, function (err, dat) {
+      t.error(err, 'dat download err')
+      dat.joinNetwork()
+      downDat = dat
     })
   })
 })
