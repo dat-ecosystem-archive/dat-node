@@ -1,6 +1,6 @@
 {
   "name": "dat-node",
-  "version": "1.0.0-alpha.2.0.0",
+  "version": "1.0.0-alpha.2.1.0",
   "description": "Share datasets on the Internet",
   "main": "index.js",
   "scripts": {
