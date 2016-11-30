@@ -33,6 +33,7 @@ module.exports = function (dir, opts, cb) {
       if (dat.owner) return dat.network
 
       dat.network.swarm.once('connection', function () {
+        // automatically open archive and set exposed values
         archive.open(function () {
           // dat.owner = archive.owner // For future multi-writer?
           dat.live = archive.live
