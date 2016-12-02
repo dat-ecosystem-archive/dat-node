@@ -1,4 +1,4 @@
-# dat-node [![Travis](https://img.shields.io/travis/datproject/dat-node.svg?style=flat-square)](https://travis-ci.org/datproject/dat-node) [![npm](https://img.shields.io/npm/v/dat-node.svg?style=flat-square)](https://npmjs.org/package/dat-node)
+# dat-node [![Travis](https://travis-ci.org/datproject/dat-node.svg?branch=master)](https://travis-ci.org/datproject/dat-node) [![npm](https://img.shields.io/npm/v/dat-node.svg?style=flat-square)](https://npmjs.org/package/dat-node)
 
 [<img src="https://raw.githubusercontent.com/datproject/design/master/downloads/dat-data-logo.png" align="right" width="140">](http://datproject.org)
 
