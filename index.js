@@ -59,7 +59,8 @@ module.exports = function (dir, opts, cb) {
             archive.finalize(function (err) {
               if (err) return cb(err)
               dat.key = archive.key
-              cb()
+              // TODO: need to get snapshot key back in db, better way?
+              db.put('!dat!key', archive.key.toString('hex'), cb)
             })
           })
         }
