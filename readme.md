@@ -1,4 +1,4 @@
-# dat-node 1.0 alpha
+# dat-node 1.0 alpha [![Travis](https://img.shields.io/travis/joehand/dat-node.svg?branch=1.0&style=flat-square)](https://travis-ci.org/joehand/dat-node)
 
 Node module for Dat (replaces dat-js). 
 
