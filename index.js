@@ -1,4 +1,5 @@
 var assert = require('assert')
+var fs = require('fs')
 var path = require('path')
 var initArchive = require('./lib/init-archive')
 var importFiles = require('./lib/import-files')
@@ -26,6 +27,15 @@ module.exports = function (dir, opts, cb) {
     dat.live = archive.live
     dat.owner = archive.owner
     dat.resumed = archive.resumed
+
+    // dat.json (TODO: move to module & validate dat.json)
+    var datJsonFile = path.join(dir, 'dat.json')
+    try {
+      dat.meta = JSON.parse(fs.readFileSync(datJsonFile, 'utf8'))
+    } catch (e) {
+      dat.meta = {title: path.basename(dir), description: ''}
+      fs.writeFileSync(datJsonFile, JSON.stringify(dat.meta))
+    }
 
     dat.joinNetwork = function (opts) {
       dat.network = network(archive, opts)
