@@ -1,6 +1,7 @@
 var assert = require('assert')
 var fs = require('fs')
 var path = require('path')
+var datKeyAs = require('dat-key-as')
 var initArchive = require('./lib/init-archive')
 var importFiles = require('./lib/import-files')
 var network = require('./lib/network')
@@ -27,15 +28,6 @@ module.exports = function (dir, opts, cb) {
     dat.live = archive.live
     dat.owner = archive.owner
     dat.resumed = archive.resumed
-
-    // dat.json (TODO: move to module & validate dat.json)
-    var datJsonFile = path.join(dir, 'dat.json')
-    try {
-      dat.meta = JSON.parse(fs.readFileSync(datJsonFile, 'utf8'))
-    } catch (e) {
-      dat.meta = {title: path.basename(dir), description: ''}
-      fs.writeFileSync(datJsonFile, JSON.stringify(dat.meta))
-    }
 
     dat.joinNetwork = function (opts) {
       dat.network = network(archive, opts)
@@ -90,7 +82,36 @@ module.exports = function (dir, opts, cb) {
       })
     }
 
-    cb(null, dat)
+    // dat.json
+    // reads to dat.meta if exists
+    // creates dat.json if not exists with title = dir name
+    // (TODO: move to module & validate dat.json)
+    var datJsonFile = path.join(dir, 'dat.json')
+    fs.readFile(datJsonFile, 'utf8', function (_, body) {
+      if (err && err.code === 'ENOENT' || !body) return createMeta()
+      else if (err) return cb(err)
+      dat.meta = JSON.parse(body)
+      done()
+    })
+
+    function createMeta () {
+      dat.meta = {title: path.basename(dir), description: ''}
+      if (dat.key) dat.meta.url = 'dat://' + datKeyAs.str(dat.key)
+      writeMeta(done)
+    }
+
+    function writeMeta (cb) {
+      fs.writeFile(datJsonFile, JSON.stringify(dat.meta), function (err) {
+        if (err) return cb(err)
+        cb()
+      })
+    }
+
+    function done (err) {
+      if (err) return cb(err)
+      console.log(dat.meta)
+      return cb(null, dat)
+    }
 
     function closeDb (cb) {
       if (!dat.db) return cb()
