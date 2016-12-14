@@ -109,7 +109,6 @@ module.exports = function (dir, opts, cb) {
 
     function done (err) {
       if (err) return cb(err)
-      console.log(dat.meta)
       return cb(null, dat)
     }
 
