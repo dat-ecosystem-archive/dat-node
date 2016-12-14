@@ -16,8 +16,8 @@ var shareDat
 var shareKey
 var fixtures = path.join(__dirname, 'fixtures')
 var fixtureStats = {
-  filesTotal: 2,
-  bytesTotal: 1441
+  filesTotal: 3,
+  bytesTotal: 1488
 }
 
 test('prep', function (t) {
@@ -194,6 +194,7 @@ test('download from snapshot', function (t) {
 test('finished', function (t) {
   shareDat.close(function () {
     shareDat.db.close(function () {
+      fs.unlinkSync(path.join(fixtures, 'dat.json'))
       rimraf.sync(path.join(fixtures, '.dat'))
       t.end()
     })

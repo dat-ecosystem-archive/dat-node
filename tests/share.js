@@ -32,6 +32,8 @@ test('create dat with default ops', function (t) {
     t.ok(dat.live, 'is live')
     t.ok(dat.owner, 'is owner')
     t.ok(!dat.resumed, 'is not resumed')
+    t.ok(dat.meta, 'has meta')
+    t.same(dat.meta.title, 'fixtures', 'sets default title to dir name')
 
     fs.stat(path.join(fixtures, '.dat'), function (err, stat) {
       t.error(err)
@@ -166,5 +168,6 @@ test('cleanup', function (t) {
 
 function cleanFixtures (cb) {
   cb = cb || function () {}
+  fs.unlinkSync(path.join(fixtures, 'dat.json'))
   rimraf(path.join(fixtures, '.dat'), cb)
 }
