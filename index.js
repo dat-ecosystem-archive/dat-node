@@ -87,23 +87,23 @@ module.exports = function (dir, opts, cb) {
     // creates dat.json if not exists with title = dir name
     // (TODO: move to module & validate dat.json)
     var datJsonFile = path.join(dir, 'dat.json')
-    fs.readFile(datJsonFile, 'utf8', function (_, body) {
+    fs.readFile(datJsonFile, 'utf8', function (err, body) {
       if (err && err.code === 'ENOENT' || !body) return createMeta()
       else if (err) return cb(err)
-      dat.meta = JSON.parse(body)
+      try {
+        dat.meta = JSON.parse(body)
+      } catch (e) {
+        return cb(new Error('Error reading the dat.json file.'))
+      }
       done()
     })
 
     function createMeta () {
       dat.meta = {title: path.basename(dir), description: ''}
       if (dat.key) dat.meta.url = 'dat://' + datKeyAs.str(dat.key)
-      writeMeta(done)
-    }
-
-    function writeMeta (cb) {
       fs.writeFile(datJsonFile, JSON.stringify(dat.meta), function (err) {
-        if (err) return cb(err)
-        cb()
+        if (err) return done(err)
+        done()
       })
     }
 
