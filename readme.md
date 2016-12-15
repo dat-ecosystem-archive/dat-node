@@ -7,7 +7,7 @@ Create Dat Archives with a `.dat` folder. Join the Dat Network. Track stats and 
 #### Features
 
 * Consistent management of `.dat` folders across modules, cli, apps using [dat-folder-db](https://github.com/joehand/dat-folder-db)
-* Join Dat Network using [hyperdrive-archive-swarm](https://github.com/karissa/hyperdrive-archive-swarm)
+* Join Dat Network using [hyperdiscovery](https://github.com/karissa/hyperdiscovery)
 * Track archive stats using [hyperdrive-stats](https://github.com/juliangruber/hyperdrive-stats)
 * Import files from using [hyperdrive-import-files](https://github.com/juliangruber/hyperdrive-import-files/)
 
@@ -26,7 +26,7 @@ Dat(dir, opts, function (err, dat) {
 
   // Join the network
   var network = dat.joinNetwork(opts)
-  network.swarm // hyperdrive-archive-swarm
+  network.swarm // hyperdiscovery
 
   // Track stats
   var stats = dat.trackStats() // hyperdrive-stats
@@ -140,7 +140,7 @@ Path of the Dat Archive
 
 Join the Dat Network for your Dat Archive.
 
-`opts` are passed to the swarm module. See [hyperdrive-archive-swarm](https://github.com/karissa/hyperdrive-archive-swarm) for options.
+`opts` are passed to the swarm module. See [hyperdiscovery](https://github.com/karissa/hyperdiscovery) for options.
 
 ##### `network.swarm`
 
