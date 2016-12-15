@@ -10,8 +10,8 @@ try { fs.unlinkSync(path.join(__dirname, 'fixtures', '.DS_Store')) } catch (e) {
 
 var fixtures = path.join(__dirname, 'fixtures')
 var fixtureStats = {
-  filesTotal: 2,
-  bytesTotal: 1441
+  filesTotal: 3,
+  bytesTotal: 1478
 }
 var fixturesKey = '1c9a237203f6397442dfc3430e9e842a2a31ef81c14156a0a3cde83fd614578a'
 var liveKey
@@ -54,10 +54,34 @@ test('create dat with default ops', function (t) {
       dat.importFiles(function (err) {
         t.error(err, 'file import err okay')
         var st = stats.get()
-        t.same(st.bytesTotal, fixtureStats.bytesTotal, 'bytes total ok')
-        t.skip(st.filesTotal, fixtureStats.filesTotal, 'TODO: files total ok') // empty.txt not showing up?
-        dat.close(function () {
-          t.end()
+        dat.archive.list({live: false}, function (err, list) {
+          t.error(err, 'archive list err')
+          var filesAndDir = fixtureStats.filesTotal + 2 // base dir + folder
+          t.same(filesAndDir, list.length, 'total items in list ok')
+
+          var hasTable = list.filter(function (item) {
+            return item.name.indexOf('table.csv') > -1
+          })
+          var hasEmpty = list.filter(function (item) {
+            return item.name.indexOf('empty.txt') > -1
+          })
+          var hasDatJson = list.filter(function (item) {
+            return item.name.indexOf('dat.json') > -1
+          })
+          t.ok(hasTable.length, 'table.csv in archive list')
+          t.ok(hasEmpty.length, 'empty.txt in archive list')
+          t.ok(hasDatJson.length, 'dat.json in archive list')
+
+          var bytesTotal = 0
+          list.map(function (item) {
+            bytesTotal += item.length
+          })
+          t.same(bytesTotal, fixtureStats.bytesTotal, 'bytes total via list ok')
+          t.skip(st.bytesTotal, fixtureStats.bytesTotal, 'bytes total via stats ok') // TODO: hyperdrive-stats bug?
+          t.skip(st.filesTotal, fixtureStats.filesTotal, 'TODO: files total ok') // empty.txt not showing up?
+          dat.close(function () {
+            t.end()
+          })
         })
       })
     })
@@ -168,6 +192,5 @@ test('cleanup', function (t) {
 
 function cleanFixtures (cb) {
   cb = cb || function () {}
-  fs.unlinkSync(path.join(fixtures, 'dat.json'))
   rimraf(path.join(fixtures, '.dat'), cb)
 }

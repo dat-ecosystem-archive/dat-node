@@ -16,8 +16,8 @@ var shareDat
 var shareKey
 var fixtures = path.join(__dirname, 'fixtures')
 var fixtureStats = {
-  filesTotal: 3,
-  bytesTotal: 1488
+  filesTotal: 3, // dat.json, table.csv, empty.txt
+  bytesTotal: 1478
 }
 
 test('prep', function (t) {
@@ -72,7 +72,7 @@ test('Download with default opts', function (t) {
       t.skip(st.blocksProgress, st.blocksTotal, 'TODO: blocks total matches progress')
       t.skip(st.filesProgress, st.filesTotal, 'TODO: file total matches progress')
       fs.readdir(downloadDir, function (_, files) {
-        var hasCsvFile = files.indexOf('all_hour.csv') > -1
+        var hasCsvFile = files.indexOf('table.csv') > -1
         var hasDatFolder = files.indexOf('.dat') > -1
         t.ok(hasDatFolder, '.dat folder created')
         t.ok(hasCsvFile, 'csv file downloaded')
@@ -175,7 +175,7 @@ test('download from snapshot', function (t) {
 
         function done () {
           fs.readdir(downloadDir, function (_, files) {
-            var hasCsvFile = files.indexOf('all_hour.csv') > -1
+            var hasCsvFile = files.indexOf('table.csv') > -1
             var hasDatFolder = files.indexOf('.dat') > -1
             t.ok(hasDatFolder, '.dat folder created')
             t.ok(hasCsvFile, 'csv file downloaded')
@@ -194,7 +194,6 @@ test('download from snapshot', function (t) {
 test('finished', function (t) {
   shareDat.close(function () {
     shareDat.db.close(function () {
-      fs.unlinkSync(path.join(fixtures, 'dat.json'))
       rimraf.sync(path.join(fixtures, '.dat'))
       t.end()
     })

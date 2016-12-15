@@ -152,7 +152,7 @@ test('leveldb open error', function (t) {
 })
 
 test('expose .key', function (t) {
-  var folder = path.join(__dirname, 'fixtures', 'folder')
+  var folder = path.join(__dirname, 'fixtures')
   var key = new Buffer(32)
   Dat(process.cwd(), { key: key, db: memdb() }, function (err, dat) {
     t.error(err)
