@@ -126,28 +126,30 @@ test('share snapshot', function (t) {
   })
 })
 
-test('share live - editing file', function (t) {
-  Dat(fixtures, function (err, dat) {
-    t.error(err, 'a okay')
-    var stats = dat.trackStats()
+if (!process.env.TRAVIS) {
+  test('share live - editing file', function (t) {
+    Dat(fixtures, function (err, dat) {
+      t.error(err, 'a okay')
+      var stats = dat.trackStats()
 
-    var importer = dat.importFiles({ live: true }, function () {
-      t.pass('initial import finishes')
-      fs.writeFileSync(path.join(fixtures, 'folder', 'empty.txt'), '')
-      t.skip(stats.get().filesTotal, fixtureStats.filesTotal, 'TODO: files total correct')
-    })
+      var importer = dat.importFiles({ live: true }, function () {
+        t.pass('initial import finishes')
+        fs.writeFileSync(path.join(fixtures, 'folder', 'empty.txt'), '')
+        t.skip(stats.get().filesTotal, fixtureStats.filesTotal, 'TODO: files total correct')
+      })
 
-    importer.on('file imported', function (file) {
-      if (file.mode === 'updated') {
-        t.ok(file.path.indexOf('empty.txt') > -1, 'correct file updated')
+      importer.on('file imported', function (file) {
+        if (file.mode === 'updated') {
+          t.ok(file.path.indexOf('empty.txt') > -1, 'correct file updated')
 
-        dat.close(function () {
-          t.end()
-        })
-      }
+          dat.close(function () {
+            t.end()
+          })
+        }
+      })
     })
   })
-})
+}
 
 if (!process.env.TRAVIS) {
   test('share live resume & create new file', function (t) {
