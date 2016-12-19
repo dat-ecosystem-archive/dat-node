@@ -10,8 +10,8 @@ try { fs.unlinkSync(path.join(__dirname, 'fixtures', '.DS_Store')) } catch (e) {
 
 var fixtures = path.join(__dirname, 'fixtures')
 var fixtureStats = {
-  filesTotal: 3,
-  bytesTotal: 1478
+  filesTotal: 2,
+  bytesTotal: 1441
 }
 var fixturesKey = '1c9a237203f6397442dfc3430e9e842a2a31ef81c14156a0a3cde83fd614578a'
 var liveKey
@@ -32,8 +32,6 @@ test('create dat with default ops', function (t) {
     t.ok(dat.live, 'is live')
     t.ok(dat.owner, 'is owner')
     t.ok(!dat.resumed, 'is not resumed')
-    t.ok(dat.meta, 'has meta')
-    t.same(dat.meta.title, 'fixtures', 'sets default title to dir name')
 
     fs.stat(path.join(fixtures, '.dat'), function (err, stat) {
       t.error(err)
@@ -65,12 +63,8 @@ test('create dat with default ops', function (t) {
           var hasEmpty = list.filter(function (item) {
             return item.name.indexOf('empty.txt') > -1
           })
-          var hasDatJson = list.filter(function (item) {
-            return item.name.indexOf('dat.json') > -1
-          })
           t.ok(hasTable.length, 'table.csv in archive list')
           t.ok(hasEmpty.length, 'empty.txt in archive list')
-          t.ok(hasDatJson.length, 'dat.json in archive list')
 
           var bytesTotal = 0
           list.map(function (item) {

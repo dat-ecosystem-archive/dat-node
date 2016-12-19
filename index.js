@@ -1,7 +1,5 @@
 var assert = require('assert')
-var fs = require('fs')
 var path = require('path')
-var datKeyAs = require('dat-key-as')
 var initArchive = require('./lib/init-archive')
 var importFiles = require('./lib/import-files')
 var network = require('./lib/network')
@@ -82,35 +80,7 @@ module.exports = function (dir, opts, cb) {
       })
     }
 
-    // dat.json
-    // reads to dat.meta if exists
-    // creates dat.json if not exists with title = dir name
-    // (TODO: move to module & validate dat.json)
-    var datJsonFile = path.join(dir, 'dat.json')
-    fs.readFile(datJsonFile, 'utf8', function (err, body) {
-      if (err && err.code === 'ENOENT' || !body) return createMeta()
-      else if (err) return cb(err)
-      try {
-        dat.meta = JSON.parse(body)
-      } catch (e) {
-        return cb(new Error('Error reading the dat.json file.'))
-      }
-      done()
-    })
-
-    function createMeta () {
-      dat.meta = {title: path.basename(dir), description: ''}
-      if (dat.key) dat.meta.url = 'dat://' + datKeyAs.str(dat.key)
-      fs.writeFile(datJsonFile, JSON.stringify(dat.meta), function (err) {
-        if (err) return done(err)
-        done()
-      })
-    }
-
-    function done (err) {
-      if (err) return cb(err)
-      return cb(null, dat)
-    }
+    cb(null, dat)
 
     function closeDb (cb) {
       if (!dat.db) return cb()

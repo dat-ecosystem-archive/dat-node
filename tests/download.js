@@ -16,8 +16,8 @@ var shareDat
 var shareKey
 var fixtures = path.join(__dirname, 'fixtures')
 var fixtureStats = {
-  filesTotal: 3, // dat.json, table.csv, empty.txt
-  bytesTotal: 1478
+  filesTotal: 2, // table.csv, empty.txt
+  bytesTotal: 1441
 }
 
 test('prep', function (t) {
