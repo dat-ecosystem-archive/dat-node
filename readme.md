@@ -1,19 +1,19 @@
 # dat-node 1.0 alpha [![Travis](https://img.shields.io/travis/datproject/dat-node.svg?branch=1.0&style=flat-square)](https://travis-ci.org/datproject/dat-node) [![npm](https://img.shields.io/npm/v/dat-node.svg?style=flat-square)](https://npmjs.org/package/dat-node)
 
-Dat is a decentralized tool for distributing data and files, built for scientific and research data. **dat-node** is a node module to help you build node applications using Dat on the file system. See karissa/dat-api if you want to build browser-friendly Dat applications.
+Dat is a decentralized tool for distributing data and files, built for scientific and research data. **dat-node** is a module to help you build node applications using Dat on the *file system*. See [dat-api](https://github.com/karissa/dat-api) if you want to build browser-friendly Dat applications.
 
 Want to use Dat and not build applications? Check out:
 
-* [Dat CLI](datproject/dat): Use Dat in the command line
-* [Dat-Desktop](datproject/dat-desktop): A desktop application for Dat
+* [Dat CLI](https://github.com/datproject/dat): Use Dat in the command line
+* [Dat-Desktop](https://github.com/datproject/dat-desktop): A desktop application for Dat
 
-#### Goal
+### Goal
 
 Dat-node's primary goal is a *consistent management* of Dat archives on the file system. Dat-node is used in the Dat CLI. Use dat-node to build applications that are compatible with the Dat CLI.
 
 Dat-node acts as glue for a collection of Dat and hyperdrive based modules, including: [dat-folder-archive](https://github.com/joehand/dat-folder-archive), [hyperdiscovery](https://github.com/karissa/hyperdiscovery), [hyperdrive-stats](https://github.com/juliangruber/hyperdrive-stats), and [hyperdrive-import-files](https://github.com/juliangruber/hyperdrive-import-files/).
 
-#### Features
+### Features
 
 * Consistent management of Dat archive folders across apps, using [dat-folder-archive](https://github.com/joehand/dat-folder-archive)
 * Join the Dat Network using [hyperdiscovery](https://github.com/karissa/hyperdiscovery)
@@ -44,6 +44,7 @@ Dat(dir, function (err, dat) {
 
   var db = dat.db // level db in .dat folder
   var archive = dat.archive // hyperdrive archive
+  var key = dat.key // the archive key
 
   // Import Files
   var importer = dat.importFiles(opts, cb) // hyperdrive-count-import
@@ -51,6 +52,22 @@ Dat(dir, function (err, dat) {
 ```
 
 This will create a `.dat` folder inside `dir` and import all the files within that directory.
+
+To share the directory, you can join the network:
+
+```js
+Dat(dir, function (err, dat) {
+  var importer = dat.importFiles(function () {
+    console.log('Done importing')
+  })
+
+  // Join Network
+  var network = dat.joinNetwork()
+  console.log('Share your dat:', dat.key.toString('hex'))
+})
+```
+
+This will join the network as soon as you start importing files. This means peers can download files as soon as they are imported!
 
 ### Downloading a Dat archive
 
@@ -74,9 +91,9 @@ Dat(dir, function (err, dat) {
 
 Dat-node uses hyperdrive stats to track how much has been downloaded so you can display progress and exit when the download is finished.
 
-### Example Apps
+### Example Applications
 
-* [dat-next](joehand/dat-next): We use dat-node in the dat-next CLI. See that for a full example of how to use dat-node.
+* [dat-next](https://github.com/joehand/dat-next): We use dat-node in the dat-next CLI. See that for a full example of how to use dat-node.
 * YOUR APP HERE. *Use dat-node in an interesting use case? Send us your example!*
 
 ## API
@@ -102,7 +119,7 @@ opts = {
 }
 ```
 
-The callback includes a `dat` object that has the following properties:
+The callback, `cb(err, dat)`, includes a `dat` object that has the following properties:
 
 * `dat.key`: key of the dat (this will be set later for non-live archives)
 * `dat.archive`: Hyperdrive archive instance.
