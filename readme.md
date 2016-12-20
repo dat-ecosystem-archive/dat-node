@@ -7,6 +7,8 @@ Want to use Dat and not build applications? Check out:
 * [Dat CLI](https://github.com/datproject/dat): Use Dat in the command line
 * [Dat-Desktop](https://github.com/datproject/dat-desktop): A desktop application for Dat
 
+#### Learn more! [docs.datproject.org](http://docs.datproject.org/) or [chat with us](https://gitter.im/datproject/discussions)
+
 ### Goal
 
 Dat-node's primary goal is a *consistent management* of Dat archives on the file system. Dat-node is used in the Dat CLI. Use dat-node to build applications that are compatible with the Dat CLI.
