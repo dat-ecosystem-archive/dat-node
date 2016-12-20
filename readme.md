@@ -102,7 +102,7 @@ Dat-node uses hyperdrive stats to track how much has been downloaded so you can 
 
 Initialize a Dat Archive in `dir`. If there is an existing Dat Archive, the archive will be resumed.
 
-Initial `opts` can include:
+Most options are passed directly to the module you're using (e.g. `dat.importFiles(opts)`. However, there are also some initial `opts` can include:
 
 ```js
 opts = {
@@ -128,6 +128,7 @@ The callback, `cb(err, dat)`, includes a `dat` object that has the following pro
 * `dat.live`: `archive.live`
 * `dat.owner`: `archive.owner`
 * `dat.resumed`: `true` if the dat was resumed from an existing `.dat` database
+* `dat.options`: All options passed to Dat and the other submodules
 
 **`dat-node` provides an easy interface to common Dat modules for the created Dat Archive on the `dat` object provided in the callback:**
 
