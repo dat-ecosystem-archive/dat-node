@@ -1,17 +1,17 @@
 {
   "name": "dat-node",
   "version": "1.0.0-alpha-2.2.0",
-  "description": "Share datasets on the Internet",
+  "description": "Build node applications with Dat archives on the file system.",
   "main": "index.js",
   "scripts": {
     "test": "standard && tape tests/*.js | tap-spec"
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/joehand/dat-node.git"
+    "url": "git://github.com/datproject/dat-node.git"
   },
   "bugs": {
-    "url": "https://github.com/joehand/dat-node/issues"
+    "url": "https://github.com/datproject/dat-node/issues"
   },
   "homepage": "http://datproject.org",
   "author": "Joe Hand <joe@hand.email>",
@@ -42,6 +42,6 @@
     "data",
     "dat",
     "hyperdrive",
-    "sync"
+    "p2p"
   ]
 }
