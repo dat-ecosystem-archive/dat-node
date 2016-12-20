@@ -71,13 +71,13 @@ This will join the network as soon as you start importing files. This means peer
 
 ### Downloading a Dat archive
 
-Downloading a Dat archive is similar. You have to join the network in order for downloads to start!
+Downloading a Dat archive is similar, but you also have to pass `{key: <download-key} as an option. You have to join the network in order for downloads to start!
 
 ```js
 var Dat = require('dat-node')
 
 // dat-node always takes `dir` as the first argument
-Dat(dir, function (err, dat) {
+Dat(dir, {key: 'download-key'}, function (err, dat) {
   // Join the network
   var network = dat.joinNetwork(opts)
   network.swarm // hyperdiscovery
