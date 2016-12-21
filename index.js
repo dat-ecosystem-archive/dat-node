@@ -1,5 +1,6 @@
 var assert = require('assert')
 var path = require('path')
+var multicb = require('multicb')
 var initArchive = require('./lib/init-archive')
 var importFiles = require('./lib/import-files')
 var network = require('./lib/network')
@@ -70,17 +71,23 @@ module.exports = function (dir, opts, cb) {
     }
 
     dat.close = function (cb) {
-      closeNet(function () {
-        closeFileWatch()
-        if (opts.db) return dat.archive.close(cb)
-        // TODO: do we want to close db? can't remember what was recommended...
-        dat.archive.close(function () {
-          closeDb(cb)
-        })
-      })
+      var done = multicb()
+      closeNet(done())
+      closeFileWatch(done())
+      closeArchiveDb(done())
+
+      done(cb)
     }
 
     cb(null, dat)
+
+    function closeArchiveDb (cb) {
+      dat.archive.close(function (err) {
+        if (err) return cb(err)
+        if (opts.db || !dat.db) return cb(null)
+        closeDb(cb)
+      })
+    }
 
     function closeDb (cb) {
       if (!dat.db) return cb()
@@ -92,10 +99,10 @@ module.exports = function (dir, opts, cb) {
       dat.network.swarm.close(cb)
     }
 
-    function closeFileWatch () {
-      // TODO: add CB
-      if (!dat.importer) return
+    function closeFileWatch (cb) {
+      if (!dat.importer) return cb()
       dat.importer.close()
+      cb() // TODO: dat importer close is currently sync-ish
     }
   })
 }
