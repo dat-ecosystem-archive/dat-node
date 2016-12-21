@@ -1,4 +1,6 @@
-# dat-node [![Travis](https://img.shields.io/travis/datproject/dat-node.svg?branch=1.0&style=flat-square)](https://travis-ci.org/datproject/dat-node) [![npm](https://img.shields.io/npm/v/dat-node.svg?style=flat-square)](https://npmjs.org/package/dat-node)
+# dat-node
+
+[![Travis](https://img.shields.io/travis/datproject/dat-node.svg?branch=1.0&style=flat-square)](https://travis-ci.org/datproject/dat-node) [![npm](https://img.shields.io/npm/v/dat-node.svg?style=flat-square)](https://npmjs.org/package/dat-node)
 
 [Dat](http://datproject.org) is a decentralized tool for distributing data and
 files, built for scientific and research data. **dat-node** is a module to help
