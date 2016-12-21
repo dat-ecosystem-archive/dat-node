@@ -68,6 +68,23 @@ test('custom ignore extends default (array)', function (t) {
   })
 })
 
+test('ignore hidden option turned off', function (t) {
+  Dat(shareFolder, function (err, dat) {
+    t.error(err)
+    dat.importFiles({ ignoreHidden: false }, function () {
+      var matchers = dat.options.importer.ignore
+
+      t.ok(Array.isArray(dat.options.importer.ignore), 'ignore extended correctly')
+      t.ok(anymatch(matchers, '.dat'), '.dat still feeling left out =(')
+      t.notOk(anymatch(matchers, '.other-hidden'), 'hidden file NOT ignored')
+      t.notOk(anymatch(matchers, 'dir/.git'), 'hidden folders with dir NOT ignored')
+      dat.close(function () {
+        t.end()
+      })
+    })
+  })
+})
+
 test('custom db option', function (t) {
   rimraf.sync(path.join(shareFolder, '.dat'))
   Dat(shareFolder, {db: memdb()}, function (err, dat) {

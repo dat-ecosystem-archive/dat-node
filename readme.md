@@ -9,18 +9,21 @@ Want to use Dat and not build applications? Check out:
 
 #### Learn more! [docs.datproject.org](http://docs.datproject.org/) or [chat with us](https://gitter.im/datproject/discussions)
 
-### Goal
-
-Dat-node's primary goal is a *consistent management* of Dat archives on the file system. Dat-node is used in the Dat CLI. Use dat-node to build applications that are compatible with the Dat CLI.
-
-Dat-node acts as glue for a collection of Dat and hyperdrive based modules, including: [dat-folder-archive](https://github.com/joehand/dat-folder-archive), [hyperdiscovery](https://github.com/karissa/hyperdiscovery), [hyperdrive-stats](https://github.com/juliangruber/hyperdrive-stats), and [hyperdrive-import-files](https://github.com/juliangruber/hyperdrive-import-files/).
 
 ### Features
 
-* Consistent management of Dat archive folders across apps, using [dat-folder-archive](https://github.com/joehand/dat-folder-archive)
-* Join the Dat Network using [hyperdiscovery](https://github.com/karissa/hyperdiscovery)
-* Track archive stats using [hyperdrive-stats](https://github.com/juliangruber/hyperdrive-stats)
-* Import files from using [hyperdrive-import-files](https://github.com/juliangruber/hyperdrive-import-files/)
+* Consistent management of Dat archives across applications, using [dat-folder-archive](https://github.com/joehand/dat-folder-archive)
+* Join the Dat network, using [hyperdiscovery](https://github.com/karissa/hyperdiscovery)
+* Track archive stats, using [hyperdrive-stats](https://github.com/juliangruber/hyperdrive-stats)
+* Import files from the file system, using [hyperdrive-import-files](https://github.com/juliangruber/hyperdrive-import-files/)
+
+### Goal of dat-node
+
+Dat-node's primary goal is a *consistent management* of Dat archives on the file system. The main Dat CLI uses Dat-node. Any applications built using dat-node will be compatible with the Dat CLI and each other.
+
+Dat-node acts as glue for a collection of Dat and hyperdrive based modules, including: [dat-folder-archive](https://github.com/joehand/dat-folder-archive), [hyperdiscovery](https://github.com/karissa/hyperdiscovery), [hyperdrive-stats](https://github.com/juliangruber/hyperdrive-stats), and [hyperdrive-import-files](https://github.com/juliangruber/hyperdrive-import-files/).
+
+If you want a minimal module that creates Dat archives compatible with the Dat CLI and works on the file system, use [dat-folder-archive](https://github.com/joehand/dat-folder-archive).
 
 #### dat-js -> dat-node
 
@@ -154,9 +157,13 @@ Get number of peers connected to you.
 
 Import files to your Dat Archive from the directory using [hyperdrive-import-files](https://github.com/juliangruber/hyperdrive-import-files/). Options are passed to the importer module. `cb` is called when import is finished.
 
-`dat-node` provides a default ignore option, ignoring the `.dat` folder and all hidden files or directories.
-
 Returns the importer event emitter.
+
+##### Importer Ignore Option: `opts.ignore`
+
+`dat-node` provides a default ignore option, ignoring the `.dat` folder and all hidden files or directories. Use `opts.ignoreHidden = false` to import hidden files or folders, except the `.dat` directory.
+
+*It's important that the `.dat` folder is not imported because it contains a private key that allows the owner to write to the archive.*
 
 #### `var stats = dat.trackStats()`
 
