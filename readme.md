@@ -7,7 +7,7 @@ Want to use Dat in the command line or an app (not build applications)? Check ou
 * [Dat CLI](https://github.com/datproject/dat): Use Dat in the command line
 * [Dat-Desktop](https://github.com/datproject/dat-desktop): A desktop application for Dat
 
-#### Learn more! [docs.datproject.org](http://docs.datproject.org/) or [chat with us](https://gitter.im/datproject/discussions)
+#### Learn more! [docs.datproject.org](http://docs.datproject.org/) or [chat with us](https://gitter.im/datproject/discussions) ([#dat on IRC](http://webchat.freenode.net/?channels=dat))
 
 ### Features
 
