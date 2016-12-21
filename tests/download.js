@@ -129,6 +129,16 @@ if (!process.env.TRAVIS) {
   })
 }
 
+if (process.env.TRAVIS) {
+  // This is closed in previous test, but travis skips that because of the live stuff
+  test('close previous download', function (t) {
+    downloadDat.close(function (err) {
+      t.error(err)
+      t.end()
+    })
+  })
+}
+
 test('close first test', function (t) {
   shareDat.close(function (err) {
     t.error(err, 'no close error')
