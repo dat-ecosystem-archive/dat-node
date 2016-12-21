@@ -1,14 +1,13 @@
-# dat-node 1.0 alpha [![Travis](https://img.shields.io/travis/datproject/dat-node.svg?branch=1.0&style=flat-square)](https://travis-ci.org/datproject/dat-node) [![npm](https://img.shields.io/npm/v/dat-node.svg?style=flat-square)](https://npmjs.org/package/dat-node)
+# dat-node 1.0 [![Travis](https://img.shields.io/travis/datproject/dat-node.svg?branch=1.0&style=flat-square)](https://travis-ci.org/datproject/dat-node) [![npm](https://img.shields.io/npm/v/dat-node.svg?style=flat-square)](https://npmjs.org/package/dat-node)
 
 Dat is a decentralized tool for distributing data and files, built for scientific and research data. **dat-node** is a module to help you build node applications using Dat on the *file system*. See [dat-api](https://github.com/karissa/dat-api) if you want to build browser-friendly Dat applications.
 
-Want to use Dat and not build applications? Check out:
+Want to use Dat in the command line or an app (not build applications)? Check out:
 
 * [Dat CLI](https://github.com/datproject/dat): Use Dat in the command line
 * [Dat-Desktop](https://github.com/datproject/dat-desktop): A desktop application for Dat
 
 #### Learn more! [docs.datproject.org](http://docs.datproject.org/) or [chat with us](https://gitter.im/datproject/discussions)
-
 
 ### Features
 
@@ -111,7 +110,7 @@ Most options are passed directly to the module you're using (e.g. `dat.importFil
 
 ```js
 opts = {
-  db: level(path/.dat), // level-db compatible database
+  db: level('dir/.dat'), // level-db compatible database
   key: '<dat-key>', // existing key to create archive with or resume
   resume: Boolean, // fail if existing archive differs from opts.key
 
@@ -175,7 +174,9 @@ Get upload and download speeds: `stats.network.uploadSpeed` or `stats.network.do
 
 #### `dat.close(cb)`
 
-Close the archive, swarm, and file watchers if active.
+Close the archive, database, swarm, and file watchers if active.
+
+If you passed `opts.db`, you'll be responsible for closing it.
 
 ## Moving from dat-js
 
