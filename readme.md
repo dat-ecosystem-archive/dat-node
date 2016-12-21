@@ -83,7 +83,7 @@ Dat(dir, {key: 'download-key'}, function (err, dat) {
   // Join the network
   var network = dat.joinNetwork(opts)
   network.swarm // hyperdiscovery
-  network.peers() // number of peers
+  network.connected // number of connected peers
 
   // Track stats
   var stats = dat.trackStats() // hyperdrive-stats
@@ -144,7 +144,7 @@ Join the Dat Network for your Dat Archive.
 
 [discovery-swarm](https://github.com/mafintosh/discovery-swarm) instance.
 
-##### `network.peers()`
+##### `network.connected`
 
 Get number of peers connected to you.
 

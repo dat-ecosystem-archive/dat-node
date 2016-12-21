@@ -196,7 +196,7 @@ test('expose .owner', function (t) {
   })
 })
 
-test('expose stats.peers', function (t) {
+test('expose swarm.connected', function (t) {
   rimraf.sync(path.join(shareFolder, '.dat'))
   var downDat
   var downFolder = path.join(os.tmpdir(), 'dat-' + Math.random().toString(16).slice(2))
@@ -206,10 +206,10 @@ test('expose stats.peers', function (t) {
     t.error(err, 'dat share err')
 
     var network = shareDat.joinNetwork()
-    t.equal(network.peers(), 0, '0 peers')
+    t.equal(network.connected, 0, '0 peers')
 
     network.swarm.once('connection', function () {
-      t.ok(network.peers() >= 1, '>=1 peer')
+      t.ok(network.connected >= 1, '>=1 peer')
 
       downDat.close(function (err) {
         t.error(err, 'download dat closed')
