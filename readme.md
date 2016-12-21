@@ -185,6 +185,8 @@ If you passed `opts.db`, you'll be responsible for closing it.
 
 ## Moving from dat-js
 
+Dat-node 1.0 has a very different API than dat-js and dat-node v0. The previous API returned an object with events. The new API uses a callback to ensure everything is done before using the archive.
+
 Archives are created with a callback function. Once the archive is created, you can join the network directly without choosing to share or download. If the user owns the archive, they will be able to import files.
 
 Directory is now the first argument, and a required argument.
