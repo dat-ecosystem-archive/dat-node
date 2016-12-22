@@ -60,9 +60,9 @@ Dat.prototype.trackStats = function (opts) {
 }
 
 Dat.prototype.importFiles = function (target, opts, cb) {
-  if (!this.archive.owner) return cb(new Error('Must be archive owner to import files.'))
   if (typeof target !== 'string') return this.importFiles('', target, opts)
   if (typeof opts === 'function') return this.importFiles(target, {}, opts)
+  if (!this.archive.owner) return cb(new Error('Must be archive owner to import files.'))
 
   var self = this
   target = target.length ? target : self.path
