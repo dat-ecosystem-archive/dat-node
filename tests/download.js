@@ -61,7 +61,7 @@ test('Download with default opts', function (t) {
     })
 
     var network = dat.joinNetwork()
-    network.swarm.once('connection', function () {
+    network.once('connection', function () {
       t.pass('connects via network')
     })
 

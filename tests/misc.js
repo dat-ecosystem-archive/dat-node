@@ -225,7 +225,7 @@ test('expose swarm.connected', function (t) {
     var network = shareDat.joinNetwork()
     t.equal(network.connected, 0, '0 peers')
 
-    network.swarm.once('connection', function () {
+    network.once('connection', function () {
       t.ok(network.connected >= 1, '>=1 peer')
 
       downDat.close(function (err) {
