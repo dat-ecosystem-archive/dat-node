@@ -3,6 +3,7 @@ var test = require('tape')
 var anymatch = require('anymatch')
 var rimraf = require('rimraf')
 var memdb = require('memdb')
+var hyperdrive = require('hyperdrive')
 var encoding = require('dat-encoding')
 var fs = require('fs')
 var os = require('os')
@@ -88,6 +89,27 @@ test('ignore hidden option turned off', function (t) {
 test('custom db option', function (t) {
   rimraf.sync(path.join(shareFolder, '.dat'))
   Dat(shareFolder, {db: memdb()}, function (err, dat) {
+    t.error(err)
+    dat.archive.open(function () {
+      // Need open otherwise get DeferredLevelDOWN
+      t.ok(dat.db.db instanceof require('memdown'), 'db is memdown')
+      try {
+        fs.statSync(path.join(shareFolder, '.dat'))
+        t.fail('.dat folder exists =(')
+      } catch (e) {
+        t.pass('.dat folder does not exist')
+      }
+      dat.close(function () {
+        t.end()
+      })
+    })
+  })
+})
+
+test('custom drive option', function (t) {
+  rimraf.sync(path.join(shareFolder, '.dat'))
+  var drive = hyperdrive(memdb())
+  Dat(shareFolder, {drive: drive}, function (err, dat) {
     t.error(err)
     dat.archive.open(function () {
       // Need open otherwise get DeferredLevelDOWN
