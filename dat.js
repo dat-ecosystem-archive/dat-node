@@ -75,7 +75,7 @@ Dat.prototype.importFiles = function (target, opts, cb) {
       if (err) return cb(err)
       self.key = self.archive.key
       // TODO: need to get snapshot key back in db, better way?
-      if (self.db) self.db.put('!dat!key', encoding.str(self.archive.key), cb)
+      if (self.db) self.db.put('!dat!key', encoding.toStr(self.archive.key), cb)
     })
   })
   self.options.importer = self.importer.options
