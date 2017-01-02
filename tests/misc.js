@@ -3,6 +3,7 @@ var test = require('tape')
 var anymatch = require('anymatch')
 var rimraf = require('rimraf')
 var memdb = require('memdb')
+var memdown = require('memdown')
 var hyperdrive = require('hyperdrive')
 var encoding = require('dat-encoding')
 var fs = require('fs')
@@ -113,7 +114,7 @@ test('custom drive option', function (t) {
     t.error(err)
     dat.archive.open(function () {
       // Need open otherwise get DeferredLevelDOWN
-      t.ok(dat.db.db instanceof require('memdown'), 'db is memdown')
+      t.ok(dat.db.db instanceof memdown, 'db is memdown')
       try {
         fs.statSync(path.join(shareFolder, '.dat'))
         t.fail('.dat folder exists =(')
