@@ -1,6 +1,7 @@
 var assert = require('assert')
 var path = require('path')
 var multicb = require('multicb')
+var encoding = require('dat-encoding')
 var importFiles = require('./lib/import-files')
 var createNetwork = require('./lib/network')
 var stats = require('./lib/stats')
@@ -74,7 +75,7 @@ Dat.prototype.importFiles = function (target, opts, cb) {
       if (err) return cb(err)
       self.key = self.archive.key
       // TODO: need to get snapshot key back in db, better way?
-      if (self.db) self.db.put('!dat!key', self.archive.key.toString('hex'), cb)
+      if (self.db) self.db.put('!dat!key', encoding.str(self.archive.key), cb)
     })
   })
   self.options.importer = self.importer.options
