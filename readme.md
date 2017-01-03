@@ -116,6 +116,7 @@ Most options are passed directly to the module you're using (e.g. `dat.importFil
 ```js
 opts = {
   db: level('dir/.dat'), // level-db compatible database
+  drive: hyperdrive(db), // an external hyperdrive instance.
   key: '<dat-key>', // existing key to create archive with or resume
   resume: Boolean, // fail if existing archive differs from opts.key
 
@@ -127,6 +128,8 @@ opts = {
   dbName: '.dat' // directory name for level database
 }
 ```
+
+*Note: If using `opts.db` or `opts.drive` dat-node will not try to resume an existing archive, or save the key to the database. Use `opts.key` to resume the archive.*
 
 The callback, `cb(err, dat)`, includes a `dat` object that has the following properties:
 
@@ -147,19 +150,25 @@ Join the Dat Network for your Dat Archive.
 
 `opts` are passed to the swarm module. See [hyperdiscovery](https://github.com/karissa/hyperdiscovery) for options.
 
-##### `network.swarm`
+Returns a [discovery-swarm](https://github.com/mafintosh/discovery-swarm) instance.
 
-[discovery-swarm](https://github.com/mafintosh/discovery-swarm) instance.
+Also can use `dat.join([opts])`
+
+#### `dat.leaveNetwork()` or `dat.leave()`
+
+Leaves the network for the archive.
 
 ##### `network.connected`
 
 Get number of peers connected to you.
 
-#### `var importer = dat.importFiles([opts], [cb])`
+#### `var importer = dat.importFiles([dir], [opts], [cb])`
 
 **(must be the archive owner)**
 
 Import files to your Dat Archive from the directory using [hyperdrive-import-files](https://github.com/juliangruber/hyperdrive-import-files/). Options are passed to the importer module. `cb` is called when import is finished.
+
+By default, files will be imported from the folder where the archive was initiated. Import files from another directory by specifying `dir`.
 
 Returns the importer event emitter.
 
@@ -182,6 +191,62 @@ Get upload and download speeds: `stats.network.uploadSpeed` or `stats.network.do
 Close the archive, database, swarm, and file watchers if active.
 
 If you passed `opts.db`, you'll be responsible for closing it.
+
+### Advanced Usage
+
+### Using an external swarm
+
+If you are managing your own swarm, you can still use dat-node to join and leave the swarm for the archive key.
+
+```js
+dat.network = discoverySwarm()
+dat.joinNetwork() // will call discoverySwarm.join(archive.discoveryKey)
+dat.leaveNetwork() // will call discoverySwarm.leave(archive.discoveryKey)
+```
+### Multidrive
+
+Use the [multidrive module](https://github.com/yoshuawuyts/multidrive) with dat-node to manage many hyperdrive instances.
+
+```js
+const multidrive = require('multidrive')
+
+const manager = multidrive('my-cool-archive', function (err) {
+  if (err) console.error(err)
+})
+const driveLocation = process.cwd()
+
+manager.create('cute-cats', driveLocation, (err, drive) => {
+  if (err) return console.error(err)
+
+  Dat(drive.location, {drive: drive, key: someKey}, function (err, dat) {
+    // Do things
+    const archive = dat.archive
+    dat.importFiles() // import from driveLocation => add to archive
+    dat.importFiles(targetDir) // import from another targetDir => drive location + add to archive
+  })
+})
+```
+
+### Creating your own archive
+
+If you want to create and manage your own archive, you can still get the benefits of `dat-node`:
+
+```js
+var Dat = require('dat-node/dat')
+
+var drive = hyperdrive(db)
+var archive = drive.createArchive()
+
+archive.open(function () {
+  opts = {
+    dir: process.cwd() // required
+  }
+  var dat = new Dat(archive, db, opts)
+
+  dat.joinNetwork()
+  dat.importFiles()
+})
+```
 
 ## Moving from dat-js
 

@@ -34,7 +34,7 @@ Dat.prototype.joinNetwork = function (opts) {
   var network = self.network = createNetwork(self.archive, opts)
   self.options.network = network.options
 
-  network.swarm = network // 1.0 backwards compat
+  network.swarm = network // 1.0 backwards compat. TODO: Remove in v2
   if (self.owner) return network
 
   network.once('connection', function () {
