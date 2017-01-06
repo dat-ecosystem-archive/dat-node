@@ -1,5 +1,6 @@
 var assert = require('assert')
 var path = require('path')
+var untildify = require('untildify')
 var multicb = require('multicb')
 var initArchive = require('./lib/init-archive')
 var importFiles = require('./lib/import-files')
@@ -13,8 +14,10 @@ module.exports = function (dir, opts, cb) {
     opts = {}
   }
 
+  dir = path.resolve(untildify(dir))
+
   var dat = {
-    path: path.resolve(dir),
+    path: dir,
     options: opts
   }
 
