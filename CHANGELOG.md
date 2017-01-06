@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   ### Added, ### Changed, ### Fixed, ### Removed, ### Deprecated
 -->
 
+## 1.1.1 - 2017-01-06
+### Fixed
+* Resolve the path and untildify before creating archive
+
 ## 1.1.0 - 2017-01-03
 ### Added
 * Use `opts.indexing` for importing.
