@@ -20,10 +20,36 @@ function Dat (archive, db, opts) {
 
   this.archive = archive
   this.db = db
-  this.key = archive.key // only resumed/owned archives will have keys here
-  this.live = archive.live
-  this.owner = archive.owner
-  this.resumed = archive.resumed
+
+  var self = this
+
+  // Getters for convenience accessors
+  Object.defineProperties(this, {
+    key: {
+      enumerable: true,
+      get: function () {
+        return self.archive.key
+      }
+    },
+    live: {
+      enumerable: true,
+      get: function () {
+        return self.archive.live
+      }
+    },
+    owner: {
+      enumerable: true,
+      get: function () {
+        return self.archive.owner
+      }
+    },
+    resumed: {
+      enumerable: true,
+      get: function () {
+        return self.archive.resumed
+      }
+    }
+  })
 }
 
 Dat.prototype.join =
