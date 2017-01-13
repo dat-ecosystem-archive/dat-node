@@ -5,14 +5,17 @@ var Dat = require('./dat')
 
 module.exports = createDat
 
-function createDat (dirOrDriveOrDb, opts, cb) {
-  assert.ok(typeof dirOrDriveOrDb, 'directory or drive required')
-  if (typeof opts === 'function') return createDat(dirOrDriveOrDb, {}, opts)
+function createDat (dirOrDrive, opts, cb) {
+  assert.ok(dirOrDrive, 'directory or drive required')
+  if (typeof opts === 'function') return createDat(dirOrDrive, {}, opts)
 
   // Figure out what first arg is
-  if (typeof dirOrDriveOrDb === 'string') opts.dir = dirOrDriveOrDb
-  else if (dirOrDriveOrDb instanceof hyperdrive) opts.drive = dirOrDriveOrDb // TODO: will this fail if our hyperdrive vesrion is different?
-  else opts.db = dirOrDriveOrDb
+  if (typeof dirOrDrive === 'string') opts.dir = dirOrDrive
+  else if (dirOrDrive instanceof hyperdrive) opts.drive = dirOrDrive // TODO: will this fail if our hyperdrive vesrion is different?
+  else return cb(new Error('first argument must either be a directory or hyperdrive instance'))
+
+  if (drive.location && !opts.dir) opts.dir = drive.location // TODO: I think this is just a multidrive thing
+  else if (!opts.dir) return cb(new Error('opts.dir must be specified'))
 
   initArchive(opts, function (err, archive, db) {
     if (err) return cb(err)
