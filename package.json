@@ -18,6 +18,7 @@
   "license": "MIT",
   "dependencies": {
     "dat-encoding": "^4.0.1",
+    "drive-or-core": "^1.0.0",
     "hyperdiscovery": "^1.0.1",
     "hyperdrive": "^7.9.0",
     "hyperdrive-count-import": "^1.0.0",
