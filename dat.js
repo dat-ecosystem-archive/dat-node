@@ -65,10 +65,7 @@ Dat.prototype.joinNetwork = function (opts) {
 
   network.once('connection', function () {
     // automatically open archive and set exposed values
-    self.archive.open(function () {
-      // self.owner = self.archive.owner // For future multi-writer?
-      self.live = self.archive.live
-    })
+    self.archive.open(noop)
   })
   return network
 }
@@ -109,8 +106,10 @@ Dat.prototype.importFiles = function (target, opts, cb) {
 }
 
 Dat.prototype.close = function (cb) {
-  cb = cb || function () { }
+  cb = cb || noop
   var self = this
+  self.leave()
+
   var done = multicb()
   closeNet(done())
   closeFileWatch(done())
@@ -142,3 +141,5 @@ Dat.prototype.close = function (cb) {
     cb() // TODO: dat importer close is currently sync-ish
   }
 }
+
+function noop () { }

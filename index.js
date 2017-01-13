@@ -1,19 +1,21 @@
 var assert = require('assert')
+var hyperdrive = require('hyperdrive')
 var initArchive = require('./lib/init-archive')
 var Dat = require('./dat')
 
 module.exports = createDat
 
-function createDat (dir, opts, cb) {
-  assert.equal(typeof dir, 'string', 'directory required')
-  if (typeof opts === 'function') return createDat(dir, {}, opts)
+function createDat (dirOrDriveOrDb, opts, cb) {
+  assert.ok(typeof dirOrDriveOrDb, 'directory or drive required')
+  if (typeof opts === 'function') return createDat(dirOrDriveOrDb, {}, opts)
 
-  initArchive(dir, opts, function (err, archive, db) {
+  // Figure out what first arg is
+  if (typeof dirOrDriveOrDb === 'string') opts.dir = dirOrDriveOrDb
+  else if (dirOrDriveOrDb instanceof hyperdrive) opts.drive = dirOrDriveOrDb // TODO: will this fail if our hyperdrive vesrion is different?
+  else opts.db = dirOrDriveOrDb
+
+  initArchive(opts, function (err, archive, db) {
     if (err) return cb(err)
-
-    opts.dir = dir
-    var dat = new Dat(archive, db, opts)
-
-    cb(null, dat)
+    cb(null, new Dat(archive, db, opts))
   })
 }

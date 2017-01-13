@@ -47,7 +47,6 @@ Create a Dat archive on the file system inside `dir`:
 ```js
 var Dat = require('dat-node')
 
-// dat-node always takes `dir` as the first argument
 Dat(dir, function (err, dat) {
   console.log(dat.path) // dat is created here with a .dat folder
 
@@ -85,7 +84,6 @@ Downloading a Dat archive is similar, but you also have to pass `{key: <download
 ```js
 var Dat = require('dat-node')
 
-// dat-node always takes `dir` as the first argument
 Dat(dir, {key: 'download-key'}, function (err, dat) {
   // Join the network
   var network = dat.joinNetwork(opts)
@@ -107,18 +105,15 @@ Dat-node uses hyperdrive stats to track how much has been downloaded so you can 
 
 ## API
 
-### `Dat(dir, [opts], cb)``
+### `Dat(dir|drive|db, [opts], cb)``
 
-Initialize a Dat Archive in `dir`. If there is an existing Dat Archive, the archive will be resumed.
+Initialize a Dat Archive in `dir`. If there is an existing Dat Archive, the archive will be resumed. You can also pass a `hyperdrive` instance or a level-compatible `database`.
 
 Most options are passed directly to the module you're using (e.g. `dat.importFiles(opts)`. However, there are also some initial `opts` can include:
 
 ```js
 opts = {
-  db: level('dir/.dat'), // level-db compatible database
-  drive: hyperdrive(db), // an external hyperdrive instance.
   key: '<dat-key>', // existing key to create archive with or resume
-  resume: Boolean, // fail if existing archive differs from opts.key
 
   // Hyperdrive createArchive options
   live: Boolean, // archive.live setting (only set if archive is owned)
