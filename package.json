@@ -21,7 +21,7 @@
     "dat-folder-archive": "^1.1.1",
     "hyperdiscovery": "^1.0.1",
     "hyperdrive": "^7.9.0",
-    "hyperdrive-count-import": "^1.0.0",
+    "hyperdrive-count-import": "^1.1.0",
     "hyperdrive-network-speed": "^1.0.1",
     "hyperdrive-stats": "^3.0.0",
     "multicb": "^1.2.1",
