@@ -1,5 +1,9 @@
 var assert = require('assert')
 var hyperdrive = require('hyperdrive')
+var path = require('path')
+var untildify = require('untildify')
+var multicb = require('multicb')
+var debug = require('debug')('dat-node')
 var initArchive = require('./lib/init-archive')
 var Dat = require('./dat')
 
@@ -16,7 +20,10 @@ function createDat (dirOrDrive, opts, cb) {
 
   if (!opts.dir && opts.drive.location) opts.dir = opts.drive.location // TODO: I think this is just a multidrive thing
   else if (!opts.dir) return cb(new Error('opts.dir must be specified'))
+  
+  opts.dir = path.resolve(untildify(opts.dir))
 
+  debug('Running initArchive on', opts.dir, 'with opts:', opts)
   initArchive(opts, function (err, archive, db) {
     if (err) return cb(err)
     cb(null, new Dat(archive, db, opts))

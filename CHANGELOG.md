@@ -18,6 +18,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Deprecated
 * Expose discovery swarm instance on `dat.network` instead of `dat.network.swarm`.
 
+## 1.1.1 - 2017-01-06
+### Fixed
+* Resolve the path and untildify before creating archive
+
+## 1.1.0 - 2017-01-03
+### Added
+* Use `opts.indexing` for importing.
+
 ## 1.0.0 - 2016-12-21
 * dat-node released with a new API. [Read about changes](https://github.com/datproject/dat-node#moving-from-dat-js) from the old API.
 
