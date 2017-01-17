@@ -25,6 +25,7 @@ function createDat (dirOrDrive, opts, cb) {
   debug('Running initArchive on', opts.dir, 'with opts:', opts)
   initArchive(opts, function (err, archive, db) {
     if (err) return cb(err)
+    debug('initArchive callback')
     cb(null, new Dat(archive, db, opts))
   })
 }
