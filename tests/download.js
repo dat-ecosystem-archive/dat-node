@@ -51,7 +51,7 @@ test('Download with default opts', function (t) {
       // Network needs to connect for archive.open to callback
       archive.content.once('download-finished', function () {
         t.pass('archive.content emits download-finished')
-        done()
+        setTimeout(done, 500) // issue w/ download-finished firing before stats updated
       })
     })
 
