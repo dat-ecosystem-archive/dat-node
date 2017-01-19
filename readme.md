@@ -16,7 +16,7 @@ Want to use Dat in the command line or an app (not build applications)? Check ou
 
 ### Features
 
-* Consistent management of Dat archives across applications, using [dat-folder-archive](https://github.com/joehand/dat-folder-archive)
+* Consistent management of Dat archives across applications
 * Join the Dat network, using [hyperdiscovery](https://github.com/karissa/hyperdiscovery)
 * Track archive stats, using [hyperdrive-stats](https://github.com/juliangruber/hyperdrive-stats)
 * Import files from the file system, using [hyperdrive-import-files](https://github.com/juliangruber/hyperdrive-import-files/)
@@ -25,9 +25,9 @@ Want to use Dat in the command line or an app (not build applications)? Check ou
 
 Dat-node's primary goal is a *consistent management* of Dat archives on the file system. The main Dat CLI uses Dat-node. Any applications built using dat-node will be compatible with the Dat CLI and each other.
 
-Dat-node acts as glue for a collection of Dat and hyperdrive based modules, including: [dat-folder-archive](https://github.com/joehand/dat-folder-archive), [hyperdiscovery](https://github.com/karissa/hyperdiscovery), [hyperdrive-stats](https://github.com/juliangruber/hyperdrive-stats), and [hyperdrive-import-files](https://github.com/juliangruber/hyperdrive-import-files/).
+Dat-node acts as glue for a collection of Dat and hyperdrive based modules, including: [hyperdiscovery](https://github.com/karissa/hyperdiscovery), [hyperdrive-stats](https://github.com/juliangruber/hyperdrive-stats), and [hyperdrive-import-files](https://github.com/juliangruber/hyperdrive-import-files/).
 
-If you want a minimal module that creates Dat archives compatible with the Dat CLI and works on the file system, use [dat-folder-archive](https://github.com/joehand/dat-folder-archive).
+If you want a minimal module that creates Dat archives compatible with the Dat CLI and works on the file system, check out `init-archive.js`. We should make a module that does that!
 
 #### dat-js -> dat-node
 
@@ -105,26 +105,26 @@ Dat-node uses hyperdrive stats to track how much has been downloaded so you can 
 
 ## API
 
-### `Dat(dir|drive|db, [opts], cb)``
+### `Dat(dir|drive, [opts], cb)``
 
-Initialize a Dat Archive in `dir`. If there is an existing Dat Archive, the archive will be resumed. You can also pass a `hyperdrive` instance or a level-compatible `database`.
+Initialize a Dat Archive in `dir`. If there is an existing Dat Archive, the archive will be resumed. You can also pass a `hyperdrive` instance.
+
+`dir` or `opts.dir` is always required. If you use a `drive` and set `drive.location` that will be set to `opts.dir`.
 
 Most options are passed directly to the module you're using (e.g. `dat.importFiles(opts)`. However, there are also some initial `opts` can include:
 
 ```js
 opts = {
   key: '<dat-key>', // existing key to create archive with or resume
+  dir: 'some/dir', // directory for the archive
 
   // Hyperdrive createArchive options
   live: Boolean, // archive.live setting (only set if archive is owned)
-  file: raf(), // file option for hyperdrive.createArchive()
+  file: raf(path.join(opts.dir, name)), // file option for hyperdrive.createArchive()
 
-  // dat-folder-archive options
-  dbName: '.dat' // directory name for level database
+  dbPath: path.join(opts.dir,'.dat') // directory name for level database
 }
 ```
-
-*Note: If using `opts.db` or `opts.drive` dat-node will not try to resume an existing archive, or save the key to the database. Use `opts.key` to resume the archive.*
 
 The callback, `cb(err, dat)`, includes a `dat` object that has the following properties:
 
@@ -134,7 +134,7 @@ The callback, `cb(err, dat)`, includes a `dat` object that has the following pro
 * `dat.path`: Path of the Dat Archive
 * `dat.live`: `archive.live`
 * `dat.owner`: `archive.owner`
-* `dat.resumed`: `true` if the dat was resumed from an existing `.dat` database
+* `dat.resumed`: `true` if the archive was resumed from an existing database
 * `dat.options`: All options passed to Dat and the other submodules
 
 **`dat-node` provides an easy interface to common Dat modules for the created Dat Archive on the `dat` object provided in the callback:**
@@ -189,15 +189,6 @@ If you passed `opts.db`, you'll be responsible for closing it.
 
 ### Advanced Usage
 
-### Using an external swarm
-
-If you are managing your own swarm, you can still use dat-node to join and leave the swarm for the archive key.
-
-```js
-dat.network = discoverySwarm()
-dat.joinNetwork() // will call discoverySwarm.join(archive.discoveryKey)
-dat.leaveNetwork() // will call discoverySwarm.leave(archive.discoveryKey)
-```
 ### Multidrive
 
 Use the [multidrive module](https://github.com/yoshuawuyts/multidrive) with dat-node to manage many hyperdrive instances.
@@ -205,7 +196,7 @@ Use the [multidrive module](https://github.com/yoshuawuyts/multidrive) with dat-
 ```js
 const multidrive = require('multidrive')
 
-const manager = multidrive('my-cool-archive', function (err) {
+const manager = multidrive('my-cool-archive', (err) => {
   if (err) console.error(err)
 })
 const driveLocation = process.cwd()
@@ -213,33 +204,12 @@ const driveLocation = process.cwd()
 manager.create('cute-cats', driveLocation, (err, drive) => {
   if (err) return console.error(err)
 
-  Dat(drive.location, {drive: drive, key: someKey}, function (err, dat) {
+  Dat(drive, {key: someKey}, (err, dat) => {
     // Do things
     const archive = dat.archive
     dat.importFiles() // import from driveLocation => add to archive
     dat.importFiles(targetDir) // import from another targetDir => drive location + add to archive
   })
-})
-```
-
-### Creating your own archive
-
-If you want to create and manage your own archive, you can still get the benefits of `dat-node`:
-
-```js
-var Dat = require('dat-node/dat')
-
-var drive = hyperdrive(db)
-var archive = drive.createArchive()
-
-archive.open(function () {
-  opts = {
-    dir: process.cwd() // required
-  }
-  var dat = new Dat(archive, db, opts)
-
-  dat.joinNetwork()
-  dat.importFiles()
 })
 ```
 

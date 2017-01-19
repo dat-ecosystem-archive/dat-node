@@ -17,7 +17,8 @@ function createDat (dirOrDrive, opts, cb) {
   else if (dirOrDrive instanceof hyperdrive) opts.drive = dirOrDrive // TODO: will this fail if our hyperdrive vesrion is different?
   else return cb(new Error('first argument must either be a directory or hyperdrive instance'))
 
-  if (!opts.dir && opts.drive.location) opts.dir = opts.drive.location // TODO: I think this is just a multidrive thing
+  // TODO: this is a multidrive thing, make it part of this API?
+  if (!opts.dir && opts.drive.location) opts.dir = opts.drive.location
   else if (!opts.dir) return cb(new Error('opts.dir must be specified'))
 
   opts.dir = path.resolve(untildify(opts.dir))
@@ -26,6 +27,7 @@ function createDat (dirOrDrive, opts, cb) {
   initArchive(opts, function (err, archive, db) {
     if (err) return cb(err)
     debug('initArchive callback')
-    cb(null, new Dat(archive, db, opts))
+    var dat = new Dat(archive, db, opts)
+    cb(null, dat)
   })
 }

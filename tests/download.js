@@ -153,12 +153,10 @@ test('download from snapshot', function (t) {
   Dat(fixtures, {live: false}, function (err, dat) {
     t.error(err, 'live: false share, no error')
     shareDat = dat
-    dat.importFiles(function () {
-      dat.archive.finalize(function () {
-        shareKey = dat.archive.key
-        dat.joinNetwork()
-        download()
-      })
+    dat.importFiles(function (err) {
+      shareKey = dat.archive.key
+      dat.joinNetwork()
+      download()
     })
   })
 
