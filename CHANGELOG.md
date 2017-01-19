@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- Change types:
   ### Added, ### Changed, ### Fixed, ### Removed, ### Deprecated
 -->
+### Added
+* Support for `opts.drive` and [multidrive](https://github.com/yoshuawuyts/multidrive/)
+* `dat.leaveNetwork` - leave the network for this archive key.
+* Added `dir` option to importer.
+* Made it easier to require Dat as a module, without creating archive.
+
+### Deprecated
+* Expose discovery swarm instance on `dat.network` instead of `dat.network.swarm`.
 
 ## 1.1.1 - 2017-01-06
 ### Fixed

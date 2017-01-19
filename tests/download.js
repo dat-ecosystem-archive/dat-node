@@ -51,7 +51,7 @@ test('Download with default opts', function (t) {
       // Network needs to connect for archive.open to callback
       archive.content.once('download-finished', function () {
         t.pass('archive.content emits download-finished')
-        done()
+        setTimeout(done, 500) // issue w/ download-finished firing before stats updated
       })
     })
 
@@ -61,7 +61,7 @@ test('Download with default opts', function (t) {
     })
 
     var network = dat.joinNetwork()
-    network.swarm.once('connection', function () {
+    network.once('connection', function () {
       t.pass('connects via network')
     })
 
@@ -153,12 +153,11 @@ test('download from snapshot', function (t) {
   Dat(fixtures, {live: false}, function (err, dat) {
     t.error(err, 'live: false share, no error')
     shareDat = dat
-    dat.importFiles(function () {
-      dat.archive.finalize(function () {
-        shareKey = dat.archive.key
-        dat.joinNetwork()
-        download()
-      })
+    dat.importFiles(function (err) {
+      t.error(err, 'import no error')
+      shareKey = dat.archive.key
+      dat.joinNetwork()
+      download()
     })
   })
 

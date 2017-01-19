@@ -45,7 +45,7 @@ test('create dat with default ops', function (t) {
         t.pass('stats update triggers')
       })
 
-      network.swarm.once('listening', function () {
+      network.once('listening', function () {
         t.pass('network listening')
       })
 
