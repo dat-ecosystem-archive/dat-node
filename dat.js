@@ -112,9 +112,12 @@ Dat.prototype.close = function (cb) {
   var done = multicb()
   closeNet(done())
   closeFileWatch(done())
-  closeArchiveDb(done())
 
-  done(cb)
+  done(function (err) {
+    if (err) return cb(err)
+    // Close archive last to make sure writes from network/file watching are done
+    closeArchiveDb(cb)
+  })
 
   function closeArchiveDb (cb) {
     self.archive.close(function (err) {

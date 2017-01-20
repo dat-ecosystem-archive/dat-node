@@ -18,9 +18,9 @@
   "license": "MIT",
   "dependencies": {
     "anymatch": "^1.3.0",
+    "count-files": "^2.1.0",
     "dat-encoding": "^4.0.1",
     "debug": "^2.6.0",
-    "folder-walker": "^3.0.0",
     "hyperdiscovery": "^1.0.1",
     "hyperdrive": "^7.9.0",
     "hyperdrive-import-files": "^2.8.0",
@@ -29,7 +29,6 @@
     "level": "^1.5.0",
     "multicb": "^1.2.1",
     "random-access-file": "^1.3.1",
-    "stream-each": "^1.2.0",
     "subleveldown": "^2.1.0",
     "untildify": "^3.0.2"
   },
