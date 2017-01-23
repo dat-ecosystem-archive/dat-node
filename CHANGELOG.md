@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   ### Added, ### Changed, ### Fixed, ### Removed, ### Deprecated
 -->
 
+## 1.2.1 - 2017-01-23
+### Fixed
+* Bug where opening archive on bad key returned without callback. Added timeout on open archive to make sure other key is tried before exiting.
+
 ## 1.2.0 - 2017-01-23
 ### Changed
 * Read existing keys directly from hyperdrive instead of using the db. Allows for better resuming in any application.
