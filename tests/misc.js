@@ -280,7 +280,10 @@ test('write and read keys', function (t) {
         t.ok(keys, 'returned keys')
         t.same(keys.public, shareDat.key, 'key read matches dat.key')
         t.same(keys.secret, shareDat.archive.metadata.secretKey, 'key read matches archive secret')
-        t.end()
+        shareDat.close(function () {
+          rimraf.sync(path.join(shareFolder, '.dat'))
+          t.end()
+        })
       })
     })
   })
