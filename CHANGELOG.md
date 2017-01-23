@@ -9,11 +9,22 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- Change types:
   ### Added, ### Changed, ### Fixed, ### Removed, ### Deprecated
 -->
+
+## 1.2.0 - 2017-01-23
+### Changed
+* Read existing keys directly from hyperdrive instead of using the db. Allows for better resuming in any application.
+* Count files much faster on import
+* Add `opts.indexing` and default to true for when `source` = `dest`.
+
 ### Added
-* Support for `opts.drive` and [multidrive](https://github.com/yoshuawuyts/multidrive/)
+* Support for `drive` as first argument and [multidrive](https://github.com/yoshuawuyts/multidrive/) support
 * `dat.leaveNetwork` - leave the network for this archive key.
 * Added `dir` option to importer.
 * Made it easier to require Dat as a module, without creating archive.
+
+### Fixed
+* Close archive after other things are closed
+* Use discoveryKey for stats database (security)
 
 ### Deprecated
 * Expose discovery swarm instance on `dat.network` instead of `dat.network.swarm`.
