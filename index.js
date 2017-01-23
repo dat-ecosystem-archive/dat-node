@@ -1,5 +1,4 @@
 var assert = require('assert')
-var fs = require('fs')
 var path = require('path')
 var hyperdrive = require('hyperdrive')
 var untildify = require('untildify')
@@ -27,26 +26,9 @@ function createDat (dirOrDrive, opts, cb) {
   debug('Running initArchive on', opts.dir, 'with opts:', opts)
   initArchive(opts, function (err, archive, db) {
     if (err) return cb(err)
+    debug('initArchive callback')
 
     var dat = new Dat(archive, db, opts)
-    writeKeys(function (err) {
-      if (err) return cb(err)
-      debug('initArchive callback')
-      cb(null, dat)
-    })
-
-    function writeKeys (cb) {
-      // TODO: allow option or don't do if temp db?
-      if (!dat.key) return cb() // snapshot
-
-      var basePath = path.join(dat.path, '.dat')
-      var pubKeyPath = path.join(basePath, 'key_ed25519_pub')
-      fs.writeFile(pubKeyPath, dat.key.toString('base64'), function (err) {
-        if (err || !dat.owner) return cb(err)
-        // owner, write secret key
-        var secKeyPath = path.join(basePath, 'key_ed25519')
-        fs.writeFile(secKeyPath, dat.archive.metadata.secretKey.toString('base64'), cb)
-      })
-    }
+    cb(null, dat)
   })
 }

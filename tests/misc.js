@@ -267,3 +267,21 @@ test('expose swarm.connected', function (t) {
     })
   })
 })
+
+test('write and read keys', function (t) {
+  rimraf.sync(path.join(shareFolder, '.dat'))
+
+  Dat(shareFolder, function (err, shareDat) {
+    t.error(err, 'dat share err')
+    shareDat.writeKeys(function (err) {
+      t.error(err, 'no write keys err')
+      shareDat.readKeys(function (err, keys) {
+        t.error(err, 'no read keys err')
+        t.ok(keys, 'returned keys')
+        t.same(keys.public, shareDat.key, 'key read matches dat.key')
+        t.same(keys.secret, shareDat.archive.metadata.secretKey, 'key read matches archive secret')
+        t.end()
+      })
+    })
+  })
+})

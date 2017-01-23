@@ -4,6 +4,7 @@ var multicb = require('multicb')
 var importFiles = require('./lib/import-files')
 var createNetwork = require('./lib/network')
 var stats = require('./lib/stats')
+var keys = require('./lib/keys')
 
 module.exports = Dat
 
@@ -102,6 +103,19 @@ Dat.prototype.importFiles = function (target, opts, cb) {
   })
   self.options.importer = self.importer.options
   return self.importer
+}
+
+Dat.prototype.writeKeys = function (dir, cb) {
+  if (typeof dir === 'function') return this.writeKeys(null, dir)
+  if (!dir) dir = path.join(this.path, '.dat')
+  var self = this
+  keys.writeKeys(self.archive, dir, cb)
+}
+
+Dat.prototype.readKeys = function (dir, cb) {
+  if (typeof dir === 'function') return this.readKeys(null, dir)
+  if (!dir) dir = path.join(this.path, '.dat')
+  keys.readKeys(dir, cb)
 }
 
 Dat.prototype.close = function (cb) {
