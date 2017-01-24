@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   ### Added, ### Changed, ### Fixed, ### Removed, ### Deprecated
 -->
 
+## 1.2.3 - 2017-01-24
+## Fixed
+* Learning things about `npm` versions!
+
 ## 1.2.2 - 2017-01-23
 ### Fixed
 * Dowloaded file could have old bytes that weren't removed with updates. Issue #79.
