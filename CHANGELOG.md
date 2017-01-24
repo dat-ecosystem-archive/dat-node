@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   ### Added, ### Changed, ### Fixed, ### Removed, ### Deprecated
 -->
 
+## 1.2.4 - 2017-01-24
+## Fixed
+* fix regression in resuming archives without content by opening them first.
+
 ## 1.2.3 - 2017-01-24
 ## Fixed
 * Learning things about `npm` versions!
