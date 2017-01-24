@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   ### Added, ### Changed, ### Fixed, ### Removed, ### Deprecated
 -->
 
+## 1.2.2 - 2017-01-23
+### Fixed
+* Dowloaded file could have old bytes that weren't removed with updates. Issue #79.
+
 ## 1.2.1 - 2017-01-23
 ### Fixed
 * Bug where opening archive on bad key returned without callback. Added timeout on open archive to make sure other key is tried before exiting.
