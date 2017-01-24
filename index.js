@@ -1,6 +1,6 @@
 var assert = require('assert')
-var hyperdrive = require('hyperdrive')
 var path = require('path')
+var hyperdrive = require('hyperdrive')
 var untildify = require('untildify')
 var debug = require('debug')('dat-node')
 var initArchive = require('./lib/init-archive')
@@ -27,6 +27,7 @@ function createDat (dirOrDrive, opts, cb) {
   initArchive(opts, function (err, archive, db) {
     if (err) return cb(err)
     debug('initArchive callback')
+
     var dat = new Dat(archive, db, opts)
     cb(null, dat)
   })
