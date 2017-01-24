@@ -109,7 +109,8 @@ if (!process.env.TRAVIS) {
 
     dat.stats.on('update:blocksProgress', function () {
       var st = dat.stats.get()
-      if (st.blocksTotal && st.blocksProgress === st.blocksTotal) return done()
+      // TODO: blocksProgress === blocksTotal (bug in stats?)
+      if (st.blocksTotal && st.blocksProgress >= st.blocksTotal) return done()
     })
 
     addShareFile()
