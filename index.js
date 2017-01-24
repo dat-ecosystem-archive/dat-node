@@ -79,8 +79,8 @@ Dat.prototype._open = function (cb) {
     var drive = hyperdrive(self.db)
     self.archive = drive.createArchive(self.key, {
       live: self.live,
-      file: function (name) {
-        return raf(path.join(self.dir, name))
+      file: function (name, opts) {
+        return raf(path.join(self.dir, name), opts && typeof opts.length === 'number' && {length: opts.length})
       }
     })
     if (!self.key) {
