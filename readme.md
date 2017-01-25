@@ -122,6 +122,9 @@ opts = {
   live: Boolean, // archive.live setting (only set if archive is owned)
   file: raf(path.join(opts.dir, name)), // file option for hyperdrive.createArchive()
 
+  // If only dir is specified (not a custom drive/db) You can use these options:
+  createIfMissing: true, // create db if doesn't exist
+  errorIfExists: false, // error if existing archive in database
   dbPath: path.join(opts.dir,'.dat') // directory name for level database
 }
 ```

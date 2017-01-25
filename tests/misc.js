@@ -267,3 +267,33 @@ test('expose swarm.connected', function (t) {
     })
   })
 })
+
+test('createIfMissing false', function (t) {
+  rimraf.sync(path.join(shareFolder, '.dat'))
+  Dat(shareFolder, {createIfMissing: false}, function (err, dat) {
+    t.ok(err, 'throws error')
+    t.end()
+  })
+})
+
+test('backwards compat resume true', function (t) {
+  rimraf.sync(path.join(shareFolder, '.dat'))
+  Dat(shareFolder, {resume: true}, function (err, dat) {
+    t.ok(err, 'throws error')
+    t.end()
+  })
+})
+
+test('errorIfExists true', function (t) {
+  rimraf.sync(path.join(shareFolder, '.dat'))
+  // create dat to resume from
+  Dat(shareFolder, function (err, dat) {
+    t.ifErr(err)
+    dat.close(function () {
+      Dat(shareFolder, {errorIfExists: true}, function (err, dat) {
+        t.ok(err, 'throws error')
+        t.end()
+      })
+    })
+  })
+})
