@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   ### Added, ### Changed, ### Fixed, ### Removed, ### Deprecated
 -->
 
+## 1.3.1 - 2017-01-25
+## Fixed
+* Real error message for `createIfMissing`
+
 ## 1.3.0 - 2017-01-25
 ## Added
 * `createIfMissing` and `errorIfExists` options
