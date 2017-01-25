@@ -16,6 +16,8 @@ See [dat-js](https://github.com/datproject/dat-js) if you want to build browser-
 
 #### Learn more! [docs.datproject.org](http://docs.datproject.org/) or [chat with us](https://gitter.im/datproject/discussions) ([#dat on IRC](http://webchat.freenode.net/?channels=dat))
 
+#### Read about the Dat protocol at [datprotocol.com](https://www.datprotocol.com/)
+
 ### Features
 
 * Consistent management of Dat archives across applications
