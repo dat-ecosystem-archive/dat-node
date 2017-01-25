@@ -3,14 +3,16 @@
 [![Travis](https://img.shields.io/travis/datproject/dat-node/master.svg?style=flat-square)](https://travis-ci.org/datproject/dat-node) [![npm](https://img.shields.io/npm/v/dat-node.svg?style=flat-square)](https://npmjs.org/package/dat-node)
 
 [Dat](http://datproject.org) is a decentralized tool for distributing data and
-files, built for scientific and research data. **dat-node** is a module to help
-you build node applications using Dat on the *file system*. See
-[dat-js](https://github.com/datproject/dat-js) if you want to build browser-friendly Dat applications.
+files, built for scientific and research data.
+You can start using Dat today in these client applications:
 
-Want to use Dat in the command line or an app (not build applications)? Check out:
+* [Dat Command Line](https://github.com/datproject/dat): Use Dat in the command line
+* [Dat Desktop](https://github.com/datproject/dat-desktop): A desktop application for Dat
+* [Beaker Browser](beakerbrowser.com): An experimental P2P browser with Dat built in
 
-* [Dat CLI](https://github.com/datproject/dat): Use Dat in the command line
-* [Dat-Desktop](https://github.com/datproject/dat-desktop): A desktop application for Dat
+**dat-node** is a high-level module to help
+you build node applications using Dat on the *file system*.
+See [dat-js](https://github.com/datproject/dat-js) if you want to build browser-friendly Dat applications.
 
 #### Learn more! [docs.datproject.org](http://docs.datproject.org/) or [chat with us](https://gitter.im/datproject/discussions) ([#dat on IRC](http://webchat.freenode.net/?channels=dat))
 
@@ -18,14 +20,15 @@ Want to use Dat in the command line or an app (not build applications)? Check ou
 
 * Consistent management of Dat archives across applications
 * Join the Dat network, using [hyperdiscovery](https://github.com/karissa/hyperdiscovery)
-* Track archive stats, using [hyperdrive-stats](https://github.com/juliangruber/hyperdrive-stats)
+* Track archive stats, using [hyperdrive-stats](https://github.com/juliangruber/hyperdrive-stats) and [hyperdrive-network-speed](https://github.com/joehand/hyperdrive-network-speed)
 * Import files from the file system, using [hyperdrive-import-files](https://github.com/juliangruber/hyperdrive-import-files/)
 
 ### Goal of dat-node
 
-Dat-node's primary goal is a *consistent management* of Dat archives on the file system. The main Dat CLI uses Dat-node. Any applications built using dat-node will be compatible with the Dat CLI and each other.
+Dat-node's primary goals are:
 
-Dat-node acts as glue for a collection of Dat and hyperdrive based modules, including: [hyperdiscovery](https://github.com/karissa/hyperdiscovery), [hyperdrive-stats](https://github.com/juliangruber/hyperdrive-stats), and [hyperdrive-import-files](https://github.com/juliangruber/hyperdrive-import-files/).
+* *consistent management* of Dat archives on the file system. The Dat CLI uses Dat-node. Any applications built using dat-node will be compatible with the Dat CLI and each other.
+* High-level glue for common Dat and hyperdrive modules, including: [hyperdiscovery](https://github.com/karissa/hyperdiscovery), [hyperdrive-stats](https://github.com/juliangruber/hyperdrive-stats), and [hyperdrive-import-files](https://github.com/juliangruber/hyperdrive-import-files/).
 
 If you want a minimal module that creates Dat archives compatible with the Dat CLI and works on the file system, check out `init-archive.js`. We should make a module that does that!
 
