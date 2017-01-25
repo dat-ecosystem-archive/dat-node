@@ -10,6 +10,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   ### Added, ### Changed, ### Fixed, ### Removed, ### Deprecated
 -->
 
+## 1.3.0 - 2017-01-25
+## Added
+* `createIfMissing` and `errorIfExists` options
+
+## Deprecated
+* `resume` option
+
 ## 1.2.4 - 2017-01-24
 ## Fixed
 * fix regression in resuming archives without content by opening them first.
