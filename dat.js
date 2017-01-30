@@ -106,6 +106,8 @@ Dat.prototype.importFiles = function (target, opts, cb) {
 
 Dat.prototype.close = function (cb) {
   cb = cb || noop
+  if (this._closed) return cb(new Error('Dat is already closed'))
+
   var self = this
   self.leave()
 
@@ -115,8 +117,8 @@ Dat.prototype.close = function (cb) {
 
   done(function (err) {
     if (err) return cb(err)
-    // Close archive last to make sure writes from network/file watching are done
-    closeArchiveDb(cb)
+    self._closed = true
+    cb()
   })
 
   function closeArchiveDb (cb) {
