@@ -10,6 +10,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   ### Added, ### Changed, ### Fixed, ### Removed, ### Deprecated
 -->
 
+## 1.3.2 - 2017-01-25
+## Fixed
+* Do not mutate input args
+* Call unreplicate on close to make sure data replication stops
+* Throw error if close is called more than once
+
 ## 1.3.1 - 2017-01-25
 ## Fixed
 * Real error message for `createIfMissing`
