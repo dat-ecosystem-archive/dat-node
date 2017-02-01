@@ -10,7 +10,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   ### Added, ### Changed, ### Fixed, ### Removed, ### Deprecated
 -->
 
-## 1.3.2 - 2017-01-25
+## 1.3.3 - 2017-02-01
+## Fixed
+* Call back with error object on init archive
+
+## 1.3.2 - 2017-02-01
 ## Fixed
 * Do not mutate input args
 * Call unreplicate on close to make sure data replication stops
