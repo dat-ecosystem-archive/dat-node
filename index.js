@@ -1,5 +1,6 @@
 var assert = require('assert')
 var hyperdrive = require('hyperdrive')
+var xtend = require('xtend')
 var path = require('path')
 var untildify = require('untildify')
 var debug = require('debug')('dat-node')
@@ -11,6 +12,8 @@ module.exports = createDat
 function createDat (dirOrDrive, opts, cb) {
   assert.ok(dirOrDrive, 'directory or drive required')
   if (typeof opts === 'function') return createDat(dirOrDrive, {}, opts)
+
+  opts = xtend(opts)
 
   // Figure out what first arg is
   if (typeof dirOrDrive === 'string') opts.dir = dirOrDrive
