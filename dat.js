@@ -106,17 +106,20 @@ Dat.prototype.importFiles = function (target, opts, cb) {
 
 Dat.prototype.close = function (cb) {
   cb = cb || noop
+  if (this._closed) return cb(new Error('Dat is already closed'))
+
   var self = this
-  self.leave()
+  self.archive.unreplicate()
 
   var done = multicb()
   closeNet(done())
   closeFileWatch(done())
+  closeArchiveDb(done())
 
   done(function (err) {
     if (err) return cb(err)
-    // Close archive last to make sure writes from network/file watching are done
-    closeArchiveDb(cb)
+    self._closed = true
+    cb()
   })
 
   function closeArchiveDb (cb) {
@@ -140,7 +143,10 @@ Dat.prototype.close = function (cb) {
   function closeFileWatch (cb) {
     if (!self.importer) return cb()
     self.importer.close()
-    cb() // TODO: dat importer close is currently sync-ish
+    process.nextTick(function () {
+      // TODO: dat importer close is currently sync-ish
+      cb()
+    })
   }
 }
 

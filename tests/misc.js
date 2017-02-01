@@ -297,3 +297,16 @@ test('errorIfExists true', function (t) {
     })
   })
 })
+
+test('close twice errors', function (t) {
+  Dat(shareFolder, function (err, dat) {
+    t.ifError(err)
+    dat.close(function (err) {
+      t.ifError(err)
+      dat.close(function (err) {
+        t.ok(err, 'has close error second time')
+        t.end()
+      })
+    })
+  })
+})
