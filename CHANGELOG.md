@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   ### Added, ### Changed, ### Fixed, ### Removed, ### Deprecated
 -->
 
+## 1.3.5 - 2017-02-04
+## Fixed
+* Key regression on resume
+
 ## 1.3.4 - 2017-02-03
 ## Fixed
 * Call back with error if `opts.key` mismatches keys in database
