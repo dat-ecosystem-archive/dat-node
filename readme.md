@@ -170,12 +170,10 @@ opts = {
   utp: true, // use utp in discovery swarm
   tcp: true // use tcp in discovery swarm
 }
-```
 
-Defaults from [datland-swarm-defaults](https://github.com/joehand/datland-swarm-defaults) can also be overwritten:
+//Defaults from datland-swarm-defaults can also be overwritten:
 
-```js
-var opts = {
+opts = {
   dns: {
     server: // DNS server
     domain: // DNS domain
