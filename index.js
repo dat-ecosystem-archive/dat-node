@@ -1,5 +1,4 @@
 var assert = require('assert')
-var hyperdrive = require('hyperdrive')
 var xtend = require('xtend')
 var path = require('path')
 var untildify = require('untildify')
@@ -10,19 +9,26 @@ var Dat = require('./dat')
 module.exports = createDat
 
 function createDat (dirOrDrive, opts, cb) {
-  assert.ok(dirOrDrive, 'directory or drive required')
-  if (typeof opts === 'function') return createDat(dirOrDrive, {}, opts)
+  if (!cb) {
+    cb = opts
+    opts = {}
+  }
+
+  assert.ok(typeof dirOrDrive === 'string' || typeof dirOrDrive === 'object', 'dat-node: dirOrDrive should be type string or type object')
+  assert.equal(typeof opts, 'object', 'dat-node: opts should be type object')
+  assert.equal(typeof cb, 'function', 'dat-node: cb should be type function')
 
   opts = xtend(opts)
 
-  // Figure out what first arg is
-  if (typeof dirOrDrive === 'string') opts.dir = dirOrDrive
-  else if (dirOrDrive instanceof hyperdrive) opts.drive = dirOrDrive // TODO: will this fail if our hyperdrive vesrion is different?
-  else return cb(new Error('first argument must either be a directory or hyperdrive instance'))
+  if (typeof dirOrDrive === 'string') {
+    opts.dir = dirOrDrive
+  } else {
+    opts.drive = dirOrDrive
+  }
 
-  // TODO: this is a multidrive thing, make it part of this API?
-  if (!opts.dir && opts.drive.location) opts.dir = opts.drive.location
-  else if (!opts.dir) return cb(new Error('opts.dir must be specified'))
+  if (!opts.dir) {
+    return cb(new Error('opts.dir must be specified'))
+  }
 
   opts.dir = path.resolve(untildify(opts.dir))
 
