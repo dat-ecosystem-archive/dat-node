@@ -319,7 +319,7 @@ test('create key and open with different key', function (t) {
     dat.close(function (err) {
       t.ifError(err)
       Dat(shareFolder, {key: '6161616161616161616161616161616161616161616161616161616161616161'}, function (err, dat) {
-        t.ok(err, 'has error')
+        t.same(err.message, 'Existing archive in database does not match key option.', 'has error')
         t.end()
       })
     })
