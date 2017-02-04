@@ -26,10 +26,7 @@ function createDat (dirOrDrive, opts, cb) {
     opts.drive = dirOrDrive
   }
 
-  // TODO: this is a multidrive thing, make it part of this API?
-  if (!opts.dir && opts.drive && opts.drive.location) {
-    opts.dir = opts.drive.location
-  } else if (!opts.dir) {
+  if (!opts.dir) {
     return cb(new Error('opts.dir must be specified'))
   }
 
