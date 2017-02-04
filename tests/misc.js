@@ -8,6 +8,7 @@ var hyperdrive = require('hyperdrive')
 var encoding = require('dat-encoding')
 var fs = require('fs')
 var os = require('os')
+var mkdirp = require('mkdirp')
 
 var Dat = require('..')
 var shareFolder = path.join(__dirname, 'fixtures')
@@ -319,6 +320,24 @@ test('create key and open with different key', function (t) {
       t.ifError(err)
       Dat(shareFolder, {key: '6161616161616161616161616161616161616161616161616161616161616161'}, function (err, dat) {
         t.ok(err, 'has error')
+        t.end()
+      })
+    })
+  })
+})
+
+test('make dat with random key and open again', function (t) {
+  var downloadDir = path.join(os.tmpdir(), 'dat-download-tests-' + new Date().getTime())
+  mkdirp.sync(downloadDir)
+  var key = '6161616161616161616161616161616161616161616161616161616161616161'
+  Dat(downloadDir, {key: key}, function (err, dat) {
+    t.ifError(err)
+    t.ok(dat, 'has dat')
+    dat.close(function (err) {
+      t.ifError(err)
+      Dat(downloadDir, {key: key}, function (err, dat) {
+        t.ifError(err)
+        t.ok(dat, 'has dat')
         t.end()
       })
     })
