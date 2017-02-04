@@ -10,6 +10,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   ### Added, ### Changed, ### Fixed, ### Removed, ### Deprecated
 -->
 
+## 1.3.4 - 2017-02-03
+## Fixed
+* Call back with error if `opts.key` mismatches keys in database
+* Fix options casting and improve errors
+* Improve key handling for archive databases + debug info
+
 ## 1.3.3 - 2017-02-01
 ## Fixed
 * Call back with error object on init archive
