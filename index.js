@@ -2,6 +2,7 @@ var assert = require('assert')
 var xtend = require('xtend')
 var path = require('path')
 var untildify = require('untildify')
+var raf = require('random-access-file')
 var debug = require('debug')('dat-node')
 var initArchive = require('./lib/init-archive')
 var Dat = require('./dat')
@@ -36,6 +37,15 @@ function createDat (dirOrDrive, opts, cb) {
   initArchive(opts, function (err, archive, db) {
     if (err) return cb(err)
     debug('initArchive callback')
+
+    if (!opts.file) {
+      // TODO: do we always want this set?
+      archive.options.file = function (name, fileOpts) {
+        if (archive && archive.secretKey) fileOpts = null
+        return raf(path.join(opts.dir, name), fileOpts && typeof fileOpts.length === 'number' && {length: fileOpts.length})
+      }
+    }
+
     var dat = new Dat(archive, db, opts)
     cb(null, dat)
   })
