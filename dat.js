@@ -89,6 +89,7 @@ Dat.prototype.importFiles = function (target, opts, cb) {
 
   var self = this
   target = target && target.length ? target : self.path
+  opts = opts || {}
   if (target === self.path && opts.indexing !== false) opts.indexing = true
 
   self.importer = importFiles(self.archive, target, opts, function (err) {
