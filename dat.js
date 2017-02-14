@@ -56,6 +56,8 @@ Dat.prototype.joinNetwork = function (opts) {
   if (this.network) return this.network.join(this.archive.discoveryKey)
   var self = this
 
+  opts = opts || {}
+  if (self.archive.owner) opts.download = false
   var network = self.network = createNetwork(self.archive, opts)
   self.options.network = network.options
 
