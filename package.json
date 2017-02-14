@@ -22,7 +22,7 @@
     "dat-encoding": "^4.0.1",
     "debug": "^2.6.0",
     "hyperdiscovery": "^1.0.1",
-    "hyperdrive": "^7.14.2",
+    "hyperdrive": "7.13.2",
     "hyperdrive-import-files": "^2.8.0",
     "hyperdrive-network-speed": "^1.0.1",
     "hyperdrive-stats": "^3.0.0",
