@@ -10,6 +10,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   ### Added, ### Changed, ### Fixed, ### Removed, ### Deprecated
 -->
 
+## 1.3.6 - 2017-02-13
+## Changed
+* Temporary changes for critical replication bugs
+* Pin hyperdrive to `7.13.2`
+* Remove length option in `raf`
+* Do not allow owner to download
+* Do not set file option for owner
+
 ## 1.3.5 - 2017-02-04
 ## Fixed
 * Key regression on resume
