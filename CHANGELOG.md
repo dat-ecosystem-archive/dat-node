@@ -12,6 +12,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## 1.3.6 - 2017-02-13
 ## Changed
+* Rollback temporary changes from 1.3.6
+* Set length on file option
+* Remove hyperdrive version pin
+
+## 1.3.6 - 2017-02-13
+## Changed
 * Temporary changes for critical replication bugs
 * Pin hyperdrive to `7.13.2`
 * Remove length option in `raf`
