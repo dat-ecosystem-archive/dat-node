@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   ### Added, ### Changed, ### Fixed, ### Removed, ### Deprecated
 -->
 
-## 1.3.6 - 2017-02-13
+## 1.3.7 - 2017-02-15
 ## Changed
 * Rollback temporary changes from 1.3.6
 * Set length on file option
