@@ -5,6 +5,7 @@ var xtend = require('xtend')
 var importFiles = require('./lib/import-files')
 var createNetwork = require('./lib/network')
 var stats = require('./lib/stats')
+var debug = require('debug')('dat-node')
 
 module.exports = Dat
 
@@ -65,7 +66,7 @@ Dat.prototype.joinNetwork = function (opts) {
         download: !self.archive.owner && opts.download
       })
       stream.on('error', function (err) {
-        console.error(err)
+        debug('Replication error:', err.message)
       })
       return stream
     }
@@ -77,7 +78,7 @@ Dat.prototype.joinNetwork = function (opts) {
   if (self.owner) return network
 
   network.once('connection', function () {
-    // automatically open archive and set exposed values
+    // automatically open archive
     self.archive.open(noop)
   })
   return network
