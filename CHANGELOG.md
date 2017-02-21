@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   ### Added, ### Changed, ### Fixed, ### Removed, ### Deprecated
 -->
 
+## 1.3.8 - 2017-02-20
+### Fixed
+* Close archive after bad key on init.
+
 ## 1.3.7 - 2017-02-15
 ## Changed
 * Rollback temporary changes from 1.3.6
