@@ -17,7 +17,7 @@ function Dat (archive, db, opts) {
   assert.ok(opts.dir, 'opts.directory required')
 
   this.path = path.resolve(opts.dir)
-  this.options = opts
+  this.options = xtend(opts)
 
   this.archive = archive
   this.db = db
@@ -54,15 +54,16 @@ function Dat (archive, db, opts) {
 }
 
 Dat.prototype.join =
-Dat.prototype.joinNetwork = function (opts) {
-  if (this.network) return this.network.join(this.archive.discoveryKey)
-  var self = this
-
+Dat.prototype.joinNetwork = function (opts, cb) {
   opts = opts || {}
+  cb = cb || noop
+  if (this.network) return this.network.join(this.archive.discoveryKey, { announce: opts.upload }, cb)
+
+  var self = this
   var netOpts = xtend({
     stream: function (peer) {
       var stream = self.archive.replicate({
-        upload: opts.upload,
+        upload: !(opts.upload === false),
         download: !self.archive.owner && opts.download
       })
       stream.on('error', function (err) {
@@ -71,10 +72,11 @@ Dat.prototype.joinNetwork = function (opts) {
       return stream
     }
   }, opts)
-  var network = self.network = createNetwork(self.archive, netOpts)
-  self.options.network = network.options
 
+  var network = self.network = createNetwork(self.archive, netOpts, cb)
+  self.options.network = network.options
   network.swarm = network // 1.0 backwards compat. TODO: Remove in v2
+
   if (self.owner) return network
 
   network.once('connection', function () {
