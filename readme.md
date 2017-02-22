@@ -21,7 +21,7 @@ See [dat-js](https://github.com/datproject/dat-js) if you want to build browser-
 ### Features
 
 * Consistent management of Dat archives across applications
-* Join the Dat network, using [hyperdiscovery](https://github.com/karissa/hyperdiscovery)
+* Join the Dat network, using [discovery-swarm](https://github.com/mafintosh/discovery-swarm)
 * Track archive stats, using [hyperdrive-stats](https://github.com/juliangruber/hyperdrive-stats) and [hyperdrive-network-speed](https://github.com/joehand/hyperdrive-network-speed)
 * Import files from the file system, using [hyperdrive-import-files](https://github.com/juliangruber/hyperdrive-import-files/)
 
@@ -30,7 +30,7 @@ See [dat-js](https://github.com/datproject/dat-js) if you want to build browser-
 Dat-node's primary goals are:
 
 * *consistent management* of Dat archives on the file system. The Dat CLI uses Dat-node. Any applications built using dat-node will be compatible with the Dat CLI and each other.
-* High-level glue for common Dat and hyperdrive modules, including: [hyperdiscovery](https://github.com/karissa/hyperdiscovery), [hyperdrive-stats](https://github.com/juliangruber/hyperdrive-stats), and [hyperdrive-import-files](https://github.com/juliangruber/hyperdrive-import-files/).
+* High-level glue for common Dat and hyperdrive modules, including: [discovery-swarm](https://github.com/mafintosh/discovery-swarm), [hyperdrive-stats](https://github.com/juliangruber/hyperdrive-stats), and [hyperdrive-import-files](https://github.com/juliangruber/hyperdrive-import-files/).
 
 ## Usage
 
@@ -83,8 +83,7 @@ var Dat = require('dat-node')
 Dat(dir, {key: 'download-key'}, function (err, dat) {
   // Join the network
   var network = dat.joinNetwork(opts)
-  network.swarm // hyperdiscovery
-  network.connected // number of connected peers
+  network.activeConnections // number of connected peers
 
   // Track stats
   var stats = dat.trackStats() // hyperdrive-stats
@@ -148,24 +147,26 @@ The callback, `cb(err, dat)`, includes a `dat` object that has the following pro
 
 **`dat-node` provides an easy interface to common Dat modules for the created Dat Archive on the `dat` object provided in the callback:**
 
-#### `var network = dat.joinNetwork([opts])`
+#### `var network = dat.joinNetwork([opts], [cb])`
 
-Join the network to start transferring data for `dat.key`, using [hyperdiscovery](https://github.com/karissa/hyperdiscovery). You can also can use `dat.join([opts])`.
+Join the network to start transferring data for `dat.key`, using [discovery-swarm](https://github.com/mafintosh/discovery-swarm). You can also can use `dat.join([opts], [cb])`.
+
+If you specify `cb`, it will be called *when the first round* of discovery has completed. This is helpful to check immediately if peers are available and if not fail gracefully, more similar to http requests.
 
 Returns a `network` object with properties:
 
-* `network.connected` - number of peers connected
+* `network.activeConnections` - number of peers connected
 * `network.on('listening')` - emitted with network is listening
 * `network.on('connection', connection, info)` - Emitted when you connect to another peer. Info is an object that contains info about the connection
 
 ##### Network Options
 
-`opts` are passed to hyperdiscovery, which can include:
+`opts` are passed to discovery-swarm, which can include:
 
 ```js
 opts = {
-  upload: true, // upload data to other peers?
-  download: true, // download data from other peers?
+  upload: true, // announce and upload data to other peers
+  download: true, // download data from other peers
   port: 3282, // port for discovery swarm
   utp: true, // use utp in discovery swarm
   tcp: true // use tcp in discovery swarm
