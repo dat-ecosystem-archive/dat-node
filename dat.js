@@ -55,6 +55,10 @@ function Dat (archive, db, opts) {
 
 Dat.prototype.join =
 Dat.prototype.joinNetwork = function (opts, cb) {
+  if (typeof opts === 'function') {
+    cb = opts
+    opts = {}
+  }
   opts = opts || {}
   cb = cb || noop
   if (this.network) return this.network.join(this.archive.discoveryKey, { announce: opts.upload }, cb)
