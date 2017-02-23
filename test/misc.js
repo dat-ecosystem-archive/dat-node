@@ -143,6 +143,19 @@ test('close twice errors', function (t) {
   })
 })
 
+test('close twice sync errors', function (t) {
+  Dat(shareFolder, function (err, dat) {
+    t.ifError(err)
+    dat.close(function (err) {
+      t.ifError(err)
+    })
+    dat.close(function (err) {
+      t.ok(err, 'has close error second time')
+      t.end()
+    })
+  })
+})
+
 test('create key and open with different key', function (t) {
   rimraf.sync(path.join(shareFolder, '.dat'))
   Dat(shareFolder, function (err, dat) {
