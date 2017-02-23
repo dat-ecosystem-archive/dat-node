@@ -112,6 +112,7 @@ Dat.prototype.close = function (cb) {
   if (this._closed) return cb(new Error('Dat is already closed'))
 
   var self = this
+  self._closed = true
   self.archive.unreplicate()
 
   var done = multicb()
@@ -121,7 +122,6 @@ Dat.prototype.close = function (cb) {
 
   done(function (err) {
     if (err) return cb(err)
-    self._closed = true
     cb()
   })
 
