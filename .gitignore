@@ -1,3 +1,7 @@
 node_modules
 .DS_Store
 tmp
+coverage/
+npm-debug.log*
+.nyc_output/
+yarn.lock

@@ -1,6 +1,6 @@
 # dat-node
 
-[![Travis](https://img.shields.io/travis/datproject/dat-node/master.svg?style=flat-square)](https://travis-ci.org/datproject/dat-node) [![npm](https://img.shields.io/npm/v/dat-node.svg?style=flat-square)](https://npmjs.org/package/dat-node)
+[![Travis](https://img.shields.io/travis/datproject/dat-node/master.svg?style=flat-square)](https://travis-ci.org/datproject/dat-node) [![npm](https://img.shields.io/npm/v/dat-node.svg?style=flat-square)](https://npmjs.org/package/dat-node) [![Test coverage](https://img.shields.io/codecov/c/github/datproject/dat-node/master.svg?style=flat-square)](https://codecov.io/github/datproject/dat-node)
 
 [Dat](http://datproject.org) is a decentralized tool for distributing data and
 files, built for scientific and research data.
