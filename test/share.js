@@ -110,13 +110,20 @@ test('share snapshot', function (t) {
     t.error(err, 'share cb without error')
 
     t.ok(!dat.live, 'live false')
-    // TODO: saving mtime breaks this
-    t.skip(fixturesKey, dat.key, 'TODO: key matches snapshot key')
+    dat.importFiles(function (err) {
+      t.error(err, 'no error')
+      dat.archive.finalize(function (err) {
+        t.error(err, 'no error')
 
-    dat.close(cleanFixtures(function () {
-      rimraf.sync(path.join(fixtures, '.dat'))
-      t.end()
-    }))
+        // TODO: saving mtime breaks this
+        t.skip(fixturesKey, dat.key, 'TODO: key matches snapshot key')
+
+        dat.close(cleanFixtures(function () {
+          rimraf.sync(path.join(fixtures, '.dat'))
+          t.end()
+        }))
+      })
+    })
   })
 })
 

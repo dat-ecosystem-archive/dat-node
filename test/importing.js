@@ -81,3 +81,18 @@ test('ignore hidden option turned off', function (t) {
     })
   })
 })
+
+test('import with options but no callback', function (t) {
+  Dat(shareFolder, function (err, dat) {
+    t.error(err)
+    var importer = dat.importFiles({ dryRun: true })
+    importer.on('error', function (err) {
+      t.error(err, 'no error')
+    })
+    dat.close(function (err) {
+      t.error(err, 'no err')
+      rimraf.sync(path.join(shareFolder, '.dat'))
+      t.end()
+    })
+  })
+})
