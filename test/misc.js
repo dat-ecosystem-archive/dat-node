@@ -1,161 +1,13 @@
-var path = require('path')
-var test = require('tape')
-var anymatch = require('anymatch')
-var rimraf = require('rimraf')
-var memdb = require('memdb')
-var memdown = require('memdown')
-var hyperdrive = require('hyperdrive')
-var encoding = require('dat-encoding')
 var fs = require('fs')
 var os = require('os')
+var path = require('path')
+var test = require('tape')
+var rimraf = require('rimraf')
+var memdb = require('memdb')
 var mkdirp = require('mkdirp')
 
 var Dat = require('..')
 var shareFolder = path.join(__dirname, 'fixtures')
-
-test('default ignore', function (t) {
-  rimraf.sync(path.join(shareFolder, '.dat')) // for previous failed tests
-  Dat(shareFolder, function (err, dat) {
-    t.error(err)
-    dat.importFiles(function () {
-      var matchers = dat.importer.options.ignore
-
-      t.ok(anymatch(matchers, '.dat'), '.dat folder ignored')
-      t.ok(anymatch(matchers, '.dat/'), '.dat folder with slash ignored')
-      t.ok(anymatch(matchers, '.dat/foo.bar'), 'files in .dat folder ignored')
-      t.ok(anymatch(matchers, 'dir/.git'), 'hidden folders with dir ignored')
-      t.ok(anymatch(matchers, 'dir/.git/test.txt'), 'files inside hidden dir with dir ignored')
-      t.notOk(anymatch(matchers, 'folder/asdf.data/file.txt'), 'weird data folder is ok')
-      t.notOk(
-        ['file.dat', '.dat.jpg', '.dat-thing'].filter(anymatch(matchers)).length !== 0,
-        'does not ignore files/folders with .dat in it')
-      dat.close(function () {
-        t.end()
-      })
-    })
-  })
-})
-
-test('custom ignore extends default (string)', function (t) {
-  Dat(shareFolder, function (err, dat) {
-    t.error(err)
-    dat.importFiles({ ignore: '**/*.js' }, function () {
-      var matchers = dat.options.importer.ignore
-
-      t.ok(Array.isArray(dat.options.importer.ignore), 'ignore extended correctly')
-      t.ok(anymatch(matchers, '.dat'), '.dat folder ignored')
-      t.ok(anymatch(matchers, 'foo/bar.js'), 'custom ignore works')
-      t.notOk(anymatch(matchers, 'foo/bar.txt'), 'txt file gets to come along =)')
-      dat.close(function () {
-        t.end()
-      })
-    })
-  })
-})
-
-test('custom ignore extends default (array)', function (t) {
-  Dat(shareFolder, function (err, dat) {
-    t.error(err)
-    dat.importFiles({ ignore: ['super_secret_stuff/*', '**/*.txt'] }, function () {
-      var matchers = dat.options.importer.ignore
-
-      t.ok(Array.isArray(dat.options.importer.ignore), 'ignore extended correctly')
-      t.ok(anymatch(matchers, '.dat'), '.dat still feeling left out =(')
-      t.ok(anymatch(matchers, 'password.txt'), 'file ignored')
-      t.ok(anymatch(matchers, 'super_secret_stuff/file.js'), 'secret stuff stays secret')
-      t.notOk(anymatch(matchers, 'foo/bar.js'), 'js file joins the party =)')
-      dat.close(function () {
-        t.end()
-      })
-    })
-  })
-})
-
-test('ignore hidden option turned off', function (t) {
-  Dat(shareFolder, function (err, dat) {
-    t.error(err)
-    dat.importFiles({ ignoreHidden: false }, function () {
-      var matchers = dat.options.importer.ignore
-
-      t.ok(Array.isArray(dat.options.importer.ignore), 'ignore extended correctly')
-      t.ok(anymatch(matchers, '.dat'), '.dat still feeling left out =(')
-      t.notOk(anymatch(matchers, '.other-hidden'), 'hidden file NOT ignored')
-      t.notOk(anymatch(matchers, 'dir/.git'), 'hidden folders with dir NOT ignored')
-      dat.close(function () {
-        rimraf.sync(path.join(shareFolder, '.dat'))
-        t.end()
-      })
-    })
-  })
-})
-
-test('custom db option', function (t) {
-  Dat(shareFolder, {db: memdb()}, function (err, dat) {
-    t.error(err)
-    dat.archive.open(function () {
-      // Need open otherwise get DeferredLevelDOWN
-      t.ok(dat.db.db instanceof require('memdown'), 'db is memdown')
-      try {
-        fs.statSync(path.join(shareFolder, '.dat'))
-        t.fail('.dat folder exists =(')
-      } catch (e) {
-        t.pass('.dat folder does not exist')
-      }
-      dat.close(function () {
-        t.end()
-      })
-    })
-  })
-})
-
-test('custom drive option', function (t) {
-  var drive = hyperdrive(memdb())
-  Dat(shareFolder, {drive: drive}, function (err, dat) {
-    t.error(err)
-    dat.archive.open(function () {
-      // Need open otherwise get DeferredLevelDOWN
-      t.ok(dat.db.db instanceof memdown, 'db is memdown')
-      try {
-        fs.statSync(path.join(shareFolder, '.dat'))
-        t.fail('.dat folder exists =(')
-      } catch (e) {
-        t.pass('.dat folder does not exist')
-      }
-      dat.close(function () {
-        t.end()
-      })
-    })
-  })
-})
-
-test('custom drive as first arg', function (t) {
-  var drive = hyperdrive(memdb())
-  Dat(drive, {dir: shareFolder}, function (err, dat) {
-    t.error(err)
-    dat.archive.open(function () {
-      // Need open otherwise get DeferredLevelDOWN
-      t.ok(dat.db.db instanceof memdown, 'db is memdown')
-      try {
-        fs.statSync(path.join(shareFolder, '.dat'))
-        t.fail('.dat folder exists =(')
-      } catch (e) {
-        t.pass('.dat folder does not exist')
-      }
-      dat.close(function () {
-        t.end()
-      })
-    })
-  })
-})
-
-test('custom drive as first arg without dir', function (t) {
-  var drive = hyperdrive(memdb())
-  Dat(drive, {}, function (err, dat) {
-    t.ok(err, 'has error')
-    rimraf.sync(path.join(shareFolder, '.dat'))
-    t.end()
-  })
-})
 
 // TODO: do we need these? All options are passed directly to swarm
 // test('swarm options', function (t) {
@@ -183,28 +35,6 @@ test('custom drive as first arg without dir', function (t) {
 //     dat._joinSwarm()
 //   })
 // })
-
-test('string or buffer .key', function (t) {
-  rimraf.sync(path.join(process.cwd(), '.dat')) // for failed tests
-  var buf = new Buffer(32)
-  Dat(process.cwd(), { key: buf }, function (err, dat) {
-    t.error(err, 'no callback error')
-    t.deepEqual(dat.archive.key, buf, 'keys match')
-
-    dat.close(function (err) {
-      t.error(err, 'no close error')
-
-      Dat(process.cwd(), {key: encoding.encode(buf)}, function (err, dat) {
-        t.error(err, 'no callback error')
-        t.deepEqual(dat.archive.key, buf, 'keys match still')
-        dat.close(function () {
-          rimraf.sync(path.join(process.cwd(), '.dat'))
-          t.end()
-        })
-      })
-    })
-  })
-})
 
 test('leveldb open error', function (t) {
   Dat(process.cwd(), function (err, datA) {
@@ -300,49 +130,6 @@ test('expose swarm.connected', function (t) {
   })
 })
 
-test('createIfMissing false', function (t) {
-  rimraf.sync(path.join(shareFolder, '.dat'))
-  Dat(shareFolder, {createIfMissing: false}, function (err, dat) {
-    t.ok(err, 'throws error')
-    t.end()
-  })
-})
-
-test('createIfMissing false with existing .dat', function (t) {
-  rimraf.sync(path.join(shareFolder, '.dat'))
-  fs.mkdirSync(path.join(shareFolder, '.dat'))
-  Dat(shareFolder, {createIfMissing: false}, function (err, dat) {
-    t.error(err, 'no error')
-    t.ok(dat, 'creates dat')
-    dat.close(function () {
-      rimraf.sync(path.join(shareFolder, '.dat'))
-      t.end()
-    })
-  })
-})
-
-test('backwards compat resume true', function (t) {
-  rimraf.sync(path.join(shareFolder, '.dat'))
-  Dat(shareFolder, {resume: true}, function (err, dat) {
-    t.ok(err, 'throws error')
-    t.end()
-  })
-})
-
-test('errorIfExists true', function (t) {
-  rimraf.sync(path.join(shareFolder, '.dat'))
-  // create dat to resume from
-  Dat(shareFolder, function (err, dat) {
-    t.ifErr(err)
-    dat.close(function () {
-      Dat(shareFolder, {errorIfExists: true}, function (err, dat) {
-        t.ok(err, 'throws error')
-        t.end()
-      })
-    })
-  })
-})
-
 test('close twice errors', function (t) {
   Dat(shareFolder, function (err, dat) {
     t.ifError(err)
@@ -364,6 +151,7 @@ test('create key and open with different key', function (t) {
       t.ifError(err)
       Dat(shareFolder, {key: '6161616161616161616161616161616161616161616161616161616161616161'}, function (err, dat) {
         t.same(err.message, 'Existing archive in database does not match key option.', 'has error')
+        rimraf.sync(path.join(shareFolder, '.dat'))
         t.end()
       })
     })
