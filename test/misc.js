@@ -148,10 +148,11 @@ test('close twice sync errors', function (t) {
     t.ifError(err)
     dat.close(function (err) {
       t.ifError(err)
+      rimraf.sync(path.join(shareFolder, '.dat'))
+      t.end()
     })
     dat.close(function (err) {
       t.ok(err, 'has close error second time')
-      t.end()
     })
   })
 })
