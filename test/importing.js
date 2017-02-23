@@ -96,3 +96,7 @@ test('import with options but no callback', function (t) {
     })
   })
 })
+
+test('import with .datignore', function (t) {
+  t.fail('nope')
+})

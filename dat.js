@@ -1,6 +1,7 @@
 var assert = require('assert')
 var path = require('path')
 var multicb = require('multicb')
+var xtend = require('xtend')
 var importFiles = require('./lib/import-files')
 var createNetwork = require('./lib/network')
 var stats = require('./lib/stats')
@@ -91,8 +92,9 @@ Dat.prototype.importFiles = function (target, opts, cb) {
 
   var self = this
   target = target && target.length ? target : self.path
-  opts = opts || {}
-  if (target === self.path && opts.indexing !== false) opts.indexing = true
+  opts = xtend({
+    indexing: opts.indexing || (target === self.path)
+  }, opts)
 
   self.importer = importFiles(self.archive, target, opts, cb)
   self.options.importer = self.importer.options
