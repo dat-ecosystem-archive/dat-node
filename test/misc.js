@@ -82,6 +82,7 @@ test('ignore hidden option turned off', function (t) {
       t.notOk(anymatch(matchers, '.other-hidden'), 'hidden file NOT ignored')
       t.notOk(anymatch(matchers, 'dir/.git'), 'hidden folders with dir NOT ignored')
       dat.close(function () {
+        rimraf.sync(path.join(shareFolder, '.dat'))
         t.end()
       })
     })
@@ -89,7 +90,6 @@ test('ignore hidden option turned off', function (t) {
 })
 
 test('custom db option', function (t) {
-  rimraf.sync(path.join(shareFolder, '.dat'))
   Dat(shareFolder, {db: memdb()}, function (err, dat) {
     t.error(err)
     dat.archive.open(function () {
@@ -109,7 +109,6 @@ test('custom db option', function (t) {
 })
 
 test('custom drive option', function (t) {
-  rimraf.sync(path.join(shareFolder, '.dat'))
   var drive = hyperdrive(memdb())
   Dat(shareFolder, {drive: drive}, function (err, dat) {
     t.error(err)
@@ -126,6 +125,35 @@ test('custom drive option', function (t) {
         t.end()
       })
     })
+  })
+})
+
+test('custom drive as first arg', function (t) {
+  var drive = hyperdrive(memdb())
+  Dat(drive, {dir: shareFolder}, function (err, dat) {
+    t.error(err)
+    dat.archive.open(function () {
+      // Need open otherwise get DeferredLevelDOWN
+      t.ok(dat.db.db instanceof memdown, 'db is memdown')
+      try {
+        fs.statSync(path.join(shareFolder, '.dat'))
+        t.fail('.dat folder exists =(')
+      } catch (e) {
+        t.pass('.dat folder does not exist')
+      }
+      dat.close(function () {
+        t.end()
+      })
+    })
+  })
+})
+
+test('custom drive as first arg without dir', function (t) {
+  var drive = hyperdrive(memdb())
+  Dat(drive, {}, function (err, dat) {
+    t.ok(err, 'has error')
+    rimraf.sync(path.join(shareFolder, '.dat'))
+    t.end()
   })
 })
 
@@ -246,12 +274,15 @@ test('expose swarm.connected', function (t) {
   Dat(shareFolder, { db: memdb() }, function (err, shareDat) {
     t.error(err, 'dat share err')
 
+    t.doesNotThrow(shareDat.leave, 'leave before join should be noop')
+
     var network = shareDat.joinNetwork()
     t.equal(network.connected, 0, '0 peers')
 
     network.once('connection', function () {
       t.ok(network.connected >= 1, '>=1 peer')
-
+      shareDat.leave()
+      t.skip(downDat.network.connected, 0, '0 peers') // TODO: Fix connection count
       downDat.close(function (err) {
         t.error(err, 'download dat closed')
         shareDat.close(function (err) {
@@ -274,6 +305,19 @@ test('createIfMissing false', function (t) {
   Dat(shareFolder, {createIfMissing: false}, function (err, dat) {
     t.ok(err, 'throws error')
     t.end()
+  })
+})
+
+test('createIfMissing false with existing .dat', function (t) {
+  rimraf.sync(path.join(shareFolder, '.dat'))
+  fs.mkdirSync(path.join(shareFolder, '.dat'))
+  Dat(shareFolder, {createIfMissing: false}, function (err, dat) {
+    t.error(err, 'no error')
+    t.ok(dat, 'creates dat')
+    dat.close(function () {
+      rimraf.sync(path.join(shareFolder, '.dat'))
+      t.end()
+    })
   })
 })
 
