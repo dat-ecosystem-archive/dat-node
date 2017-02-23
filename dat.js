@@ -85,24 +85,16 @@ Dat.prototype.trackStats = function (opts) {
 }
 
 Dat.prototype.importFiles = function (target, opts, cb) {
+  if (!this.archive.owner) throw new Error('Must be archive owner to import files.')
   if (typeof target !== 'string') return this.importFiles('', target, opts)
   if (typeof opts === 'function') return this.importFiles(target, {}, opts)
-  if (!this.archive.owner) return cb(new Error('Must be archive owner to import files.'))
 
   var self = this
   target = target && target.length ? target : self.path
   opts = opts || {}
   if (target === self.path && opts.indexing !== false) opts.indexing = true
 
-  self.importer = importFiles(self.archive, target, opts, function (err) {
-    if (err || self.archive.live) return cb(err)
-    // Finalize snapshot
-    self.archive.finalize(function (err) {
-      if (err) return cb(err)
-      // TODO: write snapshot key to file
-      cb(null)
-    })
-  })
+  self.importer = importFiles(self.archive, target, opts, cb)
   self.options.importer = self.importer.options
   return self.importer
 }

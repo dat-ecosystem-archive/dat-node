@@ -156,9 +156,12 @@ test('download from snapshot', function (t) {
     shareDat = dat
     dat.importFiles(function (err) {
       t.error(err, 'import no error')
-      shareKey = dat.archive.key
-      dat.joinNetwork()
-      download()
+      dat.archive.finalize(function (err) {
+        t.error(err, 'no error')
+        shareKey = dat.archive.key
+        dat.joinNetwork()
+        download()
+      })
     })
   })
 
