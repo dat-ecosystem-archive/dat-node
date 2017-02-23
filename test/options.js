@@ -109,16 +109,13 @@ test('createIfMissing false', function (t) {
   })
 })
 
-test('createIfMissing false with existing .dat', function (t) {
+test('createIfMissing false with empty .dat', function (t) {
   rimraf.sync(path.join(shareFolder, '.dat'))
   fs.mkdirSync(path.join(shareFolder, '.dat'))
   Dat(shareFolder, {createIfMissing: false}, function (err, dat) {
-    t.error(err, 'no error')
-    t.ok(dat, 'creates dat')
-    dat.close(function () {
-      rimraf.sync(path.join(shareFolder, '.dat'))
-      t.end()
-    })
+    t.ok(err, 'errors')
+    rimraf.sync(path.join(shareFolder, '.dat'))
+    t.end()
   })
 })
 
