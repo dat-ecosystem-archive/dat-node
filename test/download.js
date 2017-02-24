@@ -36,6 +36,7 @@ test('prep', function (t) {
 })
 
 test('Download with default opts', function (t) {
+  t.plan(17)
   Dat(downloadDir, {key: shareKey}, function (err, dat) {
     t.error(err, 'no download init error')
     t.ok(dat, 'callsback with dat object')
@@ -60,7 +61,9 @@ test('Download with default opts', function (t) {
       t.pass('stats emit update')
     })
 
-    var network = dat.joinNetwork()
+    var network = dat.joinNetwork(function () {
+      t.pass('joinNetwork calls back okay')
+    })
     network.once('connection', function () {
       t.pass('connects via network')
     })
@@ -83,7 +86,6 @@ test('Download with default opts', function (t) {
           t.skip(hasEmtpy, 'empty.txt file downloaded')
           // TODO: known hyperdrive issue https://github.com/mafintosh/hyperdrive/issues/83
         }
-        t.end()
       })
     }
   })
@@ -146,6 +148,21 @@ test('close first test', function (t) {
     t.pass('close')
     rimraf.sync(path.join(fixtures, '.dat'))
     t.end()
+  })
+})
+
+test('download joinNetwork callback without connections', function (t) {
+  testFolder(function () {
+    Dat(downloadDir, function (err, dat) {
+      t.error(err, 'no error')
+      dat.joinNetwork(function () {
+        t.pass('joinNetwork callback')
+        t.same(dat.network.connected, 0, 'no connections')
+        dat.close(function () {
+          t.end()
+        })
+      })
+    })
   })
 })
 
