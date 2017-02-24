@@ -24,7 +24,7 @@
     "dat-encoding": "^4.0.1",
     "datland-swarm-defaults": "^1.0.2",
     "debug": "^2.6.0",
-    "discovery-swarm": "^4.2.0",
+    "discovery-swarm": "^4.3.0",
     "hyperdrive": "^7.14.2",
     "hyperdrive-import-files": "^2.8.0",
     "hyperdrive-network-speed": "^1.0.1",
