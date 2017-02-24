@@ -1,3 +1,4 @@
+var fs = require('fs')
 var path = require('path')
 var test = require('tape')
 var anymatch = require('anymatch')
@@ -93,6 +94,57 @@ test('import with options but no callback', function (t) {
       t.error(err, 'no err')
       rimraf.sync(path.join(shareFolder, '.dat'))
       t.end()
+    })
+  })
+})
+
+test('import with .datignore', function (t) {
+  fs.writeFileSync(path.join(shareFolder, '.datignore'), 'ignoreme.txt')
+  fs.writeFileSync(path.join(shareFolder, 'ignoreme.txt'), 'hello world')
+  Dat(shareFolder, function (err, dat) {
+    t.error(err)
+    var importer = dat.importFiles({dryRun: true}, function (err) {
+      t.error(err)
+      var matchers = dat.options.importer.ignore
+      t.ok(anymatch(matchers, '.dat'), '.dat ignored')
+      t.ok(anymatch(matchers, path.join(shareFolder, 'ignoreme.txt')), 'file in datignore ignored')
+      dat.close(function () {
+        fs.unlinkSync(path.join(shareFolder, '.datignore'))
+        fs.unlinkSync(path.join(shareFolder, 'ignoreme.txt'))
+        rimraf.sync(path.join(shareFolder, '.dat'))
+        t.end()
+      })
+    })
+    importer.on('file imported', function (file) {
+      if (file.path.indexOf('ignoreme.txt') > -1) t.fail('ignored file imported')
+    })
+  })
+})
+
+test('import with opts.useDatIgnore false', function (t) {
+  fs.writeFileSync(path.join(shareFolder, '.datignore'), 'ignoreme.txt')
+  fs.writeFileSync(path.join(shareFolder, 'ignoreme.txt'), 'hello world')
+  Dat(shareFolder, function (err, dat) {
+    t.error(err)
+    var fileImported = false
+    var importer = dat.importFiles({dryRun: true, useDatIgnore: false}, function (err) {
+      t.error(err)
+      var matchers = dat.options.importer.ignore
+      t.ok(anymatch(matchers, '.dat'), '.dat ignored')
+      t.notOk(anymatch(matchers, path.join(shareFolder, 'ignoreme.txt')), 'file in datignore not ignored')
+      dat.close(function () {
+        if (!fileImported) t.fail('file in .datignore not imported')
+        fs.unlinkSync(path.join(shareFolder, '.datignore'))
+        fs.unlinkSync(path.join(shareFolder, 'ignoreme.txt'))
+        rimraf.sync(path.join(shareFolder, '.dat'))
+        t.end()
+      })
+    })
+    importer.on('file imported', function (file) {
+      if (file.path.indexOf('ignoreme.txt') > -1) {
+        fileImported = true
+        t.pass('ignored file imported')
+      }
     })
   })
 })

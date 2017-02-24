@@ -225,19 +225,24 @@ Options include:
 
 ```js
 var opts = {
+  ignoreHidden: true, // ignore hidden files  (if false, .dat will still be ignored)
+  useDatIgnore: true, // ignore entries in the `.datignore` file from import dir target.
+  ignore: // (see below for default info) anymatch expression to ignore files
   watch: false, // watch files for changes & import on change (archive must be live)
   overwrite: true, // allow files in the archive to be overwritten (defaults to true)
   resume: false, // assume the archive isn't fresh
   basePath: '', // where in the archive should the files import to? (defaults to '')
-  ignore: // (see below for default info) anymatch expression to ignore files
   dryRun: false, // step through the import, but don't write any files to the archive (defaults to false)
   indexing: true // Useful if target === dest so hyperdrive does not rewrite the files on import. (defaults to true if target === dest)
+  compareFileContent: false // compare import-candidates to archive's internal copy. If false, will only compare mtime and file-size, which is faster but may reslt in false-positives.
 }
 ```
 
-##### `opts.ignore`
+##### Ignoring Files
 
 `dat-node` provides a default ignore option, ignoring the `.dat` folder and all hidden files or directories. Use `opts.ignoreHidden = false` to import hidden files or folders, except the `.dat` directory.
+
+Additionally, you can use a `.datignore` file to ignore any the user specifies. This is done by default.
 
 *It's important that the `.dat` folder is not imported because it contains a private key that allows the owner to write to the archive.*
 
