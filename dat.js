@@ -93,7 +93,7 @@ Dat.prototype.importFiles = function (target, opts, cb) {
   var self = this
   target = target && target.length ? target : self.path
   opts = xtend({
-    indexing: opts.indexing || (target === self.path)
+    indexing: opts && opts.indexing || (target === self.path)
   }, opts)
 
   self.importer = importFiles(self.archive, target, opts, cb)
