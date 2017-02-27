@@ -11,53 +11,120 @@ var Dat = require('..')
 var shareFolder = path.join(__dirname, 'fixtures')
 
 test('peer connection information between two peers', function (t) {
+  var srcDat
+  var clientDat
+  var clientClean
+
   Dat(shareFolder, { db: memdb() }, function (err, dat) {
+    srcDat = dat
+    t.error(err, 'no error')
+    var sourceStats
+    var clientStats
+
     tmp(function (err, dir, cleanup) {
+      if (err) throw err
       Dat(dir, { key: dat.key }, function (err, dat) {
-        var network = dat.joinNetwork()
-        var stats = dat.trackStats()
-        dat.archive.open(function () {
-          dat.archive.content.once('download', function () {
-            var peers = stats.peers()
-            console.log('client conn', peers)
-            console.log('net con', network.connected)
-            t.ok(peers.totalPeers >= 0, 'client has total peers') // value is inconsistent
-            t.same(peers.activePeers, 1, 'client has one active peer')
-            t.same(peers.sendingPeers, 1, 'client has one sending peer')
-            t.same(peers.completePeers, 1, 'client has one complete peer')
-          })
-          dat.archive.content.once('download-finished', function () {
-            dat.close(function (err) {
-              t.error(err)
-              process.nextTick(done)
+        clientDat = dat
+        clientClean = cleanup
+        t.error(err, 'no error')
+        clientStats = dat.trackStats()
+
+        beforeConnect(function () {
+          var network = dat.joinNetwork()
+          network.once('connection', function () {
+            dat.archive.open(function () {
+              onConnect(function () {
+                dat.archive.content.once('download', onTransfer)
+              })
             })
           })
         })
       })
     })
 
-    dat.importFiles()
-    var stats = dat.trackStats()
-    var network = dat.joinNetwork()
-    dat.archive.content.once('upload', function () {
-      process.nextTick(function () {
-        var peers = stats.peers()
-        console.log('source connection', peers)
-        t.ok(peers.totalPeers >= 0, 'source has total peers') // value is inconsistent
-        t.same(peers.activePeers, 1, 'source has one active peer')
-        t.same(peers.sendingPeers, 0, 'source has zero sending peer')
-        t.ok(peers.completePeers, 0, 'source has zero complete peer')
-      })
+    sourceStats = dat.trackStats()
+    dat.importFiles(function () {
+      var network = dat.joinNetwork()
     })
 
+    function beforeConnect (cb) {
+      var sPeers = sourceStats.peers()
+      var cPeers = clientStats.peers()
+      t.same(sPeers.totalPeers, 0, 'beforeConnect: source has zero total peers')
+      t.same(sPeers.activePeers, 0, 'beforeConnect: source has zero active peer')
+      t.same(sPeers.sendingPeers, 0, 'beforeConnect: source has zero sending peer')
+      t.same(sPeers.completePeers, 0, 'beforeConnect: source has zero complete peer')
+      t.notOk(cPeers.totalPeers, 'beforeConnect: client totalPeers undefined')
+      cb()
+    }
+
+    function onConnect (cb) {
+      var sPeers = sourceStats.peers()
+      var cPeers = clientStats.peers()
+      t.ok(sPeers.totalPeers >= 1, 'onConnect: source has 1 (or more) total peers')
+      t.same(sPeers.activePeers, 0, 'onConnect: source has zero active peer')
+      t.same(sPeers.sendingPeers, 0, 'onConnect: source has zero sending peer')
+      t.same(sPeers.completePeers, 0, 'onConnect: source has zero complete peer')
+      t.ok(cPeers.totalPeers >= 1, 'onConnect: client has 1 (or more) total peers')
+      t.same(cPeers.activePeers, 0, 'onConnect: client has zero active peer')
+      t.same(cPeers.sendingPeers, 0, 'onConnect: client has zero sending peer')
+      t.ok(cPeers.completePeers >= 1, 'onConnect: client has >=1 complete peer')
+      cb()
+    }
+
+    function onTransfer () {
+      var sPeers = sourceStats.peers()
+      var cPeers = clientStats.peers()
+      t.ok(sPeers.totalPeers >= 1, 'onTransfer: source has 1 (or more) total peers')
+      t.same(sPeers.activePeers, 1, 'onTransfer: source has 1 active peer')
+      t.same(sPeers.sendingPeers, 0, 'onTransfer: source has zero sending peer')
+      t.same(sPeers.completePeers, 0, 'onTransfer: source has zero complete peer')
+      t.ok(cPeers.totalPeers >= 1, 'onTransfer: client has 1 (or more) total peers')
+      t.same(cPeers.activePeers, 1, 'onTransfer: client has 1 active peer')
+      t.same(cPeers.sendingPeers, 1, 'onTransfer: client has 1 sending peer')
+      t.ok(cPeers.completePeers >= 1, 'onTransfer: client has >=1 complete peer')
+
+      // Check for completion
+      var stats = clientStats.get()
+      if (stats.blocksProgress === stats.blocksTotal) return onComplete()
+      clientStats.on('update', function () {
+        var stats = clientStats.get()
+        if (stats.blocksProgress === stats.blocksTotal) return onComplete()
+      })
+    }
+
+    function onComplete () {
+      var sPeers = sourceStats.peers()
+      var cPeers = clientStats.peers()
+      t.ok(sPeers.totalPeers >= 1, 'onComplete: source has 1 (or more) total peers')
+      t.same(sPeers.activePeers, 1, 'onComplete: source has 1 active peer')
+      t.same(sPeers.sendingPeers, 0, 'onComplete: source has zero sending peer')
+      t.same(sPeers.completePeers, 1, 'onComplete: source has zero complete peer')
+      t.ok(cPeers.totalPeers >= 1, 'onComplete: client has 1 (or more) total peers')
+      t.same(cPeers.activePeers, 1, 'onComplete: client has 1 active peer')
+      t.same(cPeers.sendingPeers, 1, 'onComplete: client has 1 sending peer')
+      t.ok(cPeers.completePeers >= 1, 'onComplete: client has >=1 complete peer')
+      onDisconnect()
+    }
+
+    function onDisconnect () {
+      // disconnect peers
+      clientDat.close(function () {
+        var sPeers = sourceStats.peers()
+        var cPeers = clientStats.peers()
+        t.same(sPeers.activePeers, 0, 'onDisconnect: source has 0 active peer')
+        t.same(sPeers.sendingPeers, 0, 'onDisconnect: source has zero sending peer')
+        t.same(sPeers.completePeers, 0, 'onDisconnect: source has zero complete peer')
+        t.same(cPeers.activePeers, 0, 'onDisconnect: client has 0 active peer')
+        t.same(cPeers.sendingPeers, 0, 'onDisconnect: client has 0 sending peer')
+        t.same(cPeers.completePeers, 0, 'onDisconnect: client has 0 complete peer')
+        done()
+      })
+    }
+
     function done () {
-      // after other peer has disconnected
-      dat.close(function (err) {
-        t.error(err, 'err')
-        var peers = stats.peers()
-        console.log('done', peers)
-        t.same(peers.activePeers, 0, 'source has zero active peer')
-        t.same(peers.completePeers, 0, 'source has zero complete peer')
+      dat.close(function () {
+        clientClean()
         t.end()
       })
     }
