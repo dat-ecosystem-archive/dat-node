@@ -239,8 +239,8 @@ test('peer connection information between 3 peers', function (t) {
       t.same(sPeers.sendingPeers, 0, 'onComplete: source has zero sending peer')
       t.same(sPeers.completePeers, 2, 'onComplete: source has 2 complete peer')
       t.ok(cPeers.totalPeers >= 1, 'onComplete: client has 1 (or more) total peers')
-      t.same(cPeers.activePeers, 2, 'onComplete: client has 1 active peer')
-      t.same(cPeers.sendingPeers, 1, 'onComplete: client has 1 sending peer')
+      t.ok(cPeers.activePeers >=  1, 'onComplete: client has 1 active peer')
+      t.ok(cPeers.sendingPeers >=  1, 'onComplete: client has 1 sending peer')
       t.ok(cPeers.completePeers >= 2, 'onComplete: client has >=2 complete peer')
       onDisconnect()
     }
