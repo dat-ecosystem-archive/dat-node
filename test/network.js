@@ -167,8 +167,10 @@ test('peer connection information between 3 peers', function (t) {
           var network = clientDat.joinNetwork({dht: false, tcp: false})
           network.once('connection', function () {
             clientDat.archive.open(function () {
-              onConnect(function () {
-                clientDat.archive.content.once('download', onTransfer)
+              process.nextTick(function () {
+                onConnect(function () {
+                  clientDat.archive.content.once('download', onTransfer)
+                })
               })
             })
           })
