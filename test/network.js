@@ -26,7 +26,7 @@ test('peer connection information between two peers', function (t) {
         clientStats = clientDat.trackStats()
 
         beforeConnect(function () {
-          var network = clientDat.joinNetwork()
+          var network = clientDat.joinNetwork({dht: false, tcp: false})
           network.once('connection', function () {
             clientDat.archive.open(function () {
               onConnect(function () {
@@ -40,7 +40,7 @@ test('peer connection information between two peers', function (t) {
 
     sourceStats = srcDat.trackStats()
     srcDat.importFiles(function () {
-      srcDat.joinNetwork()
+      srcDat.joinNetwork({dht: false, tcp: false})
     })
 
     function beforeConnect (cb) {
@@ -151,7 +151,7 @@ test('peer connection information between 3 peers', function (t) {
         client1Clean = cleanup
         t.error(err, 'no error')
         dat.trackStats()
-        dat.joinNetwork()
+        dat.joinNetwork({dht: false, tcp: false})
       })
     })
 
@@ -164,7 +164,7 @@ test('peer connection information between 3 peers', function (t) {
         clientStats = clientDat.trackStats()
 
         beforeConnect(function () {
-          var network = clientDat.joinNetwork()
+          var network = clientDat.joinNetwork({dht: false, tcp: false})
           network.once('connection', function () {
             clientDat.archive.open(function () {
               onConnect(function () {
@@ -178,7 +178,7 @@ test('peer connection information between 3 peers', function (t) {
 
     sourceStats = srcDat.trackStats()
     srcDat.importFiles(function () {
-      srcDat.joinNetwork()
+      srcDat.joinNetwork({dht: false, tcp: false})
     })
 
     function beforeConnect (cb) {
