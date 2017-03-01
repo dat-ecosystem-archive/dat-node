@@ -59,11 +59,12 @@ Dat.prototype.joinNetwork = function (opts, cb) {
     cb = opts
     opts = {}
   }
-  opts = opts || {}
-  cb = cb || noop
-  if (this.network) return this.network.join(this.archive.discoveryKey, { announce: opts.upload }, cb)
 
   var self = this
+  if (!opts && self.options.network) opts = self.options.network // use previous options
+  else opts = opts || {}
+  cb = cb || noop
+
   var netOpts = xtend({
     stream: function (peer) {
       var stream = self.archive.replicate({
@@ -78,7 +79,7 @@ Dat.prototype.joinNetwork = function (opts, cb) {
   }, opts)
 
   var network = self.network = createNetwork(self.archive, netOpts, cb)
-  self.options.network = network.options
+  self.options.network = netOpts
   network.swarm = network // 1.0 backwards compat. TODO: Remove in v2
 
   if (self.owner) return network
@@ -93,7 +94,21 @@ Dat.prototype.joinNetwork = function (opts, cb) {
 Dat.prototype.leave =
 Dat.prototype.leaveNetwork = function () {
   if (!this.network) return
+  debug('leaveNetwork()')
+  this.archive.unreplicate()
   this.network.leave(this.archive.discoveryKey)
+  this.network.destroy()
+  delete this.network
+}
+
+Dat.prototype.pause = function () {
+  debug('pause()')
+  this.leave()
+}
+
+Dat.prototype.resume = function () {
+  debug('resume()')
+  this.join()
 }
 
 Dat.prototype.trackStats = function (opts) {

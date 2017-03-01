@@ -4,6 +4,7 @@ var os = require('os')
 var test = require('tape')
 var rimraf = require('rimraf')
 var mkdirp = require('mkdirp')
+var memdb = require('memdb')
 
 var Dat = require('..')
 
@@ -26,7 +27,7 @@ test('prep', function (t) {
     t.error(err, 'share error okay')
     shareKey = dat.key
     shareDat = dat
-    dat.joinNetwork()
+    dat.joinNetwork({ dht: false })
     dat.importFiles({ live: true }, function () { // need live for live download tests!
       testFolder(function () {
         t.end()
@@ -185,7 +186,46 @@ test('Download with sparse', function (t) {
   })
 })
 
-test('close first sharer', function (t) {
+test('Download pause', function (t) {
+  testFolder(function () {
+    Dat(downloadDir, {key: shareKey, db: memdb()}, function (err, dat) {
+      t.error(err, 'no download init error')
+
+      var paused = false
+      var stats = dat.trackStats()
+      dat.joinNetwork({ dht: false }).once('connection', function () {
+        dat.pause()
+        paused = true
+
+        dat.archive.on('download', failDownload)
+
+        setTimeout(function () {
+          dat.archive.removeListener('download', failDownload)
+          dat.resume()
+          paused = false
+        }, 500)
+
+        function failDownload () {
+          if (paused) t.fail('download when paused')
+        }
+      })
+
+      stats.on('update', function () {
+        var st = stats.get()
+        if (st.blocksTotal === st.blocksProgress) return done()
+      })
+
+      function done () {
+        t.pass('finished download after resume')
+        dat.close(function () {
+          t.end()
+        })
+      }
+    })
+  })
+})
+
+test('close first test', function (t) {
   shareDat.close(function (err) {
     t.error(err, 'no close error')
     t.pass('close')
@@ -201,7 +241,8 @@ test('download joinNetwork callback without connections', function (t) {
       dat.joinNetwork(function () {
         t.pass('joinNetwork callback')
         t.same(dat.network.connected, 0, 'no connections')
-        dat.close(function () {
+        dat.close(function (err) {
+          t.error(err, 'no error')
           t.end()
         })
       })
