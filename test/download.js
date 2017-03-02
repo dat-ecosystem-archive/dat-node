@@ -144,7 +144,6 @@ if (process.env.TRAVIS) {
 
 test('Download with sparse', function (t) {
   testFolder(function () {
-    console.log(fs.readdirSync(downloadDir))
     Dat(downloadDir, {key: shareKey, sparse: true}, function (err, dat) {
       t.error(err, 'no download init error')
       t.ok(dat, 'callsback with dat object')
@@ -172,13 +171,14 @@ test('Download with sparse', function (t) {
 
       function done () {
         fs.readdir(downloadDir, function (_, files) {
-          console.log(files)
           var hasCsvFile = files.indexOf('table.csv') > -1
           var hasDatFolder = files.indexOf('.dat') > -1
           t.ok(hasDatFolder, '.dat folder created')
           t.ok(hasCsvFile, 'csv file downloaded')
           t.same(files.length, 2, 'two items in download dir')
-          t.end()
+          downloadDat.close(function () {
+            t.end()
+          })
         })
       }
     })
