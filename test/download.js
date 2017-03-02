@@ -142,7 +142,50 @@ if (process.env.TRAVIS) {
   })
 }
 
-test('close first test', function (t) {
+test('Download with sparse', function (t) {
+  testFolder(function () {
+    Dat(downloadDir, {key: shareKey, sparse: true}, function (err, dat) {
+      t.error(err, 'no download init error')
+      t.ok(dat, 'callsback with dat object')
+      t.ok(dat.options.sparse, 'sparse option set')
+      t.ok(dat.archive.options.sparse, 'sparse option set')
+      t.ok(dat.archive._sparse, 'sparse option set')
+
+      var archive = dat.archive
+      downloadDat = dat
+
+      archive.open(function () {
+        archive.get('table.csv', function (err, entry) {
+          t.ifError(err)
+          archive.download(entry, function (err) {
+            t.ifError(err)
+            done()
+          })
+        })
+      })
+
+      var network = dat.joinNetwork()
+      network.once('connection', function () {
+        t.pass('connects via network')
+      })
+
+      function done () {
+        fs.readdir(downloadDir, function (_, files) {
+          var hasCsvFile = files.indexOf('table.csv') > -1
+          var hasDatFolder = files.indexOf('.dat') > -1
+          t.ok(hasDatFolder, '.dat folder created')
+          t.ok(hasCsvFile, 'csv file downloaded')
+          t.same(files.length, 2, 'two items in download dir')
+          downloadDat.close(function () {
+            t.end()
+          })
+        })
+      }
+    })
+  })
+})
+
+test('close first sharer', function (t) {
   shareDat.close(function (err) {
     t.error(err, 'no close error')
     t.pass('close')
