@@ -307,10 +307,8 @@ test('download from snapshot', function (t) {
 
 test('finished', function (t) {
   shareDat.close(function () {
-    shareDat.db.close(function () {
-      rimraf.sync(path.join(fixtures, '.dat'))
-      t.end()
-    })
+    rimraf.sync(path.join(fixtures, '.dat'))
+    t.end()
   })
 })
 
