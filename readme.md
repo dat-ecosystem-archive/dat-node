@@ -255,6 +255,14 @@ Additionally, you can use a `.datignore` file to ignore any the user specifies. 
 
 Get upload and download speeds: `stats.network.uploadSpeed` or `stats.network.downloadSpeed`. Transfer speeds are tracked using [hyperdrive-network-speed](https://github.com/joehand/hyperdrive-network-speed/).
 
+#### `dat.pause()`
+
+Pause all upload & downloads. Currently, this is the same as `dat.leaveNetwork()`, which leaves the network and destroys the swarm. Discovery will happen again on `resume()`.
+
+#### `dat.resume()`
+
+Resume network activity. Current, this is the same as `dat.joinNetwork()`.
+
 #### `dat.close(cb)`
 
 Stops replication and closes all the things opened for dat-node, including:
