@@ -236,13 +236,14 @@ test('close first test', function (t) {
 
 test('download joinNetwork callback without connections', function (t) {
   testFolder(function () {
-    Dat(downloadDir, function (err, dat) {
+    Dat(downloadDir, {db: memdb()}, function (err, dat) {
       t.error(err, 'no error')
       dat.joinNetwork(function () {
         t.pass('joinNetwork callback')
         t.same(dat.network.connected, 0, 'no connections')
         dat.close(function (err) {
           t.error(err, 'no error')
+          console.log('callback end')
           t.end()
         })
       })
@@ -299,6 +300,7 @@ test('download from snapshot', function (t) {
               t.pass('close callback ok')
               snapshotDat.close(function () {
                 rimraf.sync(path.join(fixtures, '.dat'))
+                console.log('snapshot end')
                 t.end()
               })
             })
