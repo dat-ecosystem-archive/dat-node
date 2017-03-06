@@ -252,9 +252,10 @@ test('download joinNetwork callback without connections', function (t) {
 
 test('download from snapshot', function (t) {
   var shareKey
+  var snapshotDat
   Dat(fixtures, {live: false}, function (err, dat) {
     t.error(err, 'live: false share, no error')
-    shareDat = dat
+    snapshotDat = dat
     dat.importFiles(function (err) {
       t.error(err, 'import no error')
       dat.archive.finalize(function (err) {

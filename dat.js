@@ -92,12 +92,12 @@ Dat.prototype.joinNetwork = function (opts, cb) {
 }
 
 Dat.prototype.leave =
-Dat.prototype.leaveNetwork = function () {
+Dat.prototype.leaveNetwork = function (cb) {
   if (!this.network) return
   debug('leaveNetwork()')
   this.archive.unreplicate()
   this.network.leave(this.archive.discoveryKey)
-  this.network.destroy()
+  this.network.destroy(cb)
   delete this.network
 }
 
@@ -167,7 +167,7 @@ Dat.prototype.close = function (cb) {
 
   function closeNet (cb) {
     if (!self.network) return cb()
-    self.network.close(cb)
+    self.leave(cb)
   }
 
   function closeFileWatch (cb) {
