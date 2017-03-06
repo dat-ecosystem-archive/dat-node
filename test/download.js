@@ -4,6 +4,7 @@ var os = require('os')
 var test = require('tape')
 var rimraf = require('rimraf')
 var mkdirp = require('mkdirp')
+var memdb = require('memdb')
 
 var Dat = require('..')
 
@@ -26,7 +27,7 @@ test('prep', function (t) {
     t.error(err, 'share error okay')
     shareKey = dat.key
     shareDat = dat
-    dat.joinNetwork()
+    dat.joinNetwork({ dht: false })
     dat.importFiles({ live: true }, function () { // need live for live download tests!
       testFolder(function () {
         t.end()
@@ -185,7 +186,46 @@ test('Download with sparse', function (t) {
   })
 })
 
-test('close first sharer', function (t) {
+test('Download pause', function (t) {
+  testFolder(function () {
+    Dat(downloadDir, {key: shareKey, db: memdb()}, function (err, dat) {
+      t.error(err, 'no download init error')
+
+      var paused = false
+      dat.joinNetwork({ dht: false }).once('connection', function () {
+        dat.pause()
+        paused = true
+
+        dat.archive.on('download', failDownload)
+
+        setTimeout(function () {
+          dat.archive.removeListener('download', failDownload)
+          dat.resume()
+          paused = false
+        }, 500)
+
+        function failDownload () {
+          if (paused) t.fail('download when paused')
+        }
+      })
+
+      dat.archive.open(function () {
+        dat.archive.content.on('download-finished', done)
+      })
+
+      function done () {
+        t.pass('finished download after resume')
+        if (dat._closed) return
+        dat.close(function (err) {
+          t.error(err, 'no error')
+          t.end()
+        })
+      }
+    })
+  })
+})
+
+test('close first test', function (t) {
   shareDat.close(function (err) {
     t.error(err, 'no close error')
     t.pass('close')
@@ -196,12 +236,13 @@ test('close first sharer', function (t) {
 
 test('download joinNetwork callback without connections', function (t) {
   testFolder(function () {
-    Dat(downloadDir, function (err, dat) {
+    Dat(downloadDir, {db: memdb()}, function (err, dat) {
       t.error(err, 'no error')
       dat.joinNetwork(function () {
         t.pass('joinNetwork callback')
         t.same(dat.network.connected, 0, 'no connections')
-        dat.close(function () {
+        dat.close(function (err) {
+          t.error(err, 'no error')
           t.end()
         })
       })
@@ -211,9 +252,10 @@ test('download joinNetwork callback without connections', function (t) {
 
 test('download from snapshot', function (t) {
   var shareKey
+  var snapshotDat
   Dat(fixtures, {live: false}, function (err, dat) {
     t.error(err, 'live: false share, no error')
-    shareDat = dat
+    snapshotDat = dat
     dat.importFiles(function (err) {
       t.error(err, 'import no error')
       dat.archive.finalize(function (err) {
@@ -255,22 +297,16 @@ test('download from snapshot', function (t) {
 
             dat.close(function () {
               t.pass('close callback ok')
-              t.end()
+              snapshotDat.close(function () {
+                rimraf.sync(path.join(fixtures, '.dat'))
+                t.end()
+              })
             })
           })
         }
       })
     })
   }
-})
-
-test('finished', function (t) {
-  shareDat.close(function () {
-    shareDat.db.close(function () {
-      rimraf.sync(path.join(fixtures, '.dat'))
-      t.end()
-    })
-  })
 })
 
 test.onFinish(function () {
