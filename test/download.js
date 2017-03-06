@@ -192,7 +192,6 @@ test('Download pause', function (t) {
       t.error(err, 'no download init error')
 
       var paused = false
-      var stats = dat.trackStats()
       dat.joinNetwork({ dht: false }).once('connection', function () {
         dat.pause()
         paused = true
@@ -210,9 +209,8 @@ test('Download pause', function (t) {
         }
       })
 
-      stats.on('update', function () {
-        var st = stats.get()
-        if (st.blocksTotal === st.blocksProgress) return done()
+      dat.archive.open(function () {
+        dat.archive.content.on('download-finished', done)
       })
 
       function done () {
