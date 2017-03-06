@@ -147,10 +147,7 @@ Dat.prototype.close = function (cb) {
   closeFileWatch(done())
   closeArchiveDb(done())
 
-  done(function (err) {
-    if (err) return cb(err)
-    cb()
-  })
+  done(cb)
 
   function closeArchiveDb (cb) {
     self.archive.close(function (err) {

@@ -217,7 +217,9 @@ test('Download pause', function (t) {
 
       function done () {
         t.pass('finished download after resume')
-        dat.close(function () {
+        if (dat._closed) return
+        dat.close(function (err) {
+          t.error(err, 'no error')
           t.end()
         })
       }
@@ -243,7 +245,6 @@ test('download joinNetwork callback without connections', function (t) {
         t.same(dat.network.connected, 0, 'no connections')
         dat.close(function (err) {
           t.error(err, 'no error')
-          console.log('callback end')
           t.end()
         })
       })
@@ -300,7 +301,6 @@ test('download from snapshot', function (t) {
               t.pass('close callback ok')
               snapshotDat.close(function () {
                 rimraf.sync(path.join(fixtures, '.dat'))
-                console.log('snapshot end')
                 t.end()
               })
             })
