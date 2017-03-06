@@ -297,20 +297,16 @@ test('download from snapshot', function (t) {
 
             dat.close(function () {
               t.pass('close callback ok')
-              t.end()
+              snapshotDat.close(function () {
+                rimraf.sync(path.join(fixtures, '.dat'))
+                t.end()
+              })
             })
           })
         }
       })
     })
   }
-})
-
-test('finished', function (t) {
-  shareDat.close(function () {
-    rimraf.sync(path.join(fixtures, '.dat'))
-    t.end()
-  })
 })
 
 test.onFinish(function () {
