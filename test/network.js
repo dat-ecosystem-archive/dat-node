@@ -44,41 +44,35 @@ test('peer connection information between two peers', function (t) {
     })
 
     function beforeConnect (cb) {
-      var sPeers = sourceStats.peers()
-      var cPeers = clientStats.peers()
-      t.same(sPeers.totalPeers, 0, 'beforeConnect: source has zero total peers')
-      t.same(sPeers.activePeers, 0, 'beforeConnect: source has zero active peer')
-      t.same(sPeers.sendingPeers, 0, 'beforeConnect: source has zero sending peer')
-      t.same(sPeers.completePeers, 0, 'beforeConnect: source has zero complete peer')
-      t.notOk(cPeers.totalPeers, 'beforeConnect: client totalPeers undefined')
+      var sPeers = sourceStats.peers
+      var cPeers = clientStats.peers
+      t.same(sPeers.total, 0, 'beforeConnect: source has zero total peers')
+      t.same(sPeers.downloadingFrom, 0, 'beforeConnect: source has zero sending peer')
+      t.same(sPeers.complete, 0, 'beforeConnect: source has zero complete peer')
+      t.notOk(cPeers.total, 'beforeConnect: client total undefined')
       cb()
     }
 
     function onConnect (cb) {
-      var sPeers = sourceStats.peers()
-      var cPeers = clientStats.peers()
-      t.ok(sPeers.totalPeers >= 1, 'onConnect: source has 1 (or more) total peers')
-      t.same(sPeers.activePeers, 0, 'onConnect: source has zero active peer')
-      t.same(sPeers.sendingPeers, 0, 'onConnect: source has zero sending peer')
-      t.same(sPeers.completePeers, 0, 'onConnect: source has zero complete peer')
-      t.ok(cPeers.totalPeers >= 1, 'onConnect: client has 1 (or more) total peers')
-      t.same(cPeers.activePeers, 0, 'onConnect: client has zero active peer')
-      t.same(cPeers.sendingPeers, 0, 'onConnect: client has zero sending peer')
-      t.ok(cPeers.completePeers >= 1, 'onConnect: client has >=1 complete peer')
+      var sPeers = sourceStats.peers
+      var cPeers = clientStats.peers
+      t.ok(sPeers.total >= 1, 'onConnect: source has 1 (or more) total peers')
+      t.same(sPeers.downloadingFrom, 0, 'onConnect: source has zero sending peer')
+      t.same(sPeers.complete, 0, 'onConnect: source has zero complete peer')
+      t.ok(cPeers.total >= 1, 'onConnect: client has 1 (or more) total peers')
+      t.same(cPeers.downloadingFrom, 0, 'onConnect: client has zero sending peer')
+      t.ok(cPeers.complete >= 1, 'onConnect: client has >=1 complete peer')
       cb()
     }
 
     function onTransfer () {
-      var sPeers = sourceStats.peers()
-      var cPeers = clientStats.peers()
-      t.ok(sPeers.totalPeers >= 1, 'onTransfer: source has 1 (or more) total peers')
-      t.skip(sPeers.activePeers, 1, 'onTransfer: source has 1 active peer') // TODO: this seems 1 block behind, but we only have 1 block.
-      t.same(sPeers.sendingPeers, 0, 'onTransfer: source has zero sending peer')
-      t.same(sPeers.completePeers, 0, 'onTransfer: source has zero complete peer')
-      t.ok(cPeers.totalPeers >= 1, 'onTransfer: client has 1 (or more) total peers')
-      t.same(cPeers.activePeers, 1, 'onTransfer: client has 1 active peer')
-      t.same(cPeers.sendingPeers, 1, 'onTransfer: client has 1 sending peer')
-      t.ok(cPeers.completePeers >= 1, 'onTransfer: client has >=1 complete peer')
+      var sPeers = sourceStats.peers
+      var cPeers = clientStats.peers
+      t.ok(sPeers.total >= 1, 'onTransfer: source has 1 (or more) total peers')
+      t.same(sPeers.downloadingFrom, 0, 'onTransfer: source has zero sending peer')
+      t.ok(cPeers.total >= 1, 'onTransfer: client has 1 (or more) total peers')
+      t.same(cPeers.downloadingFrom, 1, 'onTransfer: client has 1 sending peer')
+      t.ok(cPeers.complete >= 1, 'onTransfer: client has >=1 complete peer')
 
       // Check for completion
       var stats = clientStats.get()
@@ -94,30 +88,26 @@ test('peer connection information between two peers', function (t) {
     }
 
     function onComplete () {
-      var sPeers = sourceStats.peers()
-      var cPeers = clientStats.peers()
-      t.ok(sPeers.totalPeers >= 1, 'onComplete: source has 1 (or more) total peers')
-      t.same(sPeers.activePeers, 1, 'onComplete: source has 1 active peer')
-      t.same(sPeers.sendingPeers, 0, 'onComplete: source has zero sending peer')
-      t.same(sPeers.completePeers, 1, 'onComplete: source has 1 complete peer')
-      t.ok(cPeers.totalPeers >= 1, 'onComplete: client has 1 (or more) total peers')
-      t.same(cPeers.activePeers, 1, 'onComplete: client has 1 active peer')
-      t.same(cPeers.sendingPeers, 1, 'onComplete: client has 1 sending peer')
-      t.ok(cPeers.completePeers >= 1, 'onComplete: client has >=1 complete peer')
+      var sPeers = sourceStats.peers
+      var cPeers = clientStats.peers
+      t.ok(sPeers.total >= 1, 'onComplete: source has 1 (or more) total peers')
+      t.same(sPeers.downloadingFrom, 0, 'onComplete: source has zero sending peer')
+      t.same(sPeers.complete, 1, 'onComplete: source has 1 complete peer')
+      t.ok(cPeers.total >= 1, 'onComplete: client has 1 (or more) total peers')
+      t.same(cPeers.downloadingFrom, 1, 'onComplete: client has 1 sending peer')
+      t.ok(cPeers.complete >= 1, 'onComplete: client has >=1 complete peer')
       onDisconnect()
     }
 
     function onDisconnect () {
       // disconnect peers
       clientDat.close(function () {
-        var sPeers = sourceStats.peers()
-        var cPeers = clientStats.peers()
-        t.same(sPeers.activePeers, 0, 'onDisconnect: source has 0 active peer')
-        t.same(sPeers.sendingPeers, 0, 'onDisconnect: source has zero sending peer')
-        t.same(sPeers.completePeers, 0, 'onDisconnect: source has zero complete peer')
-        t.same(cPeers.activePeers, 0, 'onDisconnect: client has 0 active peer')
-        t.same(cPeers.sendingPeers, 0, 'onDisconnect: client has 0 sending peer')
-        t.same(cPeers.completePeers, 0, 'onDisconnect: client has 0 complete peer')
+        var sPeers = sourceStats.peers
+        var cPeers = clientStats.peers
+        t.same(sPeers.downloadingFrom, 0, 'onDisconnect: source has zero sending peer')
+        t.same(sPeers.complete, 0, 'onDisconnect: source has zero complete peer')
+        t.same(cPeers.downloadingFrom, 0, 'onDisconnect: client has 0 sending peer')
+        t.same(cPeers.complete, 0, 'onDisconnect: client has 0 complete peer')
         done()
       })
     }
@@ -184,41 +174,35 @@ test('peer connection information between 3 peers', function (t) {
     })
 
     function beforeConnect (cb) {
-      var sPeers = sourceStats.peers()
-      var cPeers = clientStats.peers()
-      t.same(sPeers.totalPeers, 0, 'beforeConnect: source has zero total peers')
-      t.same(sPeers.activePeers, 0, 'beforeConnect: source has zero active peer')
-      t.same(sPeers.sendingPeers, 0, 'beforeConnect: source has zero sending peer')
-      t.same(sPeers.completePeers, 0, 'beforeConnect: source has zero complete peer')
-      t.notOk(cPeers.totalPeers, 'beforeConnect: client totalPeers undefined')
+      var sPeers = sourceStats.peers
+      var cPeers = clientStats.peers
+      t.same(sPeers.total, 0, 'beforeConnect: source has zero total peers')
+      t.same(sPeers.downloadingFrom, 0, 'beforeConnect: source has zero sending peer')
+      t.same(sPeers.complete, 0, 'beforeConnect: source has zero complete peer')
+      t.notOk(cPeers.total, 'beforeConnect: client total undefined')
       cb()
     }
 
     function onConnect (cb) {
-      var sPeers = sourceStats.peers()
-      var cPeers = clientStats.peers()
-      t.ok(sPeers.totalPeers >= 1, 'onConnect: source has 1 (or more) total peers')
-      t.same(sPeers.activePeers, 0, 'onConnect: source has zero active peer')
-      t.same(sPeers.sendingPeers, 0, 'onConnect: source has zero sending peer')
-      t.same(sPeers.completePeers, 0, 'onConnect: source has zero complete peer')
-      t.ok(cPeers.totalPeers >= 1, 'onConnect: client has 1 (or more) total peers')
-      t.same(cPeers.activePeers, 0, 'onConnect: client has zero active peer')
-      t.same(cPeers.sendingPeers, 0, 'onConnect: client has zero sending peer')
-      t.ok(cPeers.completePeers >= 1, 'onConnect: client has >=1 complete peer')
+      var sPeers = sourceStats.peers
+      var cPeers = clientStats.peers
+      t.ok(sPeers.total >= 1, 'onConnect: source has 1 (or more) total peers')
+      t.same(sPeers.downloadingFrom, 0, 'onConnect: source has zero sending peer')
+      t.same(sPeers.complete, 0, 'onConnect: source has zero complete peer')
+      t.ok(cPeers.total >= 1, 'onConnect: client has 1 (or more) total peers')
+      t.same(cPeers.downloadingFrom, 0, 'onConnect: client has zero sending peer')
+      t.ok(cPeers.complete >= 1, 'onConnect: client has >=1 complete peer')
       cb()
     }
 
     function onTransfer () {
-      var sPeers = sourceStats.peers()
-      var cPeers = clientStats.peers()
-      t.ok(sPeers.totalPeers >= 1, 'onTransfer: source has 1 (or more) total peers')
-      t.skip(sPeers.activePeers, 2, 'onTransfer: source has 2 active peer') // TODO: this seems 1 block behind, but we only have 1 block.
-      t.same(sPeers.sendingPeers, 0, 'onTransfer: source has zero sending peer')
-      // Could be 1 or 0, t.same(sPeers.completePeers, 0, 'onTransfer: source has zero complete peer')
-      t.ok(cPeers.totalPeers >= 1, 'onTransfer: client has 1 (or more) total peers')
-      t.ok(cPeers.activePeers >= 1, 'onTransfer: client has 1 (or more) active peer')
-      t.same(cPeers.sendingPeers, 1, 'onTransfer: client has 1 sending peer')
-      t.ok(cPeers.completePeers >= 1, 'onTransfer: client has >=1 complete peer')
+      var sPeers = sourceStats.peers
+      var cPeers = clientStats.peers
+      t.ok(sPeers.total >= 1, 'onTransfer: source has 1 (or more) total peers')
+      t.same(sPeers.downloadingFrom, 0, 'onTransfer: source has zero sending peer')
+      t.ok(cPeers.total >= 1, 'onTransfer: client has 1 (or more) total peers')
+      t.same(cPeers.downloadingFrom, 1, 'onTransfer: client has 1 sending peer')
+      t.ok(cPeers.complete >= 1, 'onTransfer: client has >=1 complete peer')
 
       // Check for completion
       var stats = clientStats.get()
@@ -234,16 +218,14 @@ test('peer connection information between 3 peers', function (t) {
     }
 
     function onComplete () {
-      var sPeers = sourceStats.peers()
-      var cPeers = clientStats.peers()
-      t.ok(sPeers.totalPeers >= 1, 'onComplete: source has 1 (or more) total peers')
-      t.same(sPeers.activePeers, 2, 'onComplete: source has 2 active peer')
-      t.same(sPeers.sendingPeers, 0, 'onComplete: source has zero sending peer')
-      t.same(sPeers.completePeers, 2, 'onComplete: source has 2 complete peer')
-      t.ok(cPeers.totalPeers >= 1, 'onComplete: client has 1 (or more) total peers')
-      t.ok(cPeers.activePeers >= 1, 'onComplete: client has 1 active peer')
-      t.ok(cPeers.sendingPeers >= 1, 'onComplete: client has 1 sending peer')
-      t.ok(cPeers.completePeers >= 1, 'onComplete: client has >=1 complete peer')
+      var sPeers = sourceStats.peers
+      var cPeers = clientStats.peers
+      t.ok(sPeers.total >= 1, 'onComplete: source has 1 (or more) total peers')
+      t.same(sPeers.downloadingFrom, 0, 'onComplete: source has zero sending peer')
+      t.same(sPeers.complete, 2, 'onComplete: source has 2 complete peer')
+      t.ok(cPeers.total >= 1, 'onComplete: client has 1 (or more) total peers')
+      t.ok(cPeers.downloadingFrom >= 1, 'onComplete: client has 1 sending peer')
+      t.ok(cPeers.complete >= 1, 'onComplete: client has >=1 complete peer')
       onDisconnect()
     }
 
@@ -251,14 +233,12 @@ test('peer connection information between 3 peers', function (t) {
       // disconnect peers
       clientDat1.close()
       clientDat.close(function () {
-        var sPeers = sourceStats.peers()
-        var cPeers = clientStats.peers()
-        t.same(sPeers.activePeers, 0, 'onDisconnect: source has 0 active peer')
-        t.same(sPeers.sendingPeers, 0, 'onDisconnect: source has zero sending peer')
-        t.same(sPeers.completePeers, 0, 'onDisconnect: source has zero complete peer')
-        t.same(cPeers.activePeers, 0, 'onDisconnect: client has 0 active peer')
-        t.same(cPeers.sendingPeers, 0, 'onDisconnect: client has 0 sending peer')
-        t.same(cPeers.completePeers, 0, 'onDisconnect: client has 0 complete peer')
+        var sPeers = sourceStats.peers
+        var cPeers = clientStats.peers
+        t.same(sPeers.downloadingFrom, 0, 'onDisconnect: source has zero sending peer')
+        t.same(sPeers.complete, 0, 'onDisconnect: source has zero complete peer')
+        t.same(cPeers.downloadingFrom, 0, 'onDisconnect: client has 0 sending peer')
+        t.same(cPeers.complete, 0, 'onDisconnect: client has 0 complete peer')
         done()
       })
     }
