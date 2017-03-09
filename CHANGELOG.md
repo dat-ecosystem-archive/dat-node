@@ -10,6 +10,24 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   ### Added, ### Changed, ### Fixed, ### Removed, ### Deprecated
 -->
 
+### Added
+* `.datignore` support for ignoring files
+* Callback on `joinNetwork` after first round of discovery
+* Initial `pause` and `resume` API aliased to `join` and `leave`
+* `stats.peers` API with new peer counts
+
+### Fixed
+* Better leave network, also closes swarm.
+* Clone options passed to initArchive
+* Set `opts.file` for archive owner without length
+* `createIfMissing` passed to level options
+* `dat.close()` twice sync errors
+* Fix import without options
+* (hyperdrive fix) sparse content archives
+
+### Changed
+* Remove automatic finalize for snapshot imports
+
 ## 1.3.8 - 2017-02-20
 ### Fixed
 * Close archive after bad key on init.
