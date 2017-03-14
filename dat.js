@@ -4,6 +4,7 @@ var multicb = require('multicb')
 var xtend = require('xtend')
 var importFiles = require('./lib/import-files')
 var createNetwork = require('./lib/network')
+var datJson = require('./lib/dat-json')
 var stats = require('./lib/stats')
 var debug = require('debug')('dat-node')
 
@@ -18,6 +19,7 @@ function Dat (archive, db, opts) {
 
   this.path = path.resolve(opts.dir)
   this.options = xtend(opts)
+  this.meta = datJson(this)
 
   this.archive = archive
   this.db = db
