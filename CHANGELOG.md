@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   ### Added, ### Changed, ### Fixed, ### Removed, ### Deprecated
 -->
 
+## 1.4.1 - 2017-03-17
+### Fixed
+* Pass network `opts` through to discovery-swarm.
+
 ## 1.4.0 - 2017-03-08
 ### Added
 * `.datignore` support for ignoring files
