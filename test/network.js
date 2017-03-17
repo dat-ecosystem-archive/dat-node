@@ -222,7 +222,7 @@ test('peer connection information between 3 peers', function (t) {
       var cPeers = clientStats.peers
       t.ok(sPeers.total >= 1, 'onComplete: source has 1 (or more) total peers')
       t.same(sPeers.downloadingFrom, 0, 'onComplete: source has zero sending peer')
-      t.same(sPeers.complete, 2, 'onComplete: source has 2 complete peer')
+      t.same(sPeers.complete >= 1, 'onComplete: source has >=1 complete peer')
       t.ok(cPeers.total >= 1, 'onComplete: client has 1 (or more) total peers')
       t.ok(cPeers.downloadingFrom >= 1, 'onComplete: client has 1 sending peer')
       t.ok(cPeers.complete >= 1, 'onComplete: client has >=1 complete peer')
