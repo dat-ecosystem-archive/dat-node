@@ -33,10 +33,10 @@ function createDat (dirOrDrive, opts, cb) {
   opts.dir = path.resolve(untildify(opts.dir))
 
   debug('Running initArchive on', opts.dir, 'with opts:', opts)
-  initArchive(opts, function (err, archive, db) {
+  initArchive(opts, function (err, archive) {
     if (err) return cb(err)
     debug('initArchive callback')
-    var dat = new Dat(archive, db, opts)
+    var dat = new Dat(archive, opts)
     cb(null, dat)
   })
 }

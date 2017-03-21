@@ -9,18 +9,15 @@ var debug = require('debug')('dat-node')
 
 module.exports = Dat
 
-function Dat (archive, db, opts) {
-  if (!(this instanceof Dat)) return new Dat(archive, db, opts)
-  if (typeof opts === 'undefined') return Dat(archive, null, db)
+function Dat (archive, opts) {
+  if (!(this instanceof Dat)) return new Dat(archive, opts)
   assert.ok(archive, 'archive required')
-  // assert.ok(db, 'database required') // maybe not be required for multidrive...
   assert.ok(opts.dir, 'opts.directory required')
 
   this.path = path.resolve(opts.dir)
   this.options = xtend(opts)
 
   this.archive = archive
-  this.db = db
 
   var self = this
 
@@ -41,13 +38,13 @@ function Dat (archive, db, opts) {
     owner: {
       enumerable: true,
       get: function () {
-        return self.archive.owner
+        return self.archive.metadata.writable
       }
     },
-    resumed: {
+    version: {
       enumerable: true,
       get: function () {
-        return self.archive.resumed
+        return self.archive.version
       }
     }
   })
@@ -69,10 +66,15 @@ Dat.prototype.joinNetwork = function (opts, cb) {
     stream: function (peer) {
       var stream = self.archive.replicate({
         upload: !(opts.upload === false),
-        download: !self.archive.owner && opts.download
+        download: !self.owner && opts.download,
+        live: opts.end || false
       })
       stream.on('error', function (err) {
         debug('Replication error:', err.message)
+      })
+      stream.on('end', function () {
+        self.downloaded = true
+        console.log('download done')
       })
       return stream
     }
@@ -80,14 +82,7 @@ Dat.prototype.joinNetwork = function (opts, cb) {
 
   var network = self.network = createNetwork(self.archive, netOpts, cb)
   self.options.network = netOpts
-  network.swarm = network // 1.0 backwards compat. TODO: Remove in v2
 
-  if (self.owner) return network
-
-  network.once('connection', function () {
-    // automatically open archive
-    self.archive.open(noop)
-  })
   return network
 }
 
@@ -113,13 +108,13 @@ Dat.prototype.resume = function () {
 
 Dat.prototype.trackStats = function (opts) {
   opts = opts || {}
-  assert.ok(opts.db || this.db, 'Dat needs database to track stats')
+  // assert.ok(opts.db || this.db, 'Dat needs database to track stats')
   this.stats = stats(this.archive, opts.db || this.db)
   return this.stats
 }
 
 Dat.prototype.importFiles = function (target, opts, cb) {
-  if (!this.archive.owner) throw new Error('Must be archive owner to import files.')
+  if (!this.archive.metadata.writable) throw new Error('Must be archive owner to import files.')
   if (typeof target !== 'string') return this.importFiles('', target, opts)
   if (typeof opts === 'function') return this.importFiles(target, {}, opts)
 

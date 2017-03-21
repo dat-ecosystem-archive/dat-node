@@ -25,7 +25,7 @@
     "datland-swarm-defaults": "^1.0.2",
     "debug": "^2.6.0",
     "discovery-swarm": "^4.3.0",
-    "hyperdrive": "^7.14.5",
+    "hyperdrive": "github:mafintosh/hyperdrive#v8",
     "hyperdrive-import-files": "^2.8.0",
     "hyperdrive-network-speed": "^1.0.1",
     "hyperdrive-stats": "^3.0.0",
