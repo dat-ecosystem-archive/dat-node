@@ -74,7 +74,7 @@ Dat.prototype.joinNetwork = function (opts, cb) {
       })
       stream.on('end', function () {
         self.downloaded = true
-        console.log('download done')
+        debug('replication stream ended')
       })
       return stream
     }
