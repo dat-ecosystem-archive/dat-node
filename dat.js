@@ -35,7 +35,7 @@ function Dat (archive, opts) {
         return self.archive.live
       }
     },
-    owner: {
+    writable: {
       enumerable: true,
       get: function () {
         return self.archive.metadata.writable
@@ -66,8 +66,8 @@ Dat.prototype.joinNetwork = function (opts, cb) {
     stream: function (peer) {
       var stream = self.archive.replicate({
         upload: !(opts.upload === false),
-        download: !self.owner && opts.download,
-        live: opts.end || false
+        download: !self.writable && opts.download,
+        live: !self.writable && !opts.end
       })
       stream.on('error', function (err) {
         debug('Replication error:', err.message)
