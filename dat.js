@@ -114,7 +114,7 @@ Dat.prototype.trackStats = function (opts) {
 }
 
 Dat.prototype.importFiles = function (target, opts, cb) {
-  if (!this.archive.metadata.writable) throw new Error('Must be archive owner to import files.')
+  if (!this.writable) throw new Error('Must be archive owner to import files.')
   if (typeof target !== 'string') return this.importFiles('', target, opts)
   if (typeof opts === 'function') return this.importFiles(target, {}, opts)
 
