@@ -2,6 +2,7 @@ var assert = require('assert')
 var path = require('path')
 var multicb = require('multicb')
 var xtend = require('xtend')
+var untildify = require('untildify')
 var importFiles = require('./lib/import-files')
 var createNetwork = require('./lib/network')
 var stats = require('./lib/stats')
@@ -12,14 +13,13 @@ module.exports = Dat
 function Dat (archive, opts) {
   if (!(this instanceof Dat)) return new Dat(archive, opts)
   assert.ok(archive, 'archive required')
-  assert.ok(opts.dir, 'opts.directory required')
-
-  this.path = path.resolve(opts.dir)
-  this.options = xtend(opts)
+  var self = this
 
   this.archive = archive
-
-  var self = this
+  this.options = xtend(opts)
+  if (opts.dir) {
+    this.path = path.resolve(untildify(opts.dir))
+  }
 
   // Getters for convenience accessors
   Object.defineProperties(this, {
@@ -74,7 +74,7 @@ Dat.prototype.joinNetwork = function (opts, cb) {
       })
       stream.on('end', function () {
         self.downloaded = true
-        debug('replication stream ended')
+        debug('Replication stream ended')
       })
       return stream
     }
@@ -107,24 +107,31 @@ Dat.prototype.resume = function () {
 }
 
 Dat.prototype.trackStats = function (opts) {
-  opts = opts || {}
-  // assert.ok(opts.db || this.db, 'Dat needs database to track stats')
-  this.stats = stats(this.archive, opts.db || this.db)
+  opts = xtend({}, opts)
+  this.stats = stats(this.archive, opts)
   return this.stats
 }
 
-Dat.prototype.importFiles = function (target, opts, cb) {
+/**
+ * Import files to archive via mirror-folder
+ * @type {Function}
+ * @param {String} [src=dat.path] - Directory or File to import to `archive`.
+ * @param {Function} [cb] - Callback after import is finished
+ * @param {Object} [opts] - Options passed to `mirror-folder` and `dat-ignore`
+ * @returns {Object} - Import progress
+ */
+Dat.prototype.importFiles = function (src, opts, cb) {
   if (!this.writable) throw new Error('Must be archive owner to import files.')
-  if (typeof target !== 'string') return this.importFiles('', target, opts)
-  if (typeof opts === 'function') return this.importFiles(target, {}, opts)
+  if (typeof src !== 'string') return this.importFiles('', src, opts)
+  if (typeof opts === 'function') return this.importFiles(src, {}, opts)
 
   var self = this
-  target = target && target.length ? target : self.path
+  src = src && src.length ? src : self.path
   opts = xtend({
-    indexing: opts && opts.indexing || (target === self.path)
+    indexing: (opts && opts.indexing) || (src === self.path)
   }, opts)
 
-  self.importer = importFiles(self.archive, target, opts, cb)
+  self.importer = importFiles(self.archive, src, opts, cb)
   self.options.importer = self.importer.options
   return self.importer
 }
@@ -140,21 +147,15 @@ Dat.prototype.close = function (cb) {
   var done = multicb()
   closeNet(done())
   closeFileWatch(done())
-  closeArchiveDb(done())
+  closeArchive(done())
 
   done(cb)
 
-  function closeArchiveDb (cb) {
+  function closeArchive (cb) {
     self.archive.close(function (err) {
       if (err) return cb(err)
-      if (self.options.db || !self.db) return cb(null)
-      closeDb(cb)
+      return cb()
     })
-  }
-
-  function closeDb (cb) {
-    if (!self.db) return cb()
-    self.db.close(cb)
   }
 
   function closeNet (cb) {
