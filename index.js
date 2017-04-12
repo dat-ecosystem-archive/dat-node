@@ -11,7 +11,7 @@ var Dat = require('./dat')
 
 module.exports = createDat
 
-function createDat (dirOrDrive, opts, cb) {
+function createDat (dirOrStorage, opts, cb) {
   if (!cb) {
     cb = opts
     opts = {}
