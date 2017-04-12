@@ -4,7 +4,7 @@ var os = require('os')
 var test = require('tape')
 var rimraf = require('rimraf')
 var mkdirp = require('mkdirp')
-var memdb = require('memdb')
+// var ram = require('random-access-memory')
 
 var Dat = require('..')
 

@@ -10,6 +10,22 @@ var debug = require('debug')('dat-node')
 
 module.exports = Dat
 
+/**
+ * @class Dat
+ * @type {Object}
+ * @param {Object} archive - Hyperdrive archive
+ * @param {Object} [opts] - Options
+ * @param {String} [opts.dir] - Directory of archive
+ *
+ * @property {Object} archive - Hyperdrive Archive
+ * @property {String} path - Resolved path of archive
+ * @property {Buffer} key - Archive Key (`archive.key`)
+ * @property {Boolean} live - Archive is live (`archive.live`)
+ * @property {Boolean} writable - Archive is writable (`archive.metadata.writable`)
+ * @property {Boolean} version - Archive version (`archive.version`)
+ * @property {Object} options - Initial options and all options passed to childen functions.
+ * @returns {Object} Dat
+ */
 function Dat (archive, opts) {
   if (!(this instanceof Dat)) return new Dat(archive, opts)
   assert.ok(archive, 'archive required')
@@ -50,8 +66,15 @@ function Dat (archive, opts) {
   })
 }
 
-Dat.prototype.join =
-Dat.prototype.joinNetwork = function (opts, cb) {
+/**
+ * Join Dat Network via Hyperdiscovery
+ * @type {Function}
+ * @param {Object} [opts] - Network options, passed to hyperdiscovery.
+ * @param {Function} [cb] - Callback after first round of discovery is finished.
+ * @returns {Object} Discovery Swarm Instance
+ */
+Dat.prototype.joinNetwork =
+Dat.prototype.join = function (opts, cb) {
   if (typeof opts === 'function') {
     cb = opts
     opts = {}
@@ -86,8 +109,13 @@ Dat.prototype.joinNetwork = function (opts, cb) {
   return network
 }
 
-Dat.prototype.leave =
-Dat.prototype.leaveNetwork = function (cb) {
+/**
+ * Leave Dat Network
+ * @type {Function}
+ * @param {Function} [cb] - Callback after network is closed
+ */
+Dat.prototype.leaveNetwork =
+Dat.prototype.leave = function (cb) {
   if (!this.network) return
   debug('leaveNetwork()')
   this.archive.unreplicate()
@@ -96,16 +124,28 @@ Dat.prototype.leaveNetwork = function (cb) {
   delete this.network
 }
 
+/**
+ * Pause Dat Network
+ * @type {Function}
+ */
 Dat.prototype.pause = function () {
   debug('pause()')
   this.leave()
 }
 
+/**
+ * Resume Dat Network
+ * @type {Function}
+ */
 Dat.prototype.resume = function () {
   debug('resume()')
   this.join()
 }
 
+/**
+ * Track archive stats
+ * @type {Function}
+ */
 Dat.prototype.trackStats = function (opts) {
   opts = xtend({}, opts)
   this.stats = stats(this.archive, opts)
@@ -136,13 +176,18 @@ Dat.prototype.importFiles = function (src, opts, cb) {
   return self.importer
 }
 
+/**
+ * Close Dat archive and other things
+ * @type {Function}
+ * @param {Function} [cb] - Callback after all items closed
+ */
 Dat.prototype.close = function (cb) {
   cb = cb || noop
   if (this._closed) return cb(new Error('Dat is already closed'))
 
   var self = this
   self._closed = true
-  self.archive.unreplicate()
+  // self.archive.unreplicate()
 
   var done = multicb()
   closeNet(done())

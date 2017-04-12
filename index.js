@@ -1,17 +1,26 @@
 var assert = require('assert')
 var fs = require('fs')
-var path = require('path')
 var xtend = require('xtend')
 var hyperdrive = require('hyperdrive')
 var encoding = require('dat-encoding')
-var datStore = require('dat-secret-storage')
-var ram = require('random-access-memory')
 // var debug = require('debug')('dat-node')
+var datStore = require('./lib/storage')
 var Dat = require('./dat')
 
 module.exports = createDat
 
-function createDat (dirOrDrive, opts, cb) {
+/**
+ * Create a Dat instance, archive storage, and ready the archive.
+ * @param {string|object} dirOrStorage - Directory or hyperdrive storage object.
+ * @param {object} [opts] - Dat-node options and any hyperdrive init options.
+ * @param {String|Buffer} [opts.key] - Hyperdrive key
+ * @param {Boolean} [opts.createIfMissing = true] - Create storage if it does not exit.
+ * @param {Boolean} [opts.errorIfExists = false] - Error if storage exists.
+ * @param {Boolean} [opts.temp = false] - Use random-access-memory for temporary storage
+ * @param {function(err, dat)} cb - callback that returns `Dat` instance
+ * @see defaultStorage for storage information
+ */
+function createDat (dirOrStorage, opts, cb) {
   if (!cb) {
     cb = opts
     opts = {}
@@ -21,14 +30,13 @@ function createDat (dirOrDrive, opts, cb) {
   assert.equal(typeof cb, 'function', 'dat-node: callback required')
 
   var archive
-  var dir
-  var isDir = false
   var key = opts.key ? encoding.toBuf(opts.key) : null
-  var storage = defaultStorage(dirOrStorage)
+  var storage = datStore(dirOrStorage, opts)
   var createIfMissing = !(opts.createIfMissing === false)
   var errorIfExists = opts.errorIfExists || false
   opts = xtend({
-    dir: dir
+    // TODO: make sure opts.dir is a directory, not file
+    dir: (typeof dirOrStorage === 'string') ? dirOrStorage : null
   }, opts)
 
   // TODO: Use hyperdrive option?
@@ -37,6 +45,7 @@ function createDat (dirOrDrive, opts, cb) {
 
   /**
    * Check if archive storage folder exists.
+   * @private
    */
   function checkIfExists () {
     // TODO: set err type
@@ -61,41 +70,14 @@ function createDat (dirOrDrive, opts, cb) {
   /**
    * Create the archive and call `archive.ready()` before callback.
    * Set `archive.resumed` if archive has a content feed.
+   * @private
    */
   function create () {
     archive = hyperdrive(storage, key, opts)
     archive.ready(function () {
-      // TODO: make sure this is accurate
-      if (archive.metadata.has(0)) archive.resumed = true
+      if (archive.metadata.has(0) && archive.version) archive.resumed = true
 
       cb(null, new Dat(archive, opts))
     })
-  }
-
-  /**
-   * Parse the storage argument and return storage for hyperdrive.
-   * By default, uses dat-secret-storage to storage secret keys in user's home directory.
-   * @param {string|object} dirOrStorage - Storage for hyperdrive.
-   *   `string` is a directory or file. Directory: `/my-data`, storage will be in `/my-data/.dat`.
-   *   Single File: `/my-file.zip`, storage will be in memory.
-   *   Object is a hyperdrive storage object `{metadata: fn, content: fn}`.
-   * @returns {object} hyperdrive storage object
-   */
-  function defaultStorage (dirOrStorage) {
-    // Use custom storage or ram
-    if (typeof dirOrStorage !== 'string') return dirOrStorage
-    if (opts.temp) return ram
-
-    // Archive is dir with `.dat` folder storage
-    // TODO: what if dir doesn't exist?
-    isDir = fs.statSync(dirOrStorage).isDirectory()
-    if (isDir) {
-      dir = dirOrStorage
-      return datStore(path.join(dirOrStorage, '.dat'))
-    }
-
-    // Archive is single file
-    // TODO: permanent storage for sharing single file. For now, error.
-    return cb(new Error('Storage must be dir or opts.temp'))
   }
 }
