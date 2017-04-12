@@ -8,7 +8,7 @@ You can start using Dat today in these client applications:
 
 * [Dat Command Line](https://github.com/datproject/dat): Use Dat in the command line
 * [Dat Desktop](https://github.com/datproject/dat-desktop): A desktop application for Dat
-* [Beaker Browser](beakerbrowser.com): An experimental P2P browser with Dat built in
+* [Beaker Browser](https://beakerbrowser.com): An experimental P2P browser with Dat built in
 
 **dat-node** is a high-level module to help
 you build node applications using Dat on the *file system*.
