@@ -28,7 +28,7 @@
     "discovery-swarm": "^4.3.0",
     "hyperdrive": "^8.0.1",
     "hyperdrive-network-speed": "^2.0.0",
-    "mirror-folder": "^1.2.2",
+    "mirror-folder": "^2.0.0",
     "multicb": "^1.2.1",
     "random-access-memory": "^2.3.0",
     "untildify": "^3.0.2",

@@ -28,7 +28,7 @@ test('prep', function (t) {
     shareKey = dat.key
     shareDat = dat
     dat.joinNetwork({ dht: false })
-    dat.importFiles({ live: true }, function () { // need live for live download tests!
+    dat.importFiles({ watch: true }, function () { // need live for live download tests!
       testFolder(function () {
         t.end()
       })
