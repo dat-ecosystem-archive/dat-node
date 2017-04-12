@@ -51,6 +51,12 @@ function Dat (archive, opts) {
         return self.archive.live
       }
     },
+    resumed: {
+      enumerable: true,
+      get: function () {
+        return self.archive.resumed
+      }
+    },
     writable: {
       enumerable: true,
       get: function () {
@@ -118,7 +124,8 @@ Dat.prototype.leaveNetwork =
 Dat.prototype.leave = function (cb) {
   if (!this.network) return
   debug('leaveNetwork()')
-  this.archive.unreplicate()
+  // TODO: v8 unreplicate ?
+  // this.archive.unreplicate()
   this.network.leave(this.archive.discoveryKey)
   this.network.destroy(cb)
   delete this.network
@@ -187,7 +194,6 @@ Dat.prototype.close = function (cb) {
 
   var self = this
   self._closed = true
-  // self.archive.unreplicate()
 
   var done = multicb()
   closeNet(done())
@@ -197,10 +203,8 @@ Dat.prototype.close = function (cb) {
   done(cb)
 
   function closeArchive (cb) {
-    self.archive.close(function (err) {
-      if (err) return cb(err)
-      return cb()
-    })
+    // self.archive.unreplicate()
+    self.archive.close(cb)
   }
 
   function closeNet (cb) {
@@ -210,11 +214,8 @@ Dat.prototype.close = function (cb) {
 
   function closeFileWatch (cb) {
     if (!self.importer) return cb()
-    self.importer.close()
-    process.nextTick(function () {
-      // TODO: dat importer close is currently sync-ish
-      cb()
-    })
+    self.importer.destroy()
+    process.nextTick(cb)
   }
 }
 
