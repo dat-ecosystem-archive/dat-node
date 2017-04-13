@@ -203,6 +203,24 @@ test('share: cleanup', function (t) {
   })
 })
 
+test('share: dir storage and opts.temp', function (t) {
+  Dat(fixtures, {temp: true}, function (err, dat) {
+    t.error(err, 'error')
+
+    dat.importFiles(function (err) {
+      t.error(err, 'error')
+      verifyArchiveFixtures(t, dat.archive, done)
+    })
+
+    function done (err) {
+      t.error(err, 'error')
+      dat.close(function () {
+        t.end()
+      })
+    }
+  })
+})
+
 test('share: ram storage & import other dir', function (t) {
   Dat(ram, function (err, dat) {
     t.error(err, 'error')
