@@ -1,13 +1,12 @@
 var fs = require('fs')
 var path = require('path')
 var test = require('tape')
-var anymatch = require('anymatch')
 var rimraf = require('rimraf')
 
 var Dat = require('..')
 var fixtures = path.join(__dirname, 'fixtures')
 
-test('custom ignore extends default (string)', function (t) {
+test('importing: custom ignore extends default (string)', function (t) {
   rimraf.sync(path.join(fixtures, '.dat')) // for previous failed tests
   Dat(fixtures, {temp: true}, function (err, dat) {
     t.error(err)
@@ -23,11 +22,10 @@ test('custom ignore extends default (string)', function (t) {
   })
 })
 
-test('custom ignore extends default (array)', function (t) {
+test('importing: custom ignore extends default (array)', function (t) {
   Dat(fixtures, {temp: true}, function (err, dat) {
     t.error(err)
     dat.importFiles({ ignore: ['super_secret_stuff/*', '**/*.txt'] }, function () {
-
       var shouldIgnore = dat.options.importer.ignore
 
       t.ok(shouldIgnore('.dat'), '.dat still feeling left out =(')
@@ -41,11 +39,10 @@ test('custom ignore extends default (array)', function (t) {
   })
 })
 
-test('ignore hidden option turned off', function (t) {
+test('importing: ignore hidden option turned off', function (t) {
   Dat(fixtures, {temp: true}, function (err, dat) {
     t.error(err)
     dat.importFiles({ ignoreHidden: false }, function () {
-
       var shouldIgnore = dat.options.importer.ignore
 
       t.ok(shouldIgnore('.dat'), '.dat still feeling left out =(')
@@ -59,7 +56,7 @@ test('ignore hidden option turned off', function (t) {
   })
 })
 
-test('import with options but no callback', function (t) {
+test('importing: import with options but no callback', function (t) {
   Dat(fixtures, {temp: true}, function (err, dat) {
     t.error(err)
     var importer = dat.importFiles({ dryRun: true })
@@ -74,7 +71,7 @@ test('import with options but no callback', function (t) {
   })
 })
 
-test('import with .datignore', function (t) {
+test('importing: import with .datignore', function (t) {
   fs.writeFileSync(path.join(fixtures, '.datignore'), 'ignoreme.txt')
   fs.writeFileSync(path.join(fixtures, 'ignoreme.txt'), 'hello world')
   Dat(fixtures, {temp: true}, function (err, dat) {
@@ -97,7 +94,7 @@ test('import with .datignore', function (t) {
   })
 })
 
-test('import with opts.useDatIgnore false', function (t) {
+test('importing: import with opts.useDatIgnore false', function (t) {
   fs.writeFileSync(path.join(fixtures, '.datignore'), 'ignoreme.txt')
   fs.writeFileSync(path.join(fixtures, 'ignoreme.txt'), 'hello world')
   Dat(fixtures, {temp: true}, function (err, dat) {
@@ -117,7 +114,6 @@ test('import with opts.useDatIgnore false', function (t) {
       })
     })
     importer.on('put', function (file) {
-      console.log('put', file.name)
       if (file.name.indexOf('ignoreme.txt') > -1) {
         fileImported = true
         t.pass('ignored file imported')
