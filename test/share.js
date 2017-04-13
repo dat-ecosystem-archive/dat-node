@@ -161,42 +161,42 @@ if (!process.env.TRAVIS) {
       }
     })
   })
-}
 
-test('share: live resume & create new file', function (t) {
-  var newFile = path.join(fixtures, 'new.txt')
-  Dat(fixtures, function (err, dat) {
-    t.error(err, 'error')
-    t.ok(dat.resumed, 'was resumed')
-
-    var importer = dat.importFiles({ watch: true }, function (err) {
+  test('share: live resume & create new file', function (t) {
+    var newFile = path.join(fixtures, 'new.txt')
+    Dat(fixtures, function (err, dat) {
       t.error(err, 'error')
-      if (!err) t.fail('watch import should not cb')
-    })
+      t.ok(dat.resumed, 'was resumed')
 
-    importer.on('put-end', function (src) {
-      if (src.name.indexOf('new.txt') === -1) return
-      t.ok(src.live, 'file put is live')
-      process.nextTick(done)
-    })
+      var importer = dat.importFiles({ watch: true }, function (err) {
+        t.error(err, 'error')
+        if (!err) t.fail('watch import should not cb')
+      })
 
-    fs.writeFile(newFile, 'hello world', function (err) {
-      t.ifError(err, 'error')
-    })
+      importer.on('put-end', function (src) {
+        if (src.name.indexOf('new.txt') === -1) return
+        t.ok(src.live, 'file put is live')
+        process.nextTick(done)
+      })
 
-    function done () {
-      dat.archive.stat('/new.txt', function (err, stat) {
+      fs.writeFile(newFile, 'hello world', function (err) {
         t.ifError(err, 'error')
-        t.ok(stat, 'new file in archive')
-        fs.unlink(newFile, function () {
-          dat.close(function () {
-            t.end()
+      })
+
+      function done () {
+        dat.archive.stat('/new.txt', function (err, stat) {
+          t.ifError(err, 'error')
+          t.ok(stat, 'new file in archive')
+          fs.unlink(newFile, function () {
+            dat.close(function () {
+              t.end()
+            })
           })
         })
-      })
-    }
+      }
+    })
   })
-})
+}
 
 test('share: cleanup', function (t) {
   cleanFixtures(function () {
