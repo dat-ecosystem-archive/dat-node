@@ -1,5 +1,8 @@
 # dat-node
 
+> **dat-node** is a high-level module to help
+you build applications using Dat on the *file system*.
+
 [![npm][0]][1] [![Travis][2]][3] [![Test coverage][4]][5]
 
 [Dat](http://datproject.org) is a decentralized tool for distributing data and
@@ -10,125 +13,203 @@ You can start using Dat today in these client applications:
 * [Dat Desktop](https://github.com/datproject/dat-desktop): A desktop application for Dat
 * [Beaker Browser](beakerbrowser.com): An experimental P2P browser with Dat built in
 
-**dat-node** is a high-level module to help
-you build node applications using Dat on the *file system*.
-See [dat-js](https://github.com/datproject/dat-js) if you want to build browser-friendly Dat applications.
+#### Resources
 
-#### Learn more! [docs.datproject.org](http://docs.datproject.org/) or [chat with us](https://gitter.im/datproject/discussions) ([#dat on IRC](http://webchat.freenode.net/?channels=dat))
-
-#### Read about the Dat protocol at [datprotocol.com](https://www.datprotocol.com/)
+* [Dat Project Docs](http://docs.datproject.org/)
+* [Dat Protocol](https://www.datprotocol.com/)
+* [Gitter Chat](https://gitter.im/datproject/discussions) or [#dat on IRC](http://webchat.freenode.net/?channels=dat)
 
 ### Features
 
-* Consistent management of Dat archives across applications
-* Join the Dat network, using [discovery-swarm](https://github.com/mafintosh/discovery-swarm)
-* Track archive stats, using [hyperdrive-stats](https://github.com/juliangruber/hyperdrive-stats) and [hyperdrive-network-speed](https://github.com/joehand/hyperdrive-network-speed)
-* Import files from the file system, using [hyperdrive-import-files](https://github.com/juliangruber/hyperdrive-import-files/)
+* High-level glue for common Dat and [hyperdrive](https://github.com/mafintosh/hyperdrive) modules.
+* Sane defaults and consistent management of storage across applications.
+* Connect to the Dat network, using [discovery-swarm](https://github.com/mafintosh/discovery-swarm)
+* Import files from the file system, using [mirror-folder](https://github.com/mafintosh/mirror-folder/)
 
-### Goal of dat-node
+#### Browser Support
 
-Dat-node's primary goals are:
+Many of our dependencies work in the browser, but `dat-node` is tailored for file system applications. See [dat-js](https://github.com/datproject/dat-js) if you want to build browser-friendly Dat applications.
 
-* *consistent management* of Dat archives on the file system. The Dat CLI uses Dat-node. Any applications built using dat-node will be compatible with the Dat CLI and each other.
-* High-level glue for common Dat and hyperdrive modules, including: [discovery-swarm](https://github.com/mafintosh/discovery-swarm), [hyperdrive-stats](https://github.com/juliangruber/hyperdrive-stats), and [hyperdrive-import-files](https://github.com/juliangruber/hyperdrive-import-files/).
+## Example
 
-## Usage
+To share files over dat:
 
-dat-node manages a single archive inside of a folder. The folder contains the files you want to share or where the files will be downloaded. A `.dat` folder will be created inside the archive folder for the database.
-
-### Creating a Dat Archive
-
-Create a Dat archive on the file system inside `dir`:
+* Tell dat-node where your files are.
+* Import the files into the dat.
+* Share the files to other users on the Dat network!
 
 ```js
 var Dat = require('dat-node')
 
-Dat(dir, function (err, dat) {
-  console.log(dat.path) // dat is created here with a .dat folder
+Dat('/joe/cat-pic-analysis', function (err, dat) {
+  if (err) throw err
 
-  var db = dat.db // level db in .dat folder
-  var archive = dat.archive // hyperdrive archive
-  var key = dat.key // the archive key
-
-  // Import Files
-  var importer = dat.importFiles(opts, cb) // hyperdrive-count-import
-})
-```
-
-This will create a `.dat` folder inside `dir` and import all the files within that directory.
-
-To share the directory, you can join the network:
-
-```js
-Dat(dir, function (err, dat) {
-  var importer = dat.importFiles(function () {
-    console.log('Done importing')
+  console.log('My Dat link is: dat://', dat.key.toString('hex'))
+  dat.importFiles(function (err) {
+    if (err) throw err
+    console.log('Done Importing!')
   })
-
-  // Join Network
-  var network = dat.joinNetwork()
-  console.log('Share your dat:', dat.key.toString('hex'))
+  dat.joinNetwork()
 })
 ```
 
-This will join the network as soon as you start importing files. This means peers can download files as soon as they are imported!
+These files are now available to share over the dat network via the key printed in the console.
 
-### Downloading a Dat archive
-
-Downloading a Dat archive is similar, but you also have to pass `{key: <download-key} as an option. You have to join the network in order for downloads to start!
+To download the files, you can make another dat-node instance in a different folder:
 
 ```js
 var Dat = require('dat-node')
 
-Dat(dir, {key: 'download-key'}, function (err, dat) {
-  // Join the network
-  var network = dat.joinNetwork(opts)
-  network.activeConnections // number of connected peers
+var key = '' // key printed above
 
-  // Track stats
-  var stats = dat.trackStats() // hyperdrive-stats
-  stats.network // hyperdrive-network-speed
+Dat('/download/cat-analysis', {key: key}, function (err, dat) {
+  dat.joinNetwork()
 })
 ```
 
-Dat-node uses hyperdrive stats to track how much has been downloaded so you can display progress and exit when the download is finished.
-
-### FAQ
-
-#### How do I start/stop replicating an archive?
-
-Dat-node will automatically start replication when you join the network (`dat.joinNetwork`). To stop replicating an archive, leave the network (`dat.leave()`).
+Thats it! By default, all files are automatically downloaded when you connect to the other users.
 
 ### Example Applications
 
-* [dat-next](https://github.com/joehand/dat-next): We use dat-node in the dat-next CLI. See that for a full example of how to use dat-node.
-* YOUR APP HERE. *Use dat-node in an interesting use case? Send us your example!*
+* [Dat CLI](https://github.com/datproject/dat): We use dat-node in the dat CLI.
+* [Dat Desktop](https://github.com/datproject/dat-desktop): The Dat Desktop application manages multiple dat-node instances via [dat-worker](https://github.com/juliangruber/dat-worker).
+* See the [examples folder](examples/readme.md) for a minimal share + download usage.
+* And more! Let us know if you have a neat dat-node application to add here.
+
+## Usage
+
+All dat-node applications have a similar structure around three main elements:
+
+1. **Storage** - where the files and metadata are stored.
+2. **Network** - connecting to other users to upload or download data.
+3. **Adding Files** - adding files from the file system to the hyperdrive archive.
+
+We'll go through what these are for and a few of the common usages of each element. 
+
+### Storage
+
+Every dat archive has **storage**, this is the required first argument for dat-node. Common options are:
+
+* **Persistent storage**: Stored files in `/my-dir` and metadata in `my-dir/.dat` by passing `/my-dir` as the first argument.
+* **Temporary Storage**: Use the `temp: true` option to keep metadata stored in memory.
+
+```js
+// Permanent Storage
+Dat('/my-dir', function (err, dat) {
+  // Do Dat Stuff
+})
+
+// Temporary Storage
+Dat('/my-dir', {temp: true}, function (err, dat) {
+  // Do Dat Stuff
+})
+```
+
+Both of these will import files from `/my-dir` when doing `dat.importFiles()` but only the first will make a `.dat` folder and keep the metadata on disk.
+
+The storage argument can also be passed through to hyperdrive for more advanced storage use cases (TODO: Document these =)).
+
+### Network
+
+Dat is all about the network! You'll almost always want to join the network right after you create your Dat:
+
+```js
+Dat('/my-dir', function (err, dat) {
+  dat.joinNetwork()
+  dat.network.on('connection', function () {
+    console.log('I connected to someone!')
+  })
+})
+```
+
+#### Downloading Files
+
+Remember, if you are downloading - metadata and file downloads will happen automatically once you join the network!
+
+Dat runs on a peer to peer network, sometimes there may not be anyone online for a particular key. You can make your application more user friendly by using the callback in `joinNetwork`:
+
+```js
+// Downloading <key> with joinNetwork callback
+Dat('/my-dir', {key: '<key>'}, function (err, dat) {
+  dat.joinNetwork(function (err) {
+    if (err) throw err
+
+    // After the first round of network checks, the callback is called
+    // If no one is online, you can exit and let the user know.
+    if (!dat.network.connected) {
+      console.error('No users currently online for that key.')
+      process.exit(1)
+    }
+  })
+})
+```
+
+##### Download on Demand
+
+If you want to control what files and metadata are downloaded, you can use the sparse option:
+
+```js
+// Downloading <key> with sparse option
+Dat('/my-dir', {key: '<key>', sparse: true}, function (err, dat) {
+  dat.joinNetwork()
+
+  // Manually download files via the hyperdrive API:
+  dat.archive.readFile('/cat-locations.txt', function (err, content) {
+    console.log(content) // prints cat-locations.txt file!
+  })
+})
+```
+
+Dat will only download metadata and content for the parts you request with `sparse` mode!
+
+### Importing Files
+
+There are many ways to get files imported into an archive! Dat node provides a few basic methods. If you need more advanced imports, you can use the `archive.createWriteStream()` methods directly.
+
+By default, just call `dat.importFiles()` to import from the directory you initialized with. You can watch that folder for changes by setting the watch option:
+
+```js
+Dat('/my-data', function (err, dat) {
+  if (err) throw err
+
+  var progress = dat.importFiles({watch: true}) // with watch: true, there is no callback
+  progress.on('put', function (src, dest) {
+    console.log('Importing ', src.name, ' into archive')
+  })
+})
+```
+
+You can also import from another directory:
+
+```js
+Dat('/my-data', function (err, dat) {
+  if (err) throw err
+
+  dat.importFiles('/another-dir', function (err) {
+    console.log('done importing another-dir')
+  })
+})
+```
+
+That covers some of the common use cases, let us know if there are more to add! Keep reading for the full API docs.
 
 ## API
 
-### `Dat(dir|drive, [opts], cb)``
+### `Dat(dir|storage, [opts], callback(err, dat))`
 
-Initialize a Dat Archive in `dir`. If there is an existing Dat Archive, the archive will be resumed. You can also pass a `hyperdrive` instance.
+Initialize a Dat Archive in `dir`. If there is an existing Dat Archive, the archive will be resumed.
 
-**`dir` or `opts.dir` is always required.**
+* `storage` is passed to hyperdrive. For example, `storage` count be `require('random-access-file`'). Default storage is still in flux! We'll add more docs here soon.
 
 Most options are passed directly to the module you're using (e.g. `dat.importFiles(opts)`. However, there are also some initial `opts` can include:
 
 ```js
 opts = {
-  dir: 'some/dir', // REQUIRED: directory for the files + database
   key: '<dat-key>', // existing key to create archive with or resume
-  db: level(path.join(opts.dir, '.dat')) // custom level compatible db
+  temp: false, // Use random-access-memory as the storage.
 
   // Hyperdrive options
-  live: false, // archive.live setting (only set if archive is owned)
-  file: raf(path.join(opts.dir, name)), // file option for hyperdrive.createArchive()
-  sparse: false, // set this to only download the pieces of the feed you are requesting / prioritizing
-
-  // If only dir is specified (not drive or db) You can use these options:
-  createIfMissing: true, // create db if doesn't exist
-  errorIfExists: false, // error if existing archive in database
-  dbPath: path.join(opts.dir,'.dat') // directory name for level database
+  sparse: false // download only files you request
 }
 ```
 
@@ -136,10 +217,9 @@ The callback, `cb(err, dat)`, includes a `dat` object that has the following pro
 
 * `dat.key`: key of the dat (this will be set later for non-live archives)
 * `dat.archive`: Hyperdrive archive instance.
-* `dat.db`: leveldb database in `.dat` folder
 * `dat.path`: Path of the Dat Archive
 * `dat.live`: `archive.live`
-* `dat.owner`: `archive.owner`
+* `dat.writable`: Is the `archive` writable?
 * `dat.resumed`: `true` if the archive was resumed from an existing database
 * `dat.options`: All options passed to Dat and the other submodules
 
@@ -155,7 +235,7 @@ If you specify `cb`, it will be called *when the first round* of discovery has c
 
 Returns a `network` object with properties:
 
-* `network.activeConnections` - number of peers connected
+* `network.connected` - number of peers connected
 * `network.on('listening')` - emitted with network is listening
 * `network.on('connection', connection, info)` - Emitted when you connect to another peer. Info is an object that contains info about the connection
 
@@ -191,34 +271,25 @@ Returns a [discovery-swarm](https://github.com/mafintosh/discovery-swarm) instan
 
 Leaves the network for the archive.
 
-#### `var importer = dat.importFiles([dir], [opts], [cb])`
+#### `var importer = dat.importFiles([src], [opts], [cb])`
 
-**(must be the archive owner)**
+**Archive must be writable to import.**
 
-Import files to your Dat Archive from the directory using [hyperdrive-import-files](https://github.com/juliangruber/hyperdrive-import-files/).
+Import files to your Dat Archive from the directory using [mirror-folder](https://github.com/mafintosh/mirror-folder/).
 
-* `dir` - By default, files will be imported from the folder where the archive was initiated. Import files from another directory by specifying `dir`.
-* `opts` - options passed to hyperdrive-import-files (see below).
+* `src` - By default, files will be imported from the folder where the archive was initiated. Import files from another directory by specifying `src`.
+* `opts` - options passed to mirror-folder (see below).
 * `cb` - called when import is finished.
 
 Returns a `importer` object with properties:
 
 * `importer.on('error', err)`
-* `importer.on('file imported', { path, mode=updated|created })` - file imported
-* `importer.on('file skipped', { path })` - duplicate file in directory skipped importing
-* `importer.on('file watch event', { path })` - file watch event fired
-* `importer.fileCount` - the count of currently known files
-* `importer.totalSize` - total file size in bytes for `fileCount` files
-* `importer.bytesImported` - total number of bytes imported so far
-* `importer.countStats.files` - total number of files counted in target directory
-* `importer.countStats.bytes` - total number of bytes in target directory.
-
-##### Importer Progress
-
-To get import progress use:
-
-* `importer.fileCount / importer.countStats.files` for file progress
-* `importer.bytesImported / importer.countStats.bytes` for byte progress
+* `importer.on('put', src, dest)` - file put started. `src.live` is true is file was added by file watch event.
+* `importer.on('put-data', chunk)` - chunk of file added
+* `importer.on('put-end', src, dest)` - end of file write stream
+* `importer.on('del', dest)` - file deleted from dest
+* `importer.on('end')` - Emits when mirror is done (not emitted in watch mode)
+* `importer.on('count', {files, dirs, bytes})` - Emitted after initial scan of src directory
 
 ##### Importer Options
 
@@ -230,26 +301,18 @@ var opts = {
   useDatIgnore: true, // ignore entries in the `.datignore` file from import dir target.
   ignore: // (see below for default info) anymatch expression to ignore files
   watch: false, // watch files for changes & import on change (archive must be live)
-  overwrite: true, // allow files in the archive to be overwritten (defaults to true)
-  resume: false, // assume the archive isn't fresh
-  basePath: '', // where in the archive should the files import to? (defaults to '')
-  dryRun: false, // step through the import, but don't write any files to the archive (defaults to false)
-  indexing: true // Useful if target === dest so hyperdrive does not rewrite the files on import. (defaults to true if target === dest)
-  compareFileContent: false // compare import-candidates to archive's internal copy. If false, will only compare mtime and file-size, which is faster but may reslt in false-positives.
 }
 ```
 
 ##### Ignoring Files
 
-`dat-node` provides a default ignore option, ignoring the `.dat` folder and all hidden files or directories. Use `opts.ignoreHidden = false` to import hidden files or folders, except the `.dat` directory.
+You can use a `.datignore` file in the imported directory, `src`, to ignore any the user specifies. This is done by default.
 
-Additionally, you can use a `.datignore` file to ignore any the user specifies. This is done by default.
+`dat-node` uses [dat-ignore](https://github.com/joehand/dat-ignore) to provide a default ignore option, ignoring the `.dat` folder and all hidden files or directories. Use `opts.ignoreHidden = false` to import hidden files or folders, except the `.dat` directory.
 
 *It's important that the `.dat` folder is not imported because it contains a private key that allows the owner to write to the archive.*
 
 #### `var stats = dat.trackStats()`
-
-[hyperdrive-stats](https://github.com/juliangruber/hyperdrive-stats) instance for the Dat Archive. Stats are stored in a sublevel database in the `.dat` folder.
 
 ##### `stats.network`
 
@@ -259,7 +322,6 @@ Get upload and download speeds: `stats.network.uploadSpeed` or `stats.network.do
 
 * `peers.total` - total number of connected peers
 * `peers.complete` - connected peers with all the content data
-* `peers.downloadingFrom` - connected peers the user has downloaded data from
 
 #### `dat.pause()`
 
@@ -274,124 +336,8 @@ Resume network activity. Current, this is the same as `dat.joinNetwork()`.
 Stops replication and closes all the things opened for dat-node, including:
 
 * `dat.archive.close(cb)`
-* `dat.db.close(cb)`
 * `dat.network.close(cb)`
-* `dat.importer.close()` (file watcher)
-
-If you passed `opts.db`, you'll be responsible for closing it.
-
-### Advanced Usage
-
-### Multiple Archives
-
-Check out the [multidat module](https://github.com/yoshuawuyts/multidat) with dat-node to manage many archives in one place.
-
-### One Swarm - Many Connections
-
-**TODO** - Use a single swarm to manage many connections (hyperdiscovery is  1 swarm to 1 archive).
-
-## Moving from dat-js
-
-#### dat-js -> dat-node
-
-Dat-node was previously published as dat-js.
-
-* Dat-node ^0.1.0 is compatible with dat-js ^4.0.0
-* Dat-node 1.0.0 uses a new API. See details below for how to move from the old dat-js API.
-
-Dat-node 1.0 has a very different API than dat-js and dat-node v0. The previous API returned an object with events. The new API uses a callback to ensure everything is done before using the archive.
-
-Archives are created with a callback function. Once the archive is created, you can join the network directly without choosing to share or download. If the user owns the archive, they will be able to import files.
-
-Directory is now the first argument, and a required argument.
-
-#### Sharing
-
-For example, previously to share files with dat-js we would write:
-
-```js
-// dat-js OLD API
-var dat = Dat({dir: dir})
-dat.share(function () {
-   // automatically import files
-   // automatically join network
-  console.log('now sharing:', dat.key.toString())
-})
-```
-
-In dat-node this would be:
-
-```js
-// dat-node v1 NEW API
-Dat(dir, function (err, dat) {
-  var network = dat.joinNetwork(opts) // join network
-  console.log('now sharing:', dat.key.toString())
-
-  // import files
-  var importer = dat.importFiles(opts, function () {
-    console.log('done importing files')
-  })
-
-  // get stats info (via hyperdrive-stats)
-  var stats = dat.trackStats()
-})
-```
-
-You may have used the `dat.open()` function previously. This is now done before the callback, no need to open anything! Don't worry, you can still close it.
-
-#### Downloading
-
-Previously to download files with dat-js we would write:
-
-```js
-// dat-js OLD API
-var dat = Dat({dir: dir, key: link})
-dat.download()
-console.log('downloading...')
-```
-
-In dat-node this would be:
-
-```js
-// dat-node v1 NEW API
-Dat(dir, {key: link}, function (err, dat) {
-  var network = dat.joinNetwork(opts) // join network
-  console.log('now downloading')
-
-  var stats = dat.trackStats() // get hyperdrive-stats info
-})
-```
-
-## Contributing
-
-* Use [standardjs](http://standardjs.com/) formatting
-* `npm test` to run the tests
-* Have fun!
-
-### Tour de Code
-
-* `index.js` validates the arguments and initializes the archive with `lib/init-archive.js`
-* `dat.js` contains the `dat` class that is returned with the main callback.
-* `lib/*` contains opinionated wrappers around the modules we use (with the exception of `lib/init-archive.js`). Some of this may move into the modules themselves eventually (or into `dat.js`).
-
-#### `lib/import-files.js` 
-
-* sets default ignore options.
-* counts the files in target import directory for progress calculations
-
-#### `lib/stats.js`
-
-* Creates a sublevel database for hyperdrive-stats persistence
-* Combines hyperdrive-stats and hyperdrive-network-speed into one interface.
-
-#### `lib/network.js`
-
-* Honestly doesn't do anything anymore. Could probably remove at this point =).
-
-#### `lib/init-archive.js`
-
-* This is a temporary workaround for resuming existing archives. It looks pretty confusing, and it is.
-* Hyperdrive is moving to a one database = one archive model. Once updated, that change will eliminate the need for most of this file.
+* `dat.importer.destroy()` (file watcher)
 
 ## License
 
