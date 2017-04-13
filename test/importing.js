@@ -2,9 +2,35 @@ var fs = require('fs')
 var path = require('path')
 var test = require('tape')
 var rimraf = require('rimraf')
+var countFiles = require('count-files')
 
 var Dat = require('..')
 var fixtures = path.join(__dirname, 'fixtures')
+
+test('importing: import two directories at same time', function (t) {
+  rimraf.sync(path.join(fixtures, '.dat')) // for previous failed tests
+  Dat(fixtures, {temp: true}, function (err, dat) {
+    t.error(err, 'error')
+    var pending = 2
+    dat.importFiles(function (err) {
+      t.error(err, 'error')
+      t.pass('ok')
+      if (!--pending) done()
+    })
+    dat.importFiles(path.join(__dirname, '..', 'examples'), function (err) {
+      t.error(err, 'error')
+      if (!--pending) done()
+    })
+
+    function done () {
+      countFiles({fs: dat.archive, name: '/'}, function (err, count) {
+        t.error(err, 'error')
+        t.same(count.files, 5, 'five files total')
+        t.end()
+      })
+    }
+  })
+})
 
 test('importing: custom ignore extends default (string)', function (t) {
   rimraf.sync(path.join(fixtures, '.dat')) // for previous failed tests
