@@ -1,7 +1,6 @@
 # dat-node
 
-> **dat-node** is a high-level module to help
-you build applications using Dat on the *file system*.
+> **dat-node** is a high-level module for building Dat applications on the file system.
 
 [![npm][0]][1] [![Travis][2]][3] [![Test coverage][4]][5]
 
@@ -13,7 +12,7 @@ You can start using Dat today in these client applications:
 * [Dat Desktop](https://github.com/datproject/dat-desktop): A desktop application for Dat
 * [Beaker Browser](beakerbrowser.com): An experimental P2P browser with Dat built in
 
-#### Resources
+#### Dat Project Documentation & Resources
 
 * [Dat Project Docs](http://docs.datproject.org/)
 * [Dat Protocol](https://www.datprotocol.com/)
@@ -23,8 +22,9 @@ You can start using Dat today in these client applications:
 
 * High-level glue for common Dat and [hyperdrive](https://github.com/mafintosh/hyperdrive) modules.
 * Sane defaults and consistent management of storage across applications.
-* Connect to the Dat network, using [discovery-swarm](https://github.com/mafintosh/discovery-swarm)
+* Easily connect to the Dat network, using [discovery-swarm](https://github.com/mafintosh/discovery-swarm)
 * Import files from the file system, using [mirror-folder](https://github.com/mafintosh/mirror-folder/)
+* Access APIs to lower level modules with a single `require`!
 
 #### Browser Support
 
@@ -32,42 +32,55 @@ Many of our dependencies work in the browser, but `dat-node` is tailored for fil
 
 ## Example
 
-To share files over dat:
+To send files via Dat:
 
-* Tell dat-node where your files are.
-* Import the files into the dat.
-* Share the files to other users on the Dat network!
+1. Tell dat-node where the files are.
+2. Import the files.
+3. Share the files on the Dat network! (And share the link)
 
 ```js
 var Dat = require('dat-node')
 
+// 1. My files are in /joe/cat-pic-analysis
 Dat('/joe/cat-pic-analysis', function (err, dat) {
   if (err) throw err
 
-  console.log('My Dat link is: dat://', dat.key.toString('hex'))
-  dat.importFiles(function (err) {
-    if (err) throw err
-    console.log('Done Importing!')
-  })
+  // 2. Import the files
+  dat.importFiles()
+
+  // 3. Share the files on the network!
   dat.joinNetwork()
+  // (And share the link)
+  console.log('My Dat link is: dat://', dat.key.toString('hex'))
 })
 ```
 
 These files are now available to share over the dat network via the key printed in the console.
 
-To download the files, you can make another dat-node instance in a different folder:
+To download the files, you can make another dat-node instance in a different folder. This time we also have three steps:
+
+1. Tell dat where I want to download the files.
+2. Tell dat what the link is.
+3. Join the network and download!
 
 ```js
 var Dat = require('dat-node')
 
-var key = '' // key printed above
+// 1. Tell Dat where to download the files
+Dat('/download/cat-analysis', {
+  // 2. Tell Dat what link I want
+  key: '<dat-key>' // (a 64 character hash from above)
+}, function (err, dat) {
+  if (err) throw err
 
-Dat('/download/cat-analysis', {key: key}, function (err, dat) {
+  // 3. Join the network & download (files are automatically downloaded)
   dat.joinNetwork()
 })
 ```
 
 Thats it! By default, all files are automatically downloaded when you connect to the other users.
+
+Dig into more use cases below and please let us know if you have questions! You can [open a new issue](https://github.com/datproject/dat-node/issues) or talk to nice humans in [our chat room](https://gitter.im/datproject/discussions).
 
 ### Example Applications
 
