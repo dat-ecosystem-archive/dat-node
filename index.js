@@ -25,7 +25,7 @@ function createDat (dirOrStorage, opts, cb) {
     cb = opts
     opts = {}
   }
-  assert.ok(typeof dirOrStorage === 'string' || typeof dirOrStorage === 'function', 'dat-node: dirOrStorage should be string or object')
+  assert.ok(dirOrStorage, 'dat-node: directory or storage required')
   assert.equal(typeof opts, 'object', 'dat-node: opts should be type object')
   assert.equal(typeof cb, 'function', 'dat-node: callback required')
 
