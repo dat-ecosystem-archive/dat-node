@@ -2,8 +2,9 @@ var fs = require('fs')
 var path = require('path')
 var test = require('tape')
 var rimraf = require('rimraf')
-var countFiles = require('count-files')
 var ram = require('random-access-memory')
+var countFiles = require('count-files')
+var helpers = require('./helpers')
 
 var Dat = require('..')
 
@@ -65,7 +66,7 @@ test('share: create dat with default ops', function (t) {
       t.same(archive.version, 4, '4th archive version')
       t.same(archive.metadata.length, 5, '5 entries in metadata')
 
-      verifyArchiveFixtures(t, archive, function (err) {
+      helpers.verifyFixtures(t, archive, function (err) {
         t.ifError(err)
         dat.close(function (err) {
           t.ifError(err)
@@ -209,7 +210,7 @@ test('share: dir storage and opts.temp', function (t) {
 
     dat.importFiles(function (err) {
       t.error(err, 'error')
-      verifyArchiveFixtures(t, dat.archive, done)
+      helpers.verifyFixtures(t, dat.archive, done)
     })
 
     function done (err) {
@@ -227,7 +228,7 @@ test('share: ram storage & import other dir', function (t) {
 
     dat.importFiles(fixtures, function (err) {
       t.error(err, 'error')
-      verifyArchiveFixtures(t, dat.archive, done)
+      helpers.verifyFixtures(t, dat.archive, done)
     })
 
     function done (err) {
@@ -242,41 +243,4 @@ test('share: ram storage & import other dir', function (t) {
 function cleanFixtures (cb) {
   cb = cb || function () {}
   rimraf(path.join(fixtures, '.dat'), cb)
-}
-
-function verifyArchiveFixtures (t, archive, cb) {
-  var pending = 4
-
-  archive.stat('/table.csv', function (err, stat) {
-    if (err) return cb(err)
-    t.same(stat.size, 1441, 'stat size ok')
-    if (!--pending) return done()
-  })
-
-  archive.stat('/folder/empty.txt', function (err, stat) {
-    if (err) return cb(err)
-    t.same(stat.size, 0, 'stat size ok')
-    if (!--pending) return done()
-  })
-
-  archive.readdir('/', function (err, entries) {
-    if (err) return cb(err)
-    t.ok(entries.indexOf('table.csv') > -1, 'csv in archive')
-    t.ok(entries.indexOf('folder') > -1, 'sub dir in archive')
-    if (!--pending) return done()
-  })
-
-  archive.readdir('/folder', function (err, entries) {
-    if (err) return cb(err)
-    t.ok(entries.indexOf('empty.txt') > -1, 'has empty file')
-    if (!--pending) return done()
-  })
-
-  function done () {
-    countFiles({fs: archive, name: '/'}, function (err, count) {
-      if (err) return cb(err)
-      t.same(count, fixtureStats, 'archive stats are correct')
-      cb()
-    })
-  }
 }
