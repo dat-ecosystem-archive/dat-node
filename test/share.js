@@ -2,6 +2,9 @@ var fs = require('fs')
 var path = require('path')
 var test = require('tape')
 var rimraf = require('rimraf')
+var ram = require('random-access-memory')
+var countFiles = require('count-files')
+var helpers = require('./helpers')
 
 var Dat = require('..')
 
@@ -10,92 +13,93 @@ try { fs.unlinkSync(path.join(__dirname, 'fixtures', '.DS_Store')) } catch (e) {
 
 var fixtures = path.join(__dirname, 'fixtures')
 var fixtureStats = {
-  filesTotal: 2,
-  bytesTotal: 1441
+  files: 2,
+  bytes: 1441,
+  dirs: 1
 }
-var fixturesKey = '1c9a237203f6397442dfc3430e9e842a2a31ef81c14156a0a3cde83fd614578a'
 var liveKey
 
-test('prep', function (t) {
+test('share: prep', function (t) {
   cleanFixtures(function () {
     t.end()
   })
 })
 
-test('create dat with default ops', function (t) {
+test('share: create dat with default ops', function (t) {
   Dat(fixtures, function (err, dat) {
     t.error(err, 'cb err okay')
     t.ok(dat.path === fixtures, 'correct directory')
     t.ok(dat.archive, 'has archive')
-    t.ok(dat.db, 'has db')
     t.ok(dat.key, 'has key')
     t.ok(dat.live, 'is live')
-    t.ok(dat.owner, 'is owner')
+    t.ok(dat.writable, 'is writable')
     t.ok(!dat.resumed, 'is not resumed')
 
     fs.stat(path.join(fixtures, '.dat'), function (err, stat) {
       t.error(err)
       t.pass('creates .dat dir')
+    })
 
-      liveKey = dat.key
-      var stats = dat.trackStats()
-      var network = dat.joinNetwork()
+    liveKey = dat.key
+    var putFiles = 0
+    var stats = dat.trackStats()
+    var network = dat.joinNetwork()
 
-      stats.once('update', function () {
-        t.pass('stats update triggers')
-      })
+    // TODO: stats tests
+    // stats.once('update', function () {
+    //   t.pass('stats update triggers')
+    // })
 
-      network.once('listening', function () {
-        t.pass('network listening')
-      })
+    network.once('listening', function () {
+      t.pass('network listening')
+    })
 
-      dat.importFiles(function (err) {
-        t.error(err, 'file import err okay')
-        var st = stats.get()
-        dat.archive.list({live: false}, function (err, list) {
-          t.error(err, 'archive list err')
-          var filesAndDir = fixtureStats.filesTotal + 2 // base dir + folder
-          t.same(filesAndDir, list.length, 'total items in list ok')
+    var progress = dat.importFiles(function (err) {
+      t.error(err, 'file import err okay')
+      var archive = dat.archive
+      var st = stats.get()
 
-          var hasTable = list.filter(function (item) {
-            return item.name.indexOf('table.csv') > -1
-          })
-          var hasEmpty = list.filter(function (item) {
-            return item.name.indexOf('empty.txt') > -1
-          })
-          t.ok(hasTable.length, 'table.csv in archive list')
-          t.ok(hasEmpty.length, 'empty.txt in archive list')
+      // TODO: stat tests
+      t.skip(st.files, 'TODO')
 
-          var bytesTotal = 0
-          list.map(function (item) {
-            bytesTotal += item.length
-          })
-          t.same(bytesTotal, fixtureStats.bytesTotal, 'bytes total via list ok')
-          t.skip(st.bytesTotal, fixtureStats.bytesTotal, 'bytes total via stats ok') // TODO: hyperdrive-stats bug?
-          t.skip(st.filesTotal, fixtureStats.filesTotal, 'TODO: files total ok') // empty.txt not showing up?
-          dat.close(function () {
-            t.end()
-          })
+      t.same(putFiles, 4, '4 importer puts')
+      t.same(archive.version, 4, '4th archive version')
+      t.same(archive.metadata.length, 5, '5 entries in metadata')
+
+      helpers.verifyFixtures(t, archive, function (err) {
+        t.ifError(err)
+        dat.close(function (err) {
+          t.ifError(err)
+          t.pass('close okay')
+          t.end()
         })
       })
+    })
+
+    progress.on('put', function () {
+      putFiles++
     })
   })
 })
 
-test('Resume with .dat folder', function (t) {
+test('share: resume with .dat folder', function (t) {
   Dat(fixtures, function (err, dat) {
     t.error(err, 'cb without error')
+    t.ok(dat.writable, 'dat still writable')
     t.ok(dat.resumed, 'resume flag set')
     t.same(liveKey, dat.key, 'key matches previous key')
 
-    var stats = dat.trackStats()
+    countFiles({fs: dat.archive, name: '/'}, function (err, count) {
+      t.ifError(err, 'count err')
+      var archive = dat.archive
 
-    dat.importFiles(function (err) {
-      t.error(err, 'import files without err')
+      t.same(archive.version, 4, '4th archive version still')
 
-      var st = stats.get()
-      t.same(st.bytesTotal, fixtureStats.bytesTotal, 'bytes total still the same')
+      var st = dat.trackStats().get()
+      t.skip(st.bytesTotal, fixtureStats.bytes, 'bytes total still the same')
 
+      t.same(count.bytes, fixtureStats.bytes, 'bytes still ok')
+      t.same(count.files, fixtureStats.files, 'bytes still ok')
       dat.close(function () {
         cleanFixtures(function () {
           t.end()
@@ -105,91 +109,134 @@ test('Resume with .dat folder', function (t) {
   })
 })
 
-test('share snapshot', function (t) {
-  Dat(fixtures, { live: false }, function (err, dat) {
-    t.error(err, 'share cb without error')
+// TODO: live = false, not implemented yet in hyperdrive v8
+// test('share snapshot', function (t) {
+//   Dat(fixtures, { live: false }, function (err, dat) {
+//     t.error(err, 'share cb without error')
 
-    t.ok(!dat.live, 'live false')
-    dat.importFiles(function (err) {
-      t.error(err, 'no error')
-      dat.archive.finalize(function (err) {
-        t.error(err, 'no error')
+//     t.ok(!dat.live, 'live false')
+//     dat.importFiles(function (err) {
+//       t.error(err, 'no error')
+//       dat.archive.finalize(function (err) {
+//         t.error(err, 'no error')
 
-        // TODO: saving mtime breaks this
-        t.skip(fixturesKey, dat.key, 'TODO: key matches snapshot key')
+//         // TODO: saving mtime breaks this
+//         // t.skip(fixturesKey, dat.key, 'TODO: key matches snapshot key')
 
-        dat.close(cleanFixtures(function () {
-          rimraf.sync(path.join(fixtures, '.dat'))
-          t.end()
-        }))
-      })
-    })
-  })
-})
+//         dat.close(cleanFixtures(function () {
+//           rimraf.sync(path.join(fixtures, '.dat'))
+//           t.end()
+//         }))
+//       })
+//     })
+//   })
+// })
 
 if (!process.env.TRAVIS) {
-  test('share live - editing file', function (t) {
+  test('share: live - editing file', function (t) {
     Dat(fixtures, function (err, dat) {
-      t.error(err, 'a okay')
-      var stats = dat.trackStats()
+      t.ifError(err, 'error')
 
-      var importer = dat.importFiles({ live: true }, function () {
-        t.pass('initial import finishes')
-        fs.writeFileSync(path.join(fixtures, 'folder', 'empty.txt'), '')
-        t.skip(stats.get().filesTotal, fixtureStats.filesTotal, 'TODO: files total correct')
+      var importer = dat.importFiles({ watch: true }, function (err) {
+        t.ifError(err, 'error')
+        if (!err) t.fail('live import should not cb')
       })
-
-      importer.on('file imported', function (file) {
-        if (file.mode === 'updated') {
-          t.ok(file.path.indexOf('empty.txt') > -1, 'correct file updated')
-
-          dat.close(function () {
-            t.end()
-          })
+      importer.on('put-end', function (src) {
+        if (src.name.indexOf('empty.txt') > -1) {
+          if (src.live) return done()
+          fs.writeFileSync(path.join(fixtures, 'folder', 'empty.txt'), 'not empty')
         }
       })
+
+      function done () {
+        dat.archive.stat('/folder/empty.txt', function (err, stat) {
+          t.ifError(err, 'error')
+          t.same(stat.size, 9, 'empty file has new content')
+          dat.close(function () {
+            // make file empty again
+            fs.writeFileSync(path.join(fixtures, 'folder', 'empty.txt'), '')
+            t.end()
+          })
+        })
+      }
     })
   })
-}
 
-if (!process.env.TRAVIS) {
-  test('share live resume & create new file', function (t) {
+  test('share: live resume & create new file', function (t) {
     var newFile = path.join(fixtures, 'new.txt')
     Dat(fixtures, function (err, dat) {
-      t.error(err, 'create ok')
+      t.error(err, 'error')
       t.ok(dat.resumed, 'was resumed')
 
-      var stats = dat.trackStats()
-
-      // should already have old files, resume
-      var importer = dat.importFiles({ live: true, resume: true }, function () {
-        fs.writeFile(newFile, 'hello world', function (err) {
-          if (err) throw err
-        })
+      var importer = dat.importFiles({ watch: true }, function (err) {
+        t.error(err, 'error')
+        if (!err) t.fail('watch import should not cb')
       })
 
-      importer.on('file imported', function (file) {
-        if (file.mode === 'created') {
-          if (file.path.indexOf('new.txt') === -1) return t.fail('wrong file: ' + file.path)
+      importer.on('put-end', function (src) {
+        if (src.name.indexOf('new.txt') === -1) return
+        t.ok(src.live, 'file put is live')
+        process.nextTick(done)
+      })
 
-          t.skip(stats.get().filesTotal, fixtureStats.filesTotal + 1, 'TODO: files total correct')
-          t.ok(file.path.indexOf(newFile) > -1, 'new file with created mode')
+      fs.writeFile(newFile, 'hello world', function (err) {
+        t.ifError(err, 'error')
+      })
+
+      function done () {
+        dat.archive.stat('/new.txt', function (err, stat) {
+          t.ifError(err, 'error')
+          t.ok(stat, 'new file in archive')
           fs.unlink(newFile, function () {
             dat.close(function () {
               t.end()
             })
           })
-        } else if (file.path.indexOf('new.txt') > -1) {
-          console.error(file)
-        }
-      })
+        })
+      }
     })
   })
 }
 
-test('cleanup', function (t) {
+test('share: cleanup', function (t) {
   cleanFixtures(function () {
     t.end()
+  })
+})
+
+test('share: dir storage and opts.temp', function (t) {
+  Dat(fixtures, {temp: true}, function (err, dat) {
+    t.error(err, 'error')
+
+    dat.importFiles(function (err) {
+      t.error(err, 'error')
+      helpers.verifyFixtures(t, dat.archive, done)
+    })
+
+    function done (err) {
+      t.error(err, 'error')
+      dat.close(function () {
+        t.end()
+      })
+    }
+  })
+})
+
+test('share: ram storage & import other dir', function (t) {
+  Dat(ram, function (err, dat) {
+    t.error(err, 'error')
+
+    dat.importFiles(fixtures, function (err) {
+      t.error(err, 'error')
+      helpers.verifyFixtures(t, dat.archive, done)
+    })
+
+    function done (err) {
+      t.error(err, 'error')
+      dat.close(function () {
+        t.end()
+      })
+    }
   })
 })
 

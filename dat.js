@@ -2,6 +2,7 @@ var assert = require('assert')
 var path = require('path')
 var multicb = require('multicb')
 var xtend = require('xtend')
+var untildify = require('untildify')
 var importFiles = require('./lib/import-files')
 var createNetwork = require('./lib/network')
 var stats = require('./lib/stats')
@@ -9,20 +10,32 @@ var debug = require('debug')('dat-node')
 
 module.exports = Dat
 
-function Dat (archive, db, opts) {
-  if (!(this instanceof Dat)) return new Dat(archive, db, opts)
-  if (typeof opts === 'undefined') return Dat(archive, null, db)
+/**
+ * @class Dat
+ * @type {Object}
+ * @param {Object} archive - Hyperdrive archive
+ * @param {Object} [opts] - Options
+ * @param {String} [opts.dir] - Directory of archive
+ *
+ * @property {Object} archive - Hyperdrive Archive
+ * @property {String} path - Resolved path of archive
+ * @property {Buffer} key - Archive Key (`archive.key`)
+ * @property {Boolean} live - Archive is live (`archive.live`)
+ * @property {Boolean} writable - Archive is writable (`archive.metadata.writable`)
+ * @property {Boolean} version - Archive version (`archive.version`)
+ * @property {Object} options - Initial options and all options passed to childen functions.
+ * @returns {Object} Dat
+ */
+function Dat (archive, opts) {
+  if (!(this instanceof Dat)) return new Dat(archive, opts)
   assert.ok(archive, 'archive required')
-  // assert.ok(db, 'database required') // maybe not be required for multidrive...
-  assert.ok(opts.dir, 'opts.directory required')
-
-  this.path = path.resolve(opts.dir)
-  this.options = xtend(opts)
+  var self = this
 
   this.archive = archive
-  this.db = db
-
-  var self = this
+  this.options = xtend(opts)
+  if (opts.dir) {
+    this.path = path.resolve(untildify(opts.dir))
+  }
 
   // Getters for convenience accessors
   Object.defineProperties(this, {
@@ -38,23 +51,36 @@ function Dat (archive, db, opts) {
         return self.archive.live
       }
     },
-    owner: {
-      enumerable: true,
-      get: function () {
-        return self.archive.owner
-      }
-    },
     resumed: {
       enumerable: true,
       get: function () {
         return self.archive.resumed
       }
+    },
+    writable: {
+      enumerable: true,
+      get: function () {
+        return self.archive.metadata.writable
+      }
+    },
+    version: {
+      enumerable: true,
+      get: function () {
+        return self.archive.version
+      }
     }
   })
 }
 
-Dat.prototype.join =
-Dat.prototype.joinNetwork = function (opts, cb) {
+/**
+ * Join Dat Network via Hyperdiscovery
+ * @type {Function}
+ * @param {Object} [opts] - Network options, passed to hyperdiscovery.
+ * @param {Function} [cb] - Callback after first round of discovery is finished.
+ * @returns {Object} Discovery Swarm Instance
+ */
+Dat.prototype.joinNetwork =
+Dat.prototype.join = function (opts, cb) {
   if (typeof opts === 'function') {
     cb = opts
     opts = {}
@@ -69,10 +95,15 @@ Dat.prototype.joinNetwork = function (opts, cb) {
     stream: function (peer) {
       var stream = self.archive.replicate({
         upload: !(opts.upload === false),
-        download: !self.archive.owner && opts.download
+        download: !self.writable && opts.download,
+        live: !self.writable && !opts.end
       })
       stream.on('error', function (err) {
         debug('Replication error:', err.message)
+      })
+      stream.on('end', function () {
+        self.downloaded = true
+        debug('Replication stream ended')
       })
       return stream
     }
@@ -80,86 +111,100 @@ Dat.prototype.joinNetwork = function (opts, cb) {
 
   var network = self.network = createNetwork(self.archive, netOpts, cb)
   self.options.network = netOpts
-  network.swarm = network // 1.0 backwards compat. TODO: Remove in v2
 
-  if (self.owner) return network
-
-  network.once('connection', function () {
-    // automatically open archive
-    self.archive.open(noop)
-  })
   return network
 }
 
-Dat.prototype.leave =
-Dat.prototype.leaveNetwork = function (cb) {
+/**
+ * Leave Dat Network
+ * @type {Function}
+ * @param {Function} [cb] - Callback after network is closed
+ */
+Dat.prototype.leaveNetwork =
+Dat.prototype.leave = function (cb) {
   if (!this.network) return
   debug('leaveNetwork()')
-  this.archive.unreplicate()
+  // TODO: v8 unreplicate ?
+  // this.archive.unreplicate()
   this.network.leave(this.archive.discoveryKey)
   this.network.destroy(cb)
   delete this.network
 }
 
+/**
+ * Pause Dat Network
+ * @type {Function}
+ */
 Dat.prototype.pause = function () {
   debug('pause()')
   this.leave()
 }
 
+/**
+ * Resume Dat Network
+ * @type {Function}
+ */
 Dat.prototype.resume = function () {
   debug('resume()')
   this.join()
 }
 
+/**
+ * Track archive stats
+ * @type {Function}
+ */
 Dat.prototype.trackStats = function (opts) {
-  opts = opts || {}
-  assert.ok(opts.db || this.db, 'Dat needs database to track stats')
-  this.stats = stats(this.archive, opts.db || this.db)
+  opts = xtend({}, opts)
+  this.stats = stats(this.archive, opts)
   return this.stats
 }
 
-Dat.prototype.importFiles = function (target, opts, cb) {
-  if (!this.archive.owner) throw new Error('Must be archive owner to import files.')
-  if (typeof target !== 'string') return this.importFiles('', target, opts)
-  if (typeof opts === 'function') return this.importFiles(target, {}, opts)
+/**
+ * Import files to archive via mirror-folder
+ * @type {Function}
+ * @param {String} [src=dat.path] - Directory or File to import to `archive`.
+ * @param {Function} [cb] - Callback after import is finished
+ * @param {Object} [opts] - Options passed to `mirror-folder` and `dat-ignore`
+ * @returns {Object} - Import progress
+ */
+Dat.prototype.importFiles = function (src, opts, cb) {
+  if (!this.writable) throw new Error('Must be archive owner to import files.')
+  if (typeof src !== 'string') return this.importFiles('', src, opts)
+  if (typeof opts === 'function') return this.importFiles(src, {}, opts)
 
   var self = this
-  target = target && target.length ? target : self.path
+  src = src && src.length ? src : self.path
   opts = xtend({
-    indexing: opts && opts.indexing || (target === self.path)
+    indexing: (opts && opts.indexing) || (src === self.path)
   }, opts)
 
-  self.importer = importFiles(self.archive, target, opts, cb)
+  self.importer = importFiles(self.archive, src, opts, cb)
   self.options.importer = self.importer.options
   return self.importer
 }
 
+/**
+ * Close Dat archive and other things
+ * @type {Function}
+ * @param {Function} [cb] - Callback after all items closed
+ */
 Dat.prototype.close = function (cb) {
   cb = cb || noop
   if (this._closed) return cb(new Error('Dat is already closed'))
 
   var self = this
   self._closed = true
-  self.archive.unreplicate()
 
   var done = multicb()
   closeNet(done())
   closeFileWatch(done())
-  closeArchiveDb(done())
+  closeArchive(done())
 
   done(cb)
 
-  function closeArchiveDb (cb) {
-    self.archive.close(function (err) {
-      if (err) return cb(err)
-      if (self.options.db || !self.db) return cb(null)
-      closeDb(cb)
-    })
-  }
-
-  function closeDb (cb) {
-    if (!self.db) return cb()
-    self.db.close(cb)
+  function closeArchive (cb) {
+    // self.archive.unreplicate()
+    self.archive.close(cb)
   }
 
   function closeNet (cb) {
@@ -169,11 +214,8 @@ Dat.prototype.close = function (cb) {
 
   function closeFileWatch (cb) {
     if (!self.importer) return cb()
-    self.importer.close()
-    process.nextTick(function () {
-      // TODO: dat importer close is currently sync-ish
-      cb()
-    })
+    self.importer.destroy()
+    process.nextTick(cb)
   }
 }
 
