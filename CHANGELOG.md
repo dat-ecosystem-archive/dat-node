@@ -10,6 +10,25 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   ### Added, ### Changed, ### Fixed, ### Removed, ### Deprecated
 -->
 
+## 2.0.0 - 2017-04-13
+Big new release! Hyperdrive version 8 upgrades to our SLEEP file format. The hyperdrive release improves import, transfer speed, and metadata access. It includes a new API much like the node fs API. Lots of cool things!
+
+We've tried to keep the dat-node API changes to a minimum. But we've moved away from using leveldb to storing the metadata, using a flat file format instead. This means the 2.0 release will be incompatible with exiting dat archives.
+
+If you have any old archives, we definitely recommend you upgrade. Any upgrade time will be made up for with more speed!
+
+The major API differences are listed below, we probably forgot some minor changes as several of the underlying modules have changes options or APIs.
+
+### Changed
+* Using `mirror-folder` for importing files - this comes with a new event emitter for importing and different options.
+* Storage is a lot different! You can specify a directory or a storage function, e.g. `Dat(ram, cb)` now instead of the database.
+
+### Removed
+* `opts.db` option - no more database! You can specify a variety of storage formats as the first argument instead.
+* `dat.owner` - this is now `dat.writable`.
+* `stats` events - we are still in the process of upgrading hyperdrive-stats. Hypercore will also support more stats internally now and we will be transitioning to those soon.
+* Import options - `mirror-folder` has fewer options on import.
+
 ## 1.4.1 - 2017-03-17
 ### Fixed
 * Pass network `opts` through to discovery-swarm.
