@@ -120,7 +120,7 @@ Dat('/my-dir', {temp: true}, function (err, dat) {
 
 Both of these will import files from `/my-dir` when doing `dat.importFiles()` but only the first will make a `.dat` folder and keep the metadata on disk.
 
-The storage argument can also be passed through to hyperdrive for more advanced storage use cases (TODO: Document these =)).
+The storage argument can also be passed through to hyperdrive for more advanced storage use cases.
 
 ### Network
 
@@ -208,7 +208,7 @@ That covers some of the common use cases, let us know if there are more to add! 
 
 ## API
 
-**Warning:* This is an early `2.0` release of dat-node. Please let us know if you missing or incorrect API docs here. We still have more to document. PRs more than welcome!
+**Warning:** This is an early `2.0` release of dat-node. Please let us know if you missing or incorrect API docs here. We still have more to document. PRs more than welcome!
 
 ### `Dat(dir|storage, [opts], callback(err, dat))`
 
