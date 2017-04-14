@@ -22,7 +22,7 @@
     "count-files": "^2.6.0",
     "dat-encoding": "^4.0.1",
     "dat-ignore": "^1.0.0",
-    "datland-swarm-defaults": "^1.0.2",
+    "dat-swarm-defaults": "^1.0.0",
     "debug": "^2.6.0",
     "discovery-swarm": "^4.3.0",
     "hyperdrive": "^8.0.1",
