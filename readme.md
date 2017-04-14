@@ -86,7 +86,7 @@ Dig into more use cases below and please let us know if you have questions! You 
 
 * [Dat CLI](https://github.com/datproject/dat): We use dat-node in the dat CLI.
 * [Dat Desktop](https://github.com/datproject/dat-desktop): The Dat Desktop application manages multiple dat-node instances via [dat-worker](https://github.com/juliangruber/dat-worker).
-* See the [examples folder](examples/readme.md) for a minimal share + download usage.
+* See the [examples folder](examples) for a minimal share + download usage.
 * And more! Let us know if you have a neat dat-node application to add here.
 
 ## Usage
@@ -207,6 +207,8 @@ Dat('/my-data', function (err, dat) {
 That covers some of the common use cases, let us know if there are more to add! Keep reading for the full API docs.
 
 ## API
+
+**Warning:* This is an early `2.0` release of dat-node. Please let us know if you missing or incorrect API docs here. We still have more to document. PRs more than welcome!
 
 ### `Dat(dir|storage, [opts], callback(err, dat))`
 
