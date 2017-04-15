@@ -51,7 +51,7 @@ function createDat (dirOrStorage, opts, cb) {
     // TODO: set err type
     var missingError = new Error('Dat storage does not exist.')
     missingError.name = 'MissingError'
-    var existsError = new Error('Dat storage a;ready exists.')
+    var existsError = new Error('Dat storage already exists.')
     existsError.name = 'ExistsError'
 
     try {
