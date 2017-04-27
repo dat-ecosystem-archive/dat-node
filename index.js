@@ -58,12 +58,12 @@ function createDat (dirOrStorage, opts, cb) {
       // check if storage path exists
       fs.stat(storage, function (err, stat) {
         // TODO: check for sleep files
-        if (err || !stat.isDirectory()) return cb(missingError)
-        if (errorIfExists) return cb(existsError)
+        if ((err || !stat.isDirectory()) && !createIfMissing) return cb(missingError)
+        else if (!err && errorIfExists) return cb(existsError)
         return create()
       })
     } catch (e) {
-      return cb(missingError)
+      if (!createIfMissing) return cb(missingError)
     }
   }
 
