@@ -25,7 +25,7 @@
     "dat-swarm-defaults": "^1.0.0",
     "debug": "^2.6.0",
     "discovery-swarm": "^4.3.0",
-    "hyperdrive": "^8.0.1",
+    "hyperdrive": "^9.0.0",
     "hyperdrive-network-speed": "^2.0.0",
     "mirror-folder": "^2.0.0",
     "multicb": "^1.2.1",
