@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   ### Added, ### Changed, ### Fixed, ### Removed, ### Deprecated
 -->
 
+## 3.0.0 - 2017-04-28
+### Fixed
+* Upgrade hyperdrive with breaking change.
+
 ## 2.0.0 - 2017-04-13
 Big new release! Hyperdrive version 8 upgrades to our SLEEP file format. The hyperdrive release improves import, transfer speed, and metadata access. It includes a new API much like the node fs API. Lots of cool things!
 
