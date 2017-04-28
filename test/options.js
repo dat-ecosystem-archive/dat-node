@@ -62,3 +62,12 @@ test('errorIfExists true', function (t) {
     })
   })
 })
+
+test('errorIfExists true without existing dat', function (t) {
+  rimraf.sync(path.join(fixtures, '.dat'))
+  // create dat to resume from
+  Dat(fixtures, {errorIfExists: true}, function (err, dat) {
+    t.ifErr(err)
+    t.end()
+  })
+})
