@@ -36,7 +36,8 @@ function createDat (dirOrStorage, opts, cb) {
   var errorIfExists = opts.errorIfExists || false
   opts = xtend({
     // TODO: make sure opts.dir is a directory, not file
-    dir: (typeof dirOrStorage === 'string') ? dirOrStorage : null
+    dir: (typeof dirOrStorage === 'string') ? dirOrStorage : null,
+    latest: true
   }, opts)
 
   // TODO: Use hyperdrive option?
