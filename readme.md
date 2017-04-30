@@ -21,7 +21,7 @@ You can start using Dat today in these client applications:
 ### Features
 
 * High-level glue for common Dat and [hyperdrive](https://github.com/mafintosh/hyperdrive) modules.
-* Sane defaults and consistent management of storage across applications.
+* Sane defaults and consistent management of storage & secret keys across applications, using [dat-storage](https://github.com/datproject/dat-storage).
 * Easily connect to the Dat network, using [discovery-swarm](https://github.com/mafintosh/discovery-swarm)
 * Import files from the file system, using [mirror-folder](https://github.com/mafintosh/mirror-folder/)
 * Access APIs to lower level modules with a single `require`!
@@ -101,7 +101,7 @@ We'll go through what these are for and a few of the common usages of each eleme
 
 ### Storage
 
-Every dat archive has **storage**, this is the required first argument for dat-node. Common options are:
+Every dat archive has **storage**, this is the required first argument for dat-node. By default, we use [dat-storage](http://github.com/datproject/dat-storage) which stores the secret key in `~/.dat/` and the rest of the ddata in `dir/.dat`. Other common options are:
 
 * **Persistent storage**: Stored files in `/my-dir` and metadata in `my-dir/.dat` by passing `/my-dir` as the first argument.
 * **Temporary Storage**: Use the `temp: true` option to keep metadata stored in memory.
