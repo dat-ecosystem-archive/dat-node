@@ -26,7 +26,7 @@
     "discovery-swarm": "^4.3.0",
     "hyperdrive": "^9.0.0",
     "hyperdrive-network-speed": "^2.0.0",
-    "mirror-folder": "github:joehand/mirror-folder#merged",
+    "mirror-folder": "^2.1.0",
     "multicb": "^1.2.1",
     "random-access-memory": "^2.3.0",
     "speedometer": "^1.0.0",
