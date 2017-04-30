@@ -1,5 +1,6 @@
 var assert = require('assert')
 var fs = require('fs')
+var path = require('path')
 var xtend = require('xtend')
 var hyperdrive = require('hyperdrive')
 var encoding = require('dat-encoding')
@@ -42,6 +43,7 @@ function createDat (dirOrStorage, opts, cb) {
 
   // TODO: Use hyperdrive option?
   if (createIfMissing && !errorIfExists) return create()
+  if (!opts.dir) return create() // TODO: check other storage
   checkIfExists()
 
   /**
@@ -55,17 +57,12 @@ function createDat (dirOrStorage, opts, cb) {
     var existsError = new Error('Dat storage already exists.')
     existsError.name = 'ExistsError'
 
-    try {
-      // check if storage path exists
-      fs.stat(storage, function (err, stat) {
-        // TODO: check for sleep files
-        if ((err || !stat.isDirectory()) && !createIfMissing) return cb(missingError)
-        else if (!err && errorIfExists) return cb(existsError)
-        return create()
-      })
-    } catch (e) {
-      if (!createIfMissing) return cb(missingError)
-    }
+    fs.stat(path.join(opts.dir, '.dat'), function (err, stat) {
+      // TODO: check for sleep files
+      if ((err || !stat.isDirectory()) && !createIfMissing) return cb(missingError)
+      else if (!err && errorIfExists) return cb(existsError)
+      return create()
+    })
   }
 
   /**
