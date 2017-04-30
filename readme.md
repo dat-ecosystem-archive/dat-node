@@ -304,7 +304,10 @@ Returns a `importer` object with properties:
 * `importer.on('put-end', src, dest)` - end of file write stream
 * `importer.on('del', dest)` - file deleted from dest
 * `importer.on('end')` - Emits when mirror is done (not emitted in watch mode)
-* `importer.on('count', {files, dirs, bytes})` - Emitted after initial scan of src directory
+* If `opts.count` is true:
+  * `importer.on('count', {files, bytes})` - Emitted after initial scan of src directory. See import progress section for details.
+  * `importer.count` will be `{files, bytes}` to import after initial scan.
+  * `importer.putDone` will track `{files, bytes}` for imported files.
 
 ##### Importer Options
 
@@ -312,6 +315,7 @@ Options include:
 
 ```js
 var opts = {
+  count: true, // do an initial dry run import for rendering progress
   ignoreHidden: true, // ignore hidden files  (if false, .dat will still be ignored)
   useDatIgnore: true, // ignore entries in the `.datignore` file from import dir target.
   ignore: // (see below for default info) anymatch expression to ignore files
