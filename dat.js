@@ -98,6 +98,9 @@ Dat.prototype.join = function (opts, cb) {
         download: !self.writable && opts.download,
         live: !self.writable && !opts.end
       })
+      stream.on('close', function () {
+        debug('Stream close')
+      })
       stream.on('error', function (err) {
         debug('Replication error:', err.message)
       })
