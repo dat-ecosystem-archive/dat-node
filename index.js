@@ -61,11 +61,13 @@ function createDat (dirOrStorage, opts, cb) {
     oldError.name = 'IncompatibleError'
 
     fs.readdir(path.join(opts.dir, '.dat'), function (err, files) {
-      var noDat = (err || !files.length)
+      // TODO: omg please make this less confusing.
+      var noDat = !!(err || !files.length)
       var validSleep = (files && files.length && files.indexOf('metadata.key') > -1)
+      var badDat = !(noDat || validSleep)
 
       if ((noDat || validSleep) && createAfterValid) return create()
-      else if (!validSleep) return cb(oldError)
+      else if (badDat) return cb(oldError)
 
       if (err && !createIfMissing) return cb(missingError)
       else if (!err && errorIfExists) return cb(existsError)
