@@ -82,6 +82,7 @@ function createDat (dirOrStorage, opts, cb) {
   function create () {
     archive = hyperdrive(storage, key, opts)
     archive.ready(function () {
+      debug('archive ready. version:', archive.version)
       if (archive.metadata.has(0) && archive.version) archive.resumed = true
 
       cb(null, new Dat(archive, opts))
