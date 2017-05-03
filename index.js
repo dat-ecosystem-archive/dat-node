@@ -4,7 +4,7 @@ var path = require('path')
 var xtend = require('xtend')
 var hyperdrive = require('hyperdrive')
 var encoding = require('dat-encoding')
-// var debug = require('debug')('dat-node')
+var debug = require('debug')('dat-node')
 var datStore = require('./lib/storage')
 var Dat = require('./dat')
 
@@ -32,17 +32,16 @@ function createDat (dirOrStorage, opts, cb) {
 
   var archive
   var key = opts.key ? encoding.toBuf(opts.key) : null
+  var dir = (typeof dirOrStorage === 'string') ? dirOrStorage : null
   var storage = datStore(dirOrStorage, opts)
   var createIfMissing = !(opts.createIfMissing === false)
   var errorIfExists = opts.errorIfExists || false
   opts = xtend({
     // TODO: make sure opts.dir is a directory, not file
-    dir: (typeof dirOrStorage === 'string') ? dirOrStorage : null,
+    dir: dir,
     latest: true
   }, opts)
 
-  // TODO: Use hyperdrive option?
-  if (createIfMissing && !errorIfExists) return create()
   if (!opts.dir) return create() // TODO: check other storage
   checkIfExists()
 
@@ -51,16 +50,26 @@ function createDat (dirOrStorage, opts, cb) {
    * @private
    */
   function checkIfExists () {
-    // TODO: set err type
+    // Create after we check for pre-sleep .dat stuff
+    var createAfterValid = (createIfMissing && !errorIfExists)
+
     var missingError = new Error('Dat storage does not exist.')
     missingError.name = 'MissingError'
     var existsError = new Error('Dat storage already exists.')
     existsError.name = 'ExistsError'
+    var oldError = new Error('Dat folder contains incompatible metadata. Please remove your metadata (rm -rf .dat).')
+    oldError.name = 'IncompatibleError'
 
-    fs.stat(path.join(opts.dir, '.dat'), function (err, stat) {
-      // TODO: check for sleep files
-      if ((err || !stat.isDirectory()) && !createIfMissing) return cb(missingError)
+    fs.readdir(path.join(opts.dir, '.dat'), function (err, files) {
+      var noDat = (err || !files.length)
+      var validSleep = (files && files.length && files.indexOf('metadata.key') > -1)
+
+      if ((noDat || validSleep) && createAfterValid) return create()
+      else if (!validSleep) return cb(oldError)
+
+      if (err && !createIfMissing) return cb(missingError)
       else if (!err && errorIfExists) return cb(existsError)
+
       return create()
     })
   }

@@ -1,3 +1,4 @@
+var fs = require('fs')
 var path = require('path')
 var test = require('tape')
 var rimraf = require('rimraf')
@@ -9,6 +10,28 @@ var fixtures = path.join(__dirname, 'fixtures')
 test('misc: clean old test', function (t) {
   rimraf(path.join(fixtures, '.dat'), function () {
     t.end()
+  })
+})
+
+test('misc: empty dat folder ok', function (t) {
+  fs.mkdir(path.join(fixtures, '.dat'), function () {
+    Dat(fixtures, function (err, dat) {
+      t.error(err, 'no error')
+      rimraf.sync(path.join(fixtures, '.dat'))
+      t.end()
+    })
+  })
+})
+
+test('misc: existing invalid dat folder', function (t) {
+  fs.mkdir(path.join(fixtures, '.dat'), function () {
+    fs.writeFile(path.join(fixtures, '.dat', '0101.db'), '', function () {
+      Dat(fixtures, function (err, dat) {
+        t.ok(err, 'errors')
+        rimraf.sync(path.join(fixtures, '.dat'))
+        t.end()
+      })
+    })
   })
 })
 
