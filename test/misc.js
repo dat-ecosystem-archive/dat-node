@@ -77,7 +77,7 @@ test('misc: expose .writable', function (t) {
       t.ok(shareDat.writable, 'is writable')
       shareDat.joinNetwork()
 
-      Dat(downDir, {key: shareDat.key, temp: true}, function (err, downDat) {
+      Dat(downDir, {key: shareDat.key, temp: true, sparse: true}, function (err, downDat) {
         t.error(err, 'error')
         t.notOk(downDat.writable, 'not writable')
 
