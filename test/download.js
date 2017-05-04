@@ -33,7 +33,9 @@ test('Download with default opts', function (t) {
           t.pass('connects via network')
         })
         var archive = dat.archive
-        archive.metadata.update(done)
+        archive.once('content', function () {
+          archive.content.on('sync', done)
+        })
 
         function done () {
           helpers.verifyFixtures(t, archive, function (err) {

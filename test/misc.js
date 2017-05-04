@@ -72,12 +72,12 @@ test('misc: expose .key', function (t) {
 test('misc: expose .writable', function (t) {
   tmpDir(function (err, downDir, cleanup) {
     t.error(err, 'error')
-    Dat(fixtures, {temp: true}, function (err, shareDat) {
+    Dat(fixtures, function (err, shareDat) {
       t.error(err, 'error')
       t.ok(shareDat.writable, 'is writable')
       shareDat.joinNetwork()
 
-      Dat(downDir, {key: shareDat.key, temp: true, sparse: true}, function (err, downDat) {
+      Dat(downDir, {key: shareDat.key}, function (err, downDat) {
         t.error(err, 'error')
         t.notOk(downDat.writable, 'not writable')
 
@@ -86,6 +86,7 @@ test('misc: expose .writable', function (t) {
           downDat.close(function (err) {
             t.error(err, 'error')
             cleanup(function (err) {
+              rimraf.sync(path.join(fixtures, '.dat'))
               t.error(err, 'error')
               t.end()
             })
