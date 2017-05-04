@@ -26,6 +26,7 @@ test('Download with default opts', function (t) {
         t.ok(dat.archive, 'has archive')
         t.notOk(dat.writable, 'archive not writable')
 
+        var stats = dat.trackStats()
         var network = dat.joinNetwork(function () {
           t.pass('joinNetwork calls back okay')
         })
@@ -38,6 +39,9 @@ test('Download with default opts', function (t) {
         })
 
         function done () {
+          var st = stats.get()
+          t.ok(st.version === archive.version, 'stats version correct')
+          t.ok(st.downloaded === st.length, 'all blocks downloaded')
           helpers.verifyFixtures(t, archive, function (err) {
             t.error(err, 'error')
             dat.close(function (err) {

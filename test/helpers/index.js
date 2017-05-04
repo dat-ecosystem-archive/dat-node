@@ -1,8 +1,8 @@
 var countFiles = require('count-files')
 
 var fixtureStats = {
-  files: 2,
-  bytes: 1441,
+  files: 3,
+  bytes: 1452,
   dirs: 1
 }
 
@@ -25,6 +25,7 @@ module.exports.verifyFixtures = function (t, archive, cb) {
     if (err) return cb(err)
     t.ok(entries.indexOf('table.csv') > -1, 'csv in archive')
     t.ok(entries.indexOf('folder') > -1, 'sub dir in archive')
+    t.ok(entries.indexOf('hello.txt') > -1, 'hello file archive')
     if (!--pending) return done()
   })
 

@@ -25,7 +25,7 @@ test('importing: import two directories at same time', function (t) {
     function done () {
       countFiles({fs: dat.archive, name: '/'}, function (err, count) {
         t.error(err, 'error')
-        t.same(count.files, 5, 'five files total')
+        t.same(count.files, 6, 'five files total')
         t.end()
       })
     }

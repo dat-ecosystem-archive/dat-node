@@ -333,6 +333,24 @@ You can use a `.datignore` file in the imported directory, `src`, to ignore any 
 
 #### `var stats = dat.trackStats()`
 
+##### `stats.on('update')`
+
+Emitted when archive stats are updated. Get new stats with `stats.get()`.
+
+##### `var st = stats.get()`
+
+Get general archive stats for the latest version:
+
+```js
+{
+  files: 12,
+  byteLength: 1234,
+  length: 4, // number of blocks for latest files
+  version: 6, // archive.version for these stats
+  downloaded: 4 // number of downloaded blocks for latest
+}
+```
+
 ##### `stats.network`
 
 Get upload and download speeds: `stats.network.uploadSpeed` or `stats.network.downloadSpeed`. Transfer speeds are tracked using [hyperdrive-network-speed](https://github.com/joehand/hyperdrive-network-speed/).

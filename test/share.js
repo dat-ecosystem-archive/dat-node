@@ -13,8 +13,8 @@ try { fs.unlinkSync(path.join(__dirname, 'fixtures', '.DS_Store')) } catch (e) {
 
 var fixtures = path.join(__dirname, 'fixtures')
 var fixtureStats = {
-  files: 2,
-  bytes: 1441,
+  files: 3,
+  bytes: 1452,
   dirs: 1
 }
 var liveKey
@@ -45,11 +45,6 @@ test('share: create dat with default ops', function (t) {
     var stats = dat.trackStats()
     var network = dat.joinNetwork()
 
-    // TODO: stats tests
-    // stats.once('update', function () {
-    //   t.pass('stats update triggers')
-    // })
-
     network.once('listening', function () {
       t.pass('network listening')
     })
@@ -58,22 +53,29 @@ test('share: create dat with default ops', function (t) {
       t.error(err, 'file import err okay')
       var archive = dat.archive
       var st = stats.get()
+      if (archive.version === st.version) return check()
+      stats.once('update', check)
 
-      // TODO: stat tests
-      t.skip(st.files, 'TODO')
+      function check () {
+        var st = stats.get()
+        t.same(st.files, 3, 'stats files')
+        t.same(st.length, 2, 'stats length')
+        t.same(st.version, archive.version, 'stats version')
+        t.same(st.byteLength, 1452, 'stats bytes')
 
-      t.same(putFiles, 4, '4 importer puts')
-      t.same(archive.version, 4, '4th archive version')
-      t.same(archive.metadata.length, 5, '5 entries in metadata')
+        t.same(putFiles, 5, 'importer puts')
+        t.same(archive.version, 5, 'archive version')
+        t.same(archive.metadata.length, 6, 'entries in metadata')
 
-      helpers.verifyFixtures(t, archive, function (err) {
-        t.ifError(err)
-        dat.close(function (err) {
+        helpers.verifyFixtures(t, archive, function (err) {
           t.ifError(err)
-          t.pass('close okay')
-          t.end()
+          dat.close(function (err) {
+            t.ifError(err)
+            t.pass('close okay')
+            t.end()
+          })
         })
-      })
+      }
     })
 
     progress.on('put', function () {
@@ -88,16 +90,16 @@ test('share: resume with .dat folder', function (t) {
     t.ok(dat.writable, 'dat still writable')
     t.ok(dat.resumed, 'resume flag set')
     t.same(liveKey, dat.key, 'key matches previous key')
+    var stats = dat.trackStats()
 
     countFiles({fs: dat.archive, name: '/'}, function (err, count) {
       t.ifError(err, 'count err')
       var archive = dat.archive
 
-      t.same(archive.version, 4, '4th archive version still')
+      t.same(archive.version, 5, 'archive version still')
 
-      var st = dat.trackStats().get()
-      t.skip(st.bytesTotal, fixtureStats.bytes, 'bytes total still the same')
-
+      var st = stats.get()
+      t.same(st.byteLength, fixtureStats.bytes, 'bytes total still the same')
       t.same(count.bytes, fixtureStats.bytes, 'bytes still ok')
       t.same(count.files, fixtureStats.files, 'bytes still ok')
       dat.close(function () {
