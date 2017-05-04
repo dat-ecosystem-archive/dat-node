@@ -1,4 +1,3 @@
-// var fs = require('fs')
 var path = require('path')
 var test = require('tape')
 var rimraf = require('rimraf')
@@ -7,7 +6,7 @@ var encoding = require('dat-encoding')
 var Dat = require('..')
 var fixtures = path.join(__dirname, 'fixtures')
 
-test('string or buffer .key', function (t) {
+test('opts: string or buffer .key', function (t) {
   rimraf.sync(path.join(process.cwd(), '.dat')) // for failed tests
   var buf = Buffer.alloc(32)
   Dat(process.cwd(), { key: buf }, function (err, dat) {
@@ -29,7 +28,7 @@ test('string or buffer .key', function (t) {
   })
 })
 
-test('createIfMissing false', function (t) {
+test('opts: createIfMissing false', function (t) {
   rimraf.sync(path.join(fixtures, '.dat'))
   Dat(fixtures, {createIfMissing: false}, function (err, dat) {
     t.ok(err, 'throws error')
@@ -37,7 +36,7 @@ test('createIfMissing false', function (t) {
   })
 })
 
-test('createIfMissing false with empty .dat', function (t) {
+test('opts: createIfMissing false with empty .dat', function (t) {
   t.skip('TODO')
   t.end()
   // rimraf.sync(path.join(fixtures, '.dat'))
@@ -49,7 +48,7 @@ test('createIfMissing false with empty .dat', function (t) {
   // })
 })
 
-test('errorIfExists true', function (t) {
+test('opts: errorIfExists true', function (t) {
   rimraf.sync(path.join(fixtures, '.dat'))
   // create dat to resume from
   Dat(fixtures, function (err, dat) {
@@ -63,7 +62,7 @@ test('errorIfExists true', function (t) {
   })
 })
 
-test('errorIfExists true without existing dat', function (t) {
+test('opts: errorIfExists true without existing dat', function (t) {
   rimraf.sync(path.join(fixtures, '.dat'))
   // create dat to resume from
   Dat(fixtures, {errorIfExists: true}, function (err, dat) {
