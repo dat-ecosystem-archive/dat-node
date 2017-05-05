@@ -35,6 +35,13 @@ test('misc: existing invalid dat folder', function (t) {
   })
 })
 
+test('misc: non existing invalid dat path', function (t) {
+  t.throws(function () {
+    Dat('/non/existing/folder/', function () {})
+  })
+  t.end()
+})
+
 test('misc: open error', function (t) {
   t.skip('TODO: lock file')
   t.end()
