@@ -82,6 +82,10 @@ function createDat (dirOrStorage, opts, cb) {
    * @private
    */
   function create () {
+    if (!key && (opts.indexing !== false)) {
+      // TODO: this should be an import option instead, https://github.com/mafintosh/hyperdrive/issues/160
+      opts.indexing = true
+    }
     archive = hyperdrive(storage, key, opts)
     archive.ready(function () {
       debug('archive ready. version:', archive.version)
