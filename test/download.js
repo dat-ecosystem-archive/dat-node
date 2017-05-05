@@ -12,7 +12,7 @@ try { fs.unlinkSync(path.join(__dirname, 'fixtures', '.DS_Store')) } catch (e) {
 
 var fixtures = path.join(__dirname, 'fixtures')
 
-test('Download with default opts', function (t) {
+test('download: Download with default opts', function (t) {
   shareFixtures(function (err, shareKey, closeShare) {
     t.error(err, 'error')
 
@@ -35,6 +35,7 @@ test('Download with default opts', function (t) {
         })
         var archive = dat.archive
         archive.once('content', function () {
+          t.pass('gets content')
           archive.content.on('sync', done)
         })
 

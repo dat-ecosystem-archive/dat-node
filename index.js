@@ -82,7 +82,8 @@ function createDat (dirOrStorage, opts, cb) {
    * @private
    */
   function create () {
-    if (!key && (opts.indexing !== false)) {
+    if (dir && !opts.temp && !key && (opts.indexing !== false)) {
+      // Only set opts.indexing if storage is dat-storage
       // TODO: this should be an import option instead, https://github.com/mafintosh/hyperdrive/issues/160
       opts.indexing = true
     }
