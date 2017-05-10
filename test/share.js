@@ -63,9 +63,9 @@ test('share: create dat with default ops', function (t) {
         t.same(st.version, archive.version, 'stats version')
         t.same(st.byteLength, 1452, 'stats bytes')
 
-        t.same(putFiles, 5, 'importer puts')
-        t.same(archive.version, 5, 'archive version')
-        t.same(archive.metadata.length, 6, 'entries in metadata')
+        t.same(putFiles, 3, 'importer puts')
+        t.same(archive.version, 3, 'archive version')
+        t.same(archive.metadata.length, 4, 'entries in metadata')
 
         helpers.verifyFixtures(t, archive, function (err) {
           t.ifError(err)
@@ -96,7 +96,7 @@ test('share: resume with .dat folder', function (t) {
       t.ifError(err, 'count err')
       var archive = dat.archive
 
-      t.same(archive.version, 5, 'archive version still')
+      t.same(archive.version, 3, 'archive version still')
 
       var st = stats.get()
       t.same(st.byteLength, fixtureStats.bytes, 'bytes total still the same')
