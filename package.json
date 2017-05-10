@@ -1,6 +1,6 @@
 {
   "name": "dat-node",
-  "version": "3.2.3",
+  "version": "3.3.0",
   "description": "Build node applications with Dat archives on the file system.",
   "main": "index.js",
   "scripts": {
