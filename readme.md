@@ -97,7 +97,7 @@ All dat-node applications have a similar structure around three main elements:
 2. **Network** - connecting to other users to upload or download data.
 3. **Adding Files** - adding files from the file system to the hyperdrive archive.
 
-We'll go through what these are for and a few of the common usages of each element. 
+We'll go through what these are for and a few of the common usages of each element.
 
 ### Storage
 
@@ -317,6 +317,7 @@ Options include:
 var opts = {
   count: true, // do an initial dry run import for rendering progress
   ignoreHidden: true, // ignore hidden files  (if false, .dat will still be ignored)
+  ignoreDirs: true, // do not import directories (hyperdrive does not need them and it pollutes metadata)
   useDatIgnore: true, // ignore entries in the `.datignore` file from import dir target.
   ignore: // (see below for default info) anymatch expression to ignore files
   watch: false, // watch files for changes & import on change (archive must be live)

@@ -82,6 +82,29 @@ test('importing: ignore hidden option turned off', function (t) {
   })
 })
 
+test('importing: ignore dirs option turned off', function (t) {
+  Dat(fixtures, {temp: true}, function (err, dat) {
+    t.error(err)
+    dat.importFiles({ ignoreDirs: false }, function () {
+      var stream = dat.archive.history()
+      var hasFolder = false
+      var hasRoot = false
+      stream.on('data', function (data) {
+        if (data.name === '/folder') hasFolder = true
+        if (data.name === '/') hasRoot = true
+      })
+      stream.on('end', function () {
+        t.ok(hasFolder, 'folder in metadata')
+        t.ok(hasRoot, 'root in metadata')
+        dat.close(function () {
+          rimraf.sync(path.join(fixtures, '.dat'))
+          t.end()
+        })
+      })
+    })
+  })
+})
+
 test('importing: import with options but no callback', function (t) {
   Dat(fixtures, {temp: true}, function (err, dat) {
     t.error(err)
