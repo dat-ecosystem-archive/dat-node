@@ -214,7 +214,12 @@ That covers some of the common use cases, let us know if there are more to add! 
 
 Initialize a Dat Archive in `dir`. If there is an existing Dat Archive, the archive will be resumed.
 
-* `storage` is passed to hyperdrive. For example, `storage` count be `require('random-access-file`'). Default storage is still in flux! We'll add more docs here soon.
+#### Storage
+
+* `dir` (Default) - Use [dat-storage](https://github.com/datproject/dat-storage) inside `dir`. This stores files as files, sleep files inside `.dat`, and the secret key in the user's home directory.
+* `dir` with `opts.latest: false` - Store as SLEEP files, including storing the content as a `content.data` file. This is useful for storing all history in a single flat file.
+* `dir` with `opts.temp: true` - Store everything in memory (including files).
+* `storage` function - pass a custom storage function along to hyperdrive, see dat-storage for an example.
 
 Most options are passed directly to the module you're using (e.g. `dat.importFiles(opts)`. However, there are also some initial `opts` can include:
 

@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- Change types:
   ### Added, ### Changed, ### Fixed, ### Removed, ### Deprecated
 -->
+### Added
+* Use regular sleep storage if `opts.latest` is false
 
 ## 3.3.0 - 2017-05-10
 ### Added
