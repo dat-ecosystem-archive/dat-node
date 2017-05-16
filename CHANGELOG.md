@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- Change types:
   ### Added, ### Changed, ### Fixed, ### Removed, ### Deprecated
 -->
+
+## 3.3.1 - 2017-05-16
+### Fixed
+* Replication Stream should be true for writable archives
+
 ### Added
 * Use regular sleep storage if `opts.latest` is false
 
