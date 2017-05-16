@@ -96,7 +96,7 @@ Dat.prototype.join = function (opts, cb) {
       var stream = self.archive.replicate({
         upload: !(opts.upload === false),
         download: !self.writable && opts.download,
-        live: !self.writable && !opts.end
+        live: !opts.end
       })
       stream.on('close', function () {
         debug('Stream close')
