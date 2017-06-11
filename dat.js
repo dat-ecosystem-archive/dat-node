@@ -98,6 +98,7 @@ Dat.prototype.join = function (opts, cb) {
         download: !self.writable && opts.download,
         live: !opts.end
       })
+      if (opts.wrap) stream = opts.wrap(stream)
       stream.on('close', function () {
         debug('Stream close')
       })
