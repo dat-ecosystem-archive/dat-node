@@ -253,6 +253,8 @@ Join the network to start transferring data for `dat.key`, using [discovery-swar
 
 If you specify `cb`, it will be called *when the first round* of discovery has completed. This is helpful to check immediately if peers are available and if not fail gracefully, more similar to http requests.
 
+Set `opts.wrap` to a function taking a stream and returning another one, if you need to apply some custom transformation to the data transmitted. Use this for example to implement throttling. 
+
 Returns a `network` object with properties:
 
 * `network.connected` - number of peers connected
