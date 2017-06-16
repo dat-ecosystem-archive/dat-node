@@ -3,6 +3,7 @@ var path = require('path')
 var test = require('tape')
 var rimraf = require('rimraf')
 var countFiles = require('count-files')
+var tmpDir = require('temporary-directory')
 
 var Dat = require('..')
 var fixtures = path.join(__dirname, 'fixtures')
@@ -167,6 +168,30 @@ test('importing: import with opts.useDatIgnore false', function (t) {
         fileImported = true
         t.pass('ignored file imported')
       }
+    })
+  })
+})
+
+test('importing: import from hidden folder src', function (t) {
+  tmpDir(function (_, dir, cleanup) {
+    dir = path.join(dir, '.hidden')
+    fs.mkdirSync(dir)
+    fs.writeFileSync(path.join(dir, 'hello.txt'), 'hello world')
+    Dat(dir, {temp: true}, function (err, dat) {
+      t.error(err, 'no error')
+      dat.importFiles(function (err) {
+        t.error(err)
+        t.same(dat.archive.version, 1, 'archive has 1 file')
+        dat.archive.stat('/hello.txt', function (err, stat) {
+          t.error(err, 'no error')
+          t.ok(stat, 'file added')
+          dat.close(function () {
+            cleanup(function () {
+              t.end()
+            })
+          })
+        })
+      })
     })
   })
 })
