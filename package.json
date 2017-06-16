@@ -20,7 +20,7 @@
   "license": "MIT",
   "dependencies": {
     "dat-encoding": "^4.0.1",
-    "dat-ignore": "^1.0.0",
+    "dat-ignore": "^1.1.1",
     "dat-storage": "^1.0.0",
     "dat-swarm-defaults": "^1.0.0",
     "debug": "^2.6.0",
