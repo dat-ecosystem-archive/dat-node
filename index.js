@@ -89,8 +89,9 @@ function createDat (dirOrStorage, opts, cb) {
     }
     if (!key) return createArchive()
 
-    resolveDatLink(key, function (err, key) {
+    resolveDatLink(key, function (err, resolvedKey) {
       if (err) return cb(err)
+      key = resolvedKey
       createArchive()
     })
 
