@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   ### Added, ### Changed, ### Fixed, ### Removed, ### Deprecated
 -->
 
+## 3.4.0 - 2017-06-19
+### Added
+* Resolve dat links over http (https://github.com/datproject/dat-node/pull/159)
+
 ## 3.3.2 - 2017-05-29
 ### Fixed
 * Bump hyperdrive to fix delete bug in append-tree (https://github.com/mafintosh/append-tree/commit/7e1f3cc9998be4ca7dabe0560b1a1ec1502ac186)
