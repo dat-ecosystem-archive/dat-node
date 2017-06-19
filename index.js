@@ -3,7 +3,7 @@ var fs = require('fs')
 var path = require('path')
 var xtend = require('xtend')
 var hyperdrive = require('hyperdrive')
-var encoding = require('dat-encoding')
+var resolveDatLink = require('dat-link-resolve')
 var debug = require('debug')('dat-node')
 var datStore = require('./lib/storage')
 var Dat = require('./dat')
@@ -31,7 +31,7 @@ function createDat (dirOrStorage, opts, cb) {
   assert.equal(typeof cb, 'function', 'dat-node: callback required')
 
   var archive
-  var key = opts.key ? encoding.toBuf(opts.key) : null
+  var key = opts.key
   var dir = (typeof dirOrStorage === 'string') ? dirOrStorage : null
   var storage = datStore(dirOrStorage, opts)
   var createIfMissing = !(opts.createIfMissing === false)
@@ -87,12 +87,16 @@ function createDat (dirOrStorage, opts, cb) {
       // TODO: this should be an import option instead, https://github.com/mafintosh/hyperdrive/issues/160
       opts.indexing = true
     }
-    archive = hyperdrive(storage, key, opts)
-    archive.ready(function () {
-      debug('archive ready. version:', archive.version)
-      if (archive.metadata.has(0) && archive.version) archive.resumed = true
 
-      cb(null, new Dat(archive, opts))
+    resolveDatLink(key, function (err, key) {
+      if (err) return cb(err)
+      archive = hyperdrive(storage, key, opts)
+      archive.ready(function () {
+        debug('archive ready. version:', archive.version)
+        if (archive.metadata.has(0) && archive.version) archive.resumed = true
+
+        cb(null, new Dat(archive, opts))
+      })
     })
   }
 }
