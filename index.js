@@ -87,9 +87,14 @@ function createDat (dirOrStorage, opts, cb) {
       // TODO: this should be an import option instead, https://github.com/mafintosh/hyperdrive/issues/160
       opts.indexing = true
     }
+    if (!key) return createArchive()
 
     resolveDatLink(key, function (err, key) {
       if (err) return cb(err)
+      createArchive()
+    })
+
+    function createArchive () {
       archive = hyperdrive(storage, key, opts)
       archive.ready(function () {
         debug('archive ready. version:', archive.version)
@@ -97,6 +102,6 @@ function createDat (dirOrStorage, opts, cb) {
 
         cb(null, new Dat(archive, opts))
       })
-    })
+    }
   }
 }
