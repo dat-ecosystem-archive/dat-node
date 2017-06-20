@@ -26,6 +26,7 @@
     "debug": "^2.6.0",
     "discovery-swarm": "^4.3.0",
     "hyperdrive": "^9.2.9",
+    "hyperdrive-http": "^4.2.0",
     "hyperdrive-network-speed": "^2.0.0",
     "mirror-folder": "^2.1.0",
     "multicb": "^1.2.1",

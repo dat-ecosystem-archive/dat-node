@@ -24,6 +24,7 @@ You can start using Dat today in these client applications:
 * Sane defaults and consistent management of storage & secret keys across applications, using [dat-storage](https://github.com/datproject/dat-storage).
 * Easily connect to the Dat network, using [discovery-swarm](https://github.com/mafintosh/discovery-swarm)
 * Import files from the file system, using [mirror-folder](https://github.com/mafintosh/mirror-folder/)
+* Serve dats over http with [hyperdrive-http](https://github.com/joehand/hyperdrive-http)
 * Access APIs to lower level modules with a single `require`!
 
 #### Browser Support
@@ -365,6 +366,19 @@ Get upload and download speeds: `stats.network.uploadSpeed` or `stats.network.do
 
 * `peers.total` - total number of connected peers
 * `peers.complete` - connected peers with all the content data
+
+#### `var server = dat.serveHttp(opts)`
+
+Serve files over http via [hyperdrive-http](https://github.com/joehand/hyperdrive-http). Returns a node http server instance.
+
+```js
+opts = {
+  port: 8080, // http port
+  live: true, // live update directory index listing
+  footer: 'Served via Dat.', // Set a footer for the index listing
+  exposeHeaders: false // expose dat key in headers
+}
+```
 
 #### `dat.pause()`
 
