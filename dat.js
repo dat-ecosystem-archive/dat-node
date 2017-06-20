@@ -6,6 +6,7 @@ var untildify = require('untildify')
 var importFiles = require('./lib/import-files')
 var createNetwork = require('./lib/network')
 var stats = require('./lib/stats')
+var serveHttp = require('./lib/serve')
 var debug = require('debug')('dat-node')
 
 module.exports = Dat
@@ -184,6 +185,17 @@ Dat.prototype.importFiles = function (src, opts, cb) {
   self.importer = importFiles(self.archive, src, opts, cb)
   self.options.importer = self.importer.options
   return self.importer
+}
+
+/**
+ * Serve archive over http
+ * @type {Function}
+ * @param {Object} [opts] - Options passed to `mirror-folder` and `dat-ignore`
+ * @returns {Object} - node http server instance
+ */
+Dat.prototype.serveHttp = function (opts) {
+  this.server = serveHttp(this.archive, opts)
+  return this.server
 }
 
 /**
