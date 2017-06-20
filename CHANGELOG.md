@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   ### Added, ### Changed, ### Fixed, ### Removed, ### Deprecated
 -->
 
+## 3.5.0 - 2017-06-19
+### Added
+* Serve archives over http (https://github.com/datproject/dat-node/pull/160)
+
 ## 3.4.0 - 2017-06-19
 ### Added
 * Resolve dat links over http (https://github.com/datproject/dat-node/pull/159)
