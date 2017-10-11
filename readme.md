@@ -1,10 +1,8 @@
 # dat-node
 
-[![Greenkeeper badge](https://badges.greenkeeper.io/datproject/dat-node.svg)](https://greenkeeper.io/)
-
 > **dat-node** is a high-level module for building Dat applications on the file system.
 
-[![npm][0]][1] [![Travis][2]][3] [![Test coverage][4]][5]
+[![npm][0]][1] [![Travis][2]][3] [![Test coverage][4]][5] [![Greenkeeper badge](https://badges.greenkeeper.io/datproject/dat-node.svg)](https://greenkeeper.io/)
 
 [Dat](http://datproject.org) is a decentralized tool for distributing data and
 files, built for scientific and research data.
