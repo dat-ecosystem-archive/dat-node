@@ -45,8 +45,10 @@ test('download: Download with default opts', function (t) {
           t.ok(st.downloaded === st.length, 'all blocks downloaded')
           helpers.verifyFixtures(t, archive, function (err) {
             t.error(err, 'error')
+            t.ok(dat.network, 'network is open')
             dat.close(function (err) {
               t.error(err, 'error')
+              t.equal(dat.network, undefined, 'network is closed')
               cleanup(function (err) {
                 t.error(err, 'error')
                 closeShare(function (err) {
