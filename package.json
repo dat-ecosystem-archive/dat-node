@@ -32,6 +32,7 @@
     "multicb": "^1.2.1",
     "random-access-file": "^1.7.2",
     "random-access-memory": "^2.3.0",
+    "sparse-bitfield": "^3.0.3",
     "speedometer": "^1.0.0",
     "stream-each": "^1.2.0",
     "untildify": "^3.0.2",
