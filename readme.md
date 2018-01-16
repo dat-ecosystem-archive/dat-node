@@ -342,9 +342,9 @@ You can use a `.datignore` file in the imported directory, `src`, to ignore any 
 
 Emitted when archive stats are updated. Get new stats with `stats.get()`.
 
-##### `var st = stats.get()`
+##### `var st = dat.stats.get()`
 
-Get general archive stats for the latest version:
+`dat.trackStats()` adds a `stats` object to `dat`.  Get general archive stats for the latest version:
 
 ```js
 {
