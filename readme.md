@@ -248,7 +248,7 @@ The callback, `cb(err, dat)`, includes a `dat` object that has the following pro
 
 #### `var network = dat.joinNetwork([opts], [cb])`
 
-Join the network to start transferring data for `dat.key`, using [discovery-swarm](https://github.com/mafintosh/discovery-swarm). You can also can use `dat.join([opts], [cb])`.
+Join the network to start transferring data for `dat.key`, using [discovery-swarm](https://github.com/mafintosh/discovery-swarm). You can also use `dat.join([opts], [cb])`.
 
 If you specify `cb`, it will be called *when the first round* of discovery has completed. This is helpful to check immediately if peers are available and if not fail gracefully, more similar to http requests.
 
