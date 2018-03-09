@@ -62,6 +62,63 @@ test('download: Download with default opts', function (t) {
   })
 })
 
+test('download: Download with secretDir opt', function (t) {
+  shareFixtures(function (err, shareKey, closeShare) {
+    t.error(err, 'error')
+
+    tmpDir(function (err, downDir, cleanup) {
+      t.error(err, 'error')
+
+      tmpDir(function (err, downSecretDir, cleanupSecret) {
+        t.error(err, 'error')
+
+        Dat(downDir, {secretDir: downSecretDir, key: shareKey}, function (err, dat) {
+          t.error(err, 'error')
+          t.ok(dat, 'callsback with dat object')
+          t.ok(dat.key, 'has key')
+          t.ok(dat.archive, 'has archive')
+          t.notOk(dat.writable, 'archive not writable')
+
+          var stats = dat.trackStats()
+          var network = dat.joinNetwork(function () {
+            t.pass('joinNetwork calls back okay')
+          })
+          network.once('connection', function () {
+            t.pass('connects via network')
+          })
+          var archive = dat.archive
+          archive.once('content', function () {
+            t.pass('gets content')
+            archive.content.on('sync', done)
+          })
+
+          function done () {
+            var st = stats.get()
+            t.ok(st.version === archive.version, 'stats version correct')
+            t.ok(st.downloaded === st.length, 'all blocks downloaded')
+            helpers.verifyFixtures(t, archive, function (err) {
+              t.error(err, 'error')
+              dat.close(function (err) {
+                t.error(err, 'error')
+                cleanup(function (err) {
+                  t.error(err, 'error')
+                  cleanupSecret(function (err) {
+                    t.error(err, 'error')
+                    closeShare(function (err) {
+                      t.error(err, 'error')
+                      t.end()
+                    })
+                  })
+                })
+              })
+            })
+          }
+        })
+      })
+    })
+  })
+})
+
 // TODO:
 // rest of download tests
 // tests will be a lot better with some download-finished type check
