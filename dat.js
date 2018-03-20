@@ -58,10 +58,16 @@ function Dat (archive, opts) {
         return self.archive.resumed
       }
     },
-    writable: {
+    writer: {
       enumerable: true,
       get: function () {
-        return self.archive.metadata.writable
+        return self.archive.db.authorized(self.archive.local)
+      }
+    },
+    owner: {
+      enumerable: true,
+      get: function () {
+        return self.archive.db.source.writable
       }
     },
     version: {
@@ -95,8 +101,9 @@ Dat.prototype.join = function (opts, cb) {
   var netOpts = xtend({
     stream: function (peer) {
       var stream = self.archive.replicate({
-        upload: !(opts.upload === false),
-        download: !self.writable && opts.download,
+        // TODO (need to add to hyperdb?)
+        // upload: !(opts.upload === false),
+        // download: !self.writer && opts.download,
         live: !opts.end
       })
       stream.on('close', function () {
@@ -172,7 +179,8 @@ Dat.prototype.trackStats = function (opts) {
  * @returns {Object} - Import progress
  */
 Dat.prototype.importFiles = function (src, opts, cb) {
-  if (!this.writable) throw new Error('Must be archive owner to import files.')
+  debug(`Owner: ${this.owner}. Writer: ${this.writer}`)
+  if (!this.writer) throw new Error('Must be archive owner to import files.')
   if (typeof src !== 'string') return this.importFiles('', src, opts)
   if (typeof opts === 'function') return this.importFiles(src, {}, opts)
 

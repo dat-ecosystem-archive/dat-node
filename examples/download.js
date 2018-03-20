@@ -19,8 +19,9 @@ Dat(ram, {key: key, sparse: true}, function (err, dat) {
   var network = dat.joinNetwork()
   network.once('connection', function () {
     console.log('Connected')
+    download()
   })
-  dat.archive.metadata.update(download)
+  // dat.archive.metadata.update(download)
 
   function download () {
     var progress = mirror({fs: dat.archive, name: '/'}, dest, function (err) {

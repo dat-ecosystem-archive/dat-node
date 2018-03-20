@@ -98,11 +98,11 @@ function createDat (dirOrStorage, opts, cb) {
     function createArchive () {
       archive = hyperdrive(storage, key, opts)
       archive.on('error', cb)
-      archive.ready(function () {
-        debug('archive ready. version:', archive.version)
-        if (archive.metadata.has(0) && archive.version) archive.resumed = true
-        archive.removeListener('error', cb)
+      archive.on('ready', function () {
+        debug('archive ready')
+        if (archive.feeds[0].length) archive.resumed = true
 
+        archive.removeListener('error', cb)
         cb(null, new Dat(archive, opts))
       })
     }
