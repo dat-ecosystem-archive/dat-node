@@ -131,8 +131,8 @@ Dat.prototype.leave = function (cb) {
   // TODO: v8 unreplicate ?
   // this.archive.unreplicate()
   this.network.leave(this.archive.discoveryKey)
+  var id = setTimeout(function () {}, 1000000)
   this.network.destroy(function () {
-    var id = setTimeout(function () {}, 1000000)
     clearTimeout(id)
     cb()
   })
