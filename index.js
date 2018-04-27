@@ -36,6 +36,7 @@ function createDat (dirOrStorage, opts, cb) {
   var storage = datStore(dirOrStorage, opts)
   var createIfMissing = !(opts.createIfMissing === false)
   var errorIfExists = opts.errorIfExists || false
+  var resuming = false
   opts = xtend({
     // TODO: make sure opts.dir is a directory, not file
     dir: dir,
@@ -63,6 +64,7 @@ function createDat (dirOrStorage, opts, cb) {
     fs.readdir(path.join(opts.dir, '.dat'), function (err, files) {
       // TODO: omg please make this less confusing.
       var noDat = !!(err || !files.length)
+      resuming = !noDat
       var validSleep = (files && files.length && files.indexOf('metadata.key') > -1)
       var badDat = !(noDat || validSleep)
 
@@ -100,7 +102,7 @@ function createDat (dirOrStorage, opts, cb) {
       archive.on('error', cb)
       archive.ready(function () {
         debug('archive ready. version:', archive.version)
-        if (archive.metadata.has(0) && archive.version) archive.resumed = true
+        archive.resumed = resuming
         archive.removeListener('error', cb)
 
         cb(null, new Dat(archive, opts))
