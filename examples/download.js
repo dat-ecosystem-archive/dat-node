@@ -13,7 +13,7 @@ if (!key) {
 var dest = path.join(__dirname, 'tmp')
 fs.mkdirSync(dest)
 
-Dat(ram, {key: key, sparse: true}, function (err, dat) {
+Dat(ram, {key: key, files: dest}, function (err, dat) {
   if (err) throw err
 
   var network = dat.joinNetwork()

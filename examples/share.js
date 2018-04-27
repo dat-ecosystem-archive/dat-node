@@ -3,7 +3,7 @@ var Dat = require('..')
 
 var src = path.join(__dirname, '..')
 
-Dat(src, {temp: true}, function (err, dat) {
+Dat(src, function (err, dat) {
   if (err) throw err
 
   var network = dat.joinNetwork()

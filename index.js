@@ -39,7 +39,7 @@ function createDat (dirOrStorage, opts, cb) {
   opts = xtend({
     // TODO: make sure opts.dir is a directory, not file
     dir: dir,
-    latest: true
+    files: dir
   }, opts)
 
   if (!opts.dir) return create() // TODO: check other storage
@@ -63,7 +63,9 @@ function createDat (dirOrStorage, opts, cb) {
     fs.readdir(path.join(opts.dir, '.dat'), function (err, files) {
       // TODO: omg please make this less confusing.
       var noDat = !!(err || !files.length)
-      var validSleep = (files && files.length && files.indexOf('metadata.key') > -1)
+
+      // TODO: check for valid storage
+      var validSleep = (files && files.length && files.indexOf('source') > -1)
       var badDat = !(noDat || validSleep)
 
       if ((noDat || validSleep) && createAfterValid) return create()
@@ -96,6 +98,7 @@ function createDat (dirOrStorage, opts, cb) {
     })
 
     function createArchive () {
+      debug('createArchive(), storage:', storage)
       archive = hyperdrive(storage, key, opts)
       archive.on('error', cb)
       archive.on('ready', function () {
