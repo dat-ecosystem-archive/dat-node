@@ -230,6 +230,7 @@ test('share: cleanup', function (t) {
 test('share: dir storage and opts.temp', function (t) {
   Dat(fixtures, {temp: true}, function (err, dat) {
     t.error(err, 'error')
+    t.false(dat.resumed, 'resume flag false')
 
     dat.importFiles(function (err) {
       t.error(err, 'error')
@@ -248,6 +249,7 @@ test('share: dir storage and opts.temp', function (t) {
 test('share: ram storage & import other dir', function (t) {
   Dat(ram, function (err, dat) {
     t.error(err, 'error')
+    t.false(dat.resumed, 'resume flag false')
 
     dat.importFiles(fixtures, function (err) {
       t.error(err, 'error')
