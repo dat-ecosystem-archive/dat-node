@@ -111,6 +111,27 @@ test('share: resume with .dat folder', function (t) {
   })
 })
 
+test('share: resume with empty .dat folder', function (t) {
+  var emptyPath = path.join(__dirname, 'empty')
+  Dat(emptyPath, function (err, dat) {
+    t.error(err, 'cb without error')
+    t.false(dat.resumed, 'resume flag false')
+
+    dat.close(function () {
+      Dat(emptyPath, function (err, dat) {
+        t.error(err, 'cb without error')
+        t.ok(dat.resumed, 'resume flag set')
+
+        dat.close(function () {
+          rimraf(emptyPath, function () {
+            t.end()
+          })
+        })
+      })
+    })
+  })
+})
+
 // TODO: live = false, not implemented yet in hyperdrive v8
 // test('share snapshot', function (t) {
 //   Dat(fixtures, { live: false }, function (err, dat) {
@@ -209,6 +230,7 @@ test('share: cleanup', function (t) {
 test('share: dir storage and opts.temp', function (t) {
   Dat(fixtures, {temp: true}, function (err, dat) {
     t.error(err, 'error')
+    t.false(dat.resumed, 'resume flag false')
 
     dat.importFiles(function (err) {
       t.error(err, 'error')
@@ -227,6 +249,7 @@ test('share: dir storage and opts.temp', function (t) {
 test('share: ram storage & import other dir', function (t) {
   Dat(ram, function (err, dat) {
     t.error(err, 'error')
+    t.false(dat.resumed, 'resume flag false')
 
     dat.importFiles(fixtures, function (err) {
       t.error(err, 'error')
