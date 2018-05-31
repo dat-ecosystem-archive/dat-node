@@ -1,9 +1,9 @@
 language: node_js
 
 node_js:
-  - "4"
   - "6"
   - "8"
+  - "10"
 
 sudo: false
 
@@ -12,3 +12,7 @@ script:
 
 after_success:
  - npm i -g codecov && npm run coverage && codecov
+
+cache:
+  directories:
+    - node_modules
