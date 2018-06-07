@@ -229,7 +229,8 @@ Dat.prototype.close = function (cb) {
 
   function closeArchive (cb) {
     // self.archive.unreplicate()
-    self.archive.close(cb)
+    // self.archive.close(cb)
+    cb()
   }
 
   function closeNet (cb) {

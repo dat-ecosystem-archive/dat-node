@@ -55,6 +55,7 @@ test('share: create dat with default ops', function (t) {
       var st = stats.get()
       if (archive.version === st.version) return check()
       stats.once('update', check)
+      check() // HACK
 
       function check () {
         var st = stats.get()
@@ -65,12 +66,12 @@ test('share: create dat with default ops', function (t) {
 
         t.same(putFiles, 3, 'importer puts')
         t.same(archive.version, 3, 'archive version')
-        t.same(archive.metadata.length, 4, 'entries in metadata')
+        t.same(archive.metadata ? archive.metadata.length : null, 4, 'entries in metadata')
 
         helpers.verifyFixtures(t, archive, function (err) {
           t.ifError(err)
           dat.close(function (err) {
-            t.ifError(err)
+            t.ifError(err, 'no error')
             t.pass('close okay')
             t.end()
           })
