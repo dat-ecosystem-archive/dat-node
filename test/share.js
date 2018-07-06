@@ -201,10 +201,13 @@ if (!process.env.TRAVIS) {
         t.ok(src.live, 'file put is live')
         process.nextTick(done)
       })
+      setTimeout(writeFile, 500)
 
-      fs.writeFile(newFile, 'hello world', function (err) {
-        t.ifError(err, 'error')
-      })
+      function writeFile () {
+        fs.writeFile(newFile, 'hello world', function (err) {
+          t.ifError(err, 'error')
+        })
+      }
 
       function done () {
         dat.archive.stat('/new.txt', function (err, stat) {
