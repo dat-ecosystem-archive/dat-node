@@ -102,14 +102,21 @@ We'll go through what these are for and a few of the common usages of each eleme
 
 ### Storage
 
-Every dat archive has **storage**, this is the required first argument for dat-node. By default, we use [dat-storage](http://github.com/datproject/dat-storage) which stores the secret key in `~/.dat/` and the rest of the ddata in `dir/.dat`. Other common options are:
+Every dat archive has **storage**, this is the required first argument for dat-node. By default, we use [dat-storage](http://github.com/datproject/dat-storage) which stores the secret key in `~/.dat/` and the rest of the data in `dir/.dat`. Other common options are:
 
 * **Persistent storage**: Stored files in `/my-dir` and metadata in `my-dir/.dat` by passing `/my-dir` as the first argument.
 * **Temporary Storage**: Use the `temp: true` option to keep metadata stored in memory.
+* **Secret Key Dir**: Specify secretDir in the second opts argument in the form of {secretDir: '/my-secrets'} to store files
+  in /my-dir and secrets in /my-secrets respectively.
 
 ```js
 // Permanent Storage
 Dat('/my-dir', function (err, dat) {
+  // Do Dat Stuff
+})
+
+// Secret Storage
+Dat('/my-dir', {secretDir: '/my-secrets'}, function (err, dat) {
   // Do Dat Stuff
 })
 
@@ -119,7 +126,7 @@ Dat('/my-dir', {temp: true}, function (err, dat) {
 })
 ```
 
-Both of these will import files from `/my-dir` when doing `dat.importFiles()` but only the first will make a `.dat` folder and keep the metadata on disk.
+All of these will import files from `/my-dir` when doing `dat.importFiles()` but only the first two will make a `.dat` folder and keep the metadata on disk.
 
 The storage argument can also be passed through to hyperdrive for more advanced storage use cases.
 

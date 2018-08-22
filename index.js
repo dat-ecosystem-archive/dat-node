@@ -18,6 +18,7 @@ module.exports = createDat
  * @param {Boolean} [opts.createIfMissing = true] - Create storage if it does not exit.
  * @param {Boolean} [opts.errorIfExists = false] - Error if storage exists.
  * @param {Boolean} [opts.temp = false] - Use random-access-memory for temporary storage
+ * @param {string} [opts.secretDir] - Directory for storage of secrets
  * @param {function(err, dat)} cb - callback that returns `Dat` instance
  * @see defaultStorage for storage information
  */
