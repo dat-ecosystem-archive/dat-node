@@ -15,7 +15,6 @@ fs.mkdirSync(dest)
 
 Dat(dest, {key: key}, function (err, dat) {
   if (err) throw err
-
   var network = dat.joinNetwork()
   network.once('connection', function () {
     console.log('Connected')
@@ -24,17 +23,9 @@ Dat(dest, {key: key}, function (err, dat) {
       console.log('done')
     })
   })
-  // dat.archive.metadata.update(download)
-
-  function download () {
-    var progress = mirror({fs: dat.archive, name: '/'}, dest, function (err) {
-      if (err) throw err
-      console.log('Done')
-    })
-    progress.on('put', function (src) {
-      console.log('Downloading', src.name)
-    })
-  }
+  dat.archive.db.source.on('sync', function () {
+    console.log('source sync')
+  })
 
   console.log(`Downloading: ${dat.key.toString('hex')}\n`)
 })

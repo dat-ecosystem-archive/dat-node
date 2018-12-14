@@ -34,19 +34,16 @@ test('download: Download with default opts', function (t) {
           t.pass('connects via network')
         })
         var archive = dat.archive
-        archive.once('content', function () {
-          t.pass('gets content')
-          archive.content.on('sync', done)
-        })
-
+        archive.db.source.on('sync', done)
+        
         function done () {
           var st = stats.get()
           t.ok(st.version === archive.version, 'stats version correct')
           t.ok(st.downloaded === st.length, 'all blocks downloaded')
           helpers.verifyFixtures(t, archive, function (err) {
             t.error(err, 'error')
-            dat.close(function (err) {
-              t.error(err, 'error')
+            // dat.close(function (err) {
+              // t.error(err, 'error')
               cleanup(function (err) {
                 t.error(err, 'error')
                 closeShare(function (err) {
@@ -54,7 +51,7 @@ test('download: Download with default opts', function (t) {
                   t.end()
                 })
               })
-            })
+            // })
           })
         }
       })
@@ -267,10 +264,10 @@ function shareFixtures (opts, cb) {
     })
 
     function close (cb) {
-      dat.close(function (err) {
+      // dat.close(function (err) {
         cb(err)
         // rimraf if we need it?
-      })
+      // })
     }
   })
 }
