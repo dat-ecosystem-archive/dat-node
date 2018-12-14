@@ -13,13 +13,16 @@ if (!key) {
 var dest = path.join(__dirname, 'tmp')
 fs.mkdirSync(dest)
 
-Dat(ram, {key: key, files: dest}, function (err, dat) {
+Dat(dest, {key: key}, function (err, dat) {
   if (err) throw err
 
   var network = dat.joinNetwork()
   network.once('connection', function () {
     console.log('Connected')
-    download()
+    // download()
+    dat.archive.localContent.on('sync', function () {
+      console.log('done')
+    })
   })
   // dat.archive.metadata.update(download)
 
