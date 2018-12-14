@@ -92,7 +92,7 @@ test('share: resume with .dat folder', function (t) {
     t.same(liveKey, dat.key, 'key matches previous key')
     var stats = dat.trackStats()
 
-    countFiles({fs: dat.archive, name: '/'}, function (err, count) {
+    countFiles({ fs: dat.archive, name: '/' }, function (err, count) {
       t.ifError(err, 'count err')
       var archive = dat.archive
 
@@ -231,7 +231,7 @@ test('share: cleanup', function (t) {
 })
 
 test('share: dir storage and opts.temp', function (t) {
-  Dat(fixtures, {temp: true}, function (err, dat) {
+  Dat(fixtures, { temp: true }, function (err, dat) {
     t.error(err, 'error')
     t.false(dat.resumed, 'resume flag false')
 

@@ -27,8 +27,8 @@ function createDat (dirOrStorage, opts, cb) {
     opts = {}
   }
   assert.ok(dirOrStorage, 'dat-node: directory or storage required')
-  assert.equal(typeof opts, 'object', 'dat-node: opts should be type object')
-  assert.equal(typeof cb, 'function', 'dat-node: callback required')
+  assert.strictEqual(typeof opts, 'object', 'dat-node: opts should be type object')
+  assert.strictEqual(typeof cb, 'function', 'dat-node: callback required')
 
   var archive
   var key = opts.key

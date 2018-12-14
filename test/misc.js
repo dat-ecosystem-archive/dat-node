@@ -84,7 +84,7 @@ test('misc: expose .writable', function (t) {
       t.ok(shareDat.writable, 'is writable')
       shareDat.joinNetwork()
 
-      Dat(downDir, {key: shareDat.key}, function (err, downDat) {
+      Dat(downDir, { key: shareDat.key }, function (err, downDat) {
         t.error(err, 'error')
         t.notOk(downDat.writable, 'not writable')
 
@@ -142,7 +142,7 @@ test('misc: expose swarm.connected', function (t) {
 })
 
 test('misc: close twice errors', function (t) {
-  Dat(fixtures, {temp: true}, function (err, dat) {
+  Dat(fixtures, { temp: true }, function (err, dat) {
     t.error(err, 'error')
     dat.close(function (err) {
       t.error(err, 'error')
@@ -155,7 +155,7 @@ test('misc: close twice errors', function (t) {
 })
 
 test('misc: close twice sync errors', function (t) {
-  Dat(fixtures, {temp: true}, function (err, dat) {
+  Dat(fixtures, { temp: true }, function (err, dat) {
     t.error(err, 'error')
     dat.close(function (err) {
       t.error(err, 'error')
@@ -191,12 +191,12 @@ test('misc: make dat with random key and open again', function (t) {
   tmpDir(function (err, downDir, cleanup) {
     t.error(err, 'error')
     var key = '6161616161616161616161616161616161616161616161616161616161616161'
-    Dat(downDir, {key: key}, function (err, dat) {
+    Dat(downDir, { key: key }, function (err, dat) {
       t.error(err, 'error')
       t.ok(dat, 'has dat')
       dat.close(function (err) {
         t.error(err, 'error')
-        Dat(downDir, {key: key}, function (err, dat) {
+        Dat(downDir, { key: key }, function (err, dat) {
           t.error(err, 'error')
           t.ok(dat, 'has dat')
           t.end()
@@ -209,12 +209,12 @@ test('misc: make dat with random key and open again', function (t) {
 test('misc: close order', function (t) {
   tmpDir(function (err, downDir, cleanup) {
     t.error(err, 'opened tmp dir')
-    Dat(downDir, {watch: true}, function (err, dat) {
+    Dat(downDir, { watch: true }, function (err, dat) {
       t.error(err, 'dat properly opened')
       dat.importFiles(function (err) {
         t.error(err, 'started importing files')
         t.ok(dat.importer, 'importer exists')
-        dat.joinNetwork({dht: false}, function (err) {
+        dat.joinNetwork({ dht: false }, function (err) {
           t.error(err, 'joined network')
           var order = []
           dat.network.on('error', function (err) {

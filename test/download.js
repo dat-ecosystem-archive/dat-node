@@ -19,7 +19,7 @@ test('download: Download with default opts', function (t) {
     tmpDir(function (err, downDir, cleanup) {
       t.error(err, 'error')
 
-      Dat(downDir, {key: shareKey}, function (err, dat) {
+      Dat(downDir, { key: shareKey }, function (err, dat) {
         t.error(err, 'error')
         t.ok(dat, 'callsback with dat object')
         t.ok(dat.key, 'has key')
@@ -260,7 +260,7 @@ function shareFixtures (opts, cb) {
   if (!opts) opts = {}
 
   rimraf.sync(path.join(fixtures, '.dat')) // for previous failed tests
-  Dat(fixtures, {temp: true}, function (err, dat) {
+  Dat(fixtures, { temp: true }, function (err, dat) {
     if (err) return cb(err)
     dat.joinNetwork({ dht: false })
     dat.importFiles(function (err) {

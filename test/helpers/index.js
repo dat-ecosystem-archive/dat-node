@@ -36,7 +36,7 @@ module.exports.verifyFixtures = function (t, archive, cb) {
   })
 
   function done () {
-    countFiles({fs: archive, name: '/'}, function (err, count) {
+    countFiles({ fs: archive, name: '/' }, function (err, count) {
       if (err) return cb(err)
       t.same(count, fixtureStats, 'archive stats are correct')
       cb()

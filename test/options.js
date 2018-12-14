@@ -16,7 +16,7 @@ test('opts: string or buffer .key', function (t) {
     dat.close(function (err) {
       t.error(err, 'no close error')
 
-      Dat(process.cwd(), {key: encoding.encode(buf)}, function (err, dat) {
+      Dat(process.cwd(), { key: encoding.encode(buf) }, function (err, dat) {
         t.error(err, 'no callback error')
         t.deepEqual(dat.archive.key, buf, 'keys match still')
         dat.close(function () {
@@ -30,7 +30,7 @@ test('opts: string or buffer .key', function (t) {
 
 test('opts: createIfMissing false', function (t) {
   rimraf.sync(path.join(fixtures, '.dat'))
-  Dat(fixtures, {createIfMissing: false}, function (err, dat) {
+  Dat(fixtures, { createIfMissing: false }, function (err, dat) {
     t.ok(err, 'throws error')
     t.end()
   })
@@ -54,7 +54,7 @@ test('opts: errorIfExists true', function (t) {
   Dat(fixtures, function (err, dat) {
     t.ifErr(err)
     dat.close(function () {
-      Dat(fixtures, {errorIfExists: true}, function (err, dat) {
+      Dat(fixtures, { errorIfExists: true }, function (err, dat) {
         t.ok(err, 'throws error')
         t.end()
       })
@@ -65,7 +65,7 @@ test('opts: errorIfExists true', function (t) {
 test('opts: errorIfExists true without existing dat', function (t) {
   rimraf.sync(path.join(fixtures, '.dat'))
   // create dat to resume from
-  Dat(fixtures, {errorIfExists: true}, function (err, dat) {
+  Dat(fixtures, { errorIfExists: true }, function (err, dat) {
     t.ifErr(err)
     t.end()
   })

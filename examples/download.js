@@ -13,7 +13,7 @@ if (!key) {
 var dest = path.join(__dirname, 'tmp')
 fs.mkdirSync(dest)
 
-Dat(ram, {key: key, sparse: true}, function (err, dat) {
+Dat(ram, { key: key, sparse: true }, function (err, dat) {
   if (err) throw err
 
   var network = dat.joinNetwork()
@@ -23,7 +23,7 @@ Dat(ram, {key: key, sparse: true}, function (err, dat) {
   dat.archive.metadata.update(download)
 
   function download () {
-    var progress = mirror({fs: dat.archive, name: '/'}, dest, function (err) {
+    var progress = mirror({ fs: dat.archive, name: '/' }, dest, function (err) {
       if (err) throw err
       console.log('Done')
     })
