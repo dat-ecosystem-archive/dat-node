@@ -205,3 +205,38 @@ test('misc: make dat with random key and open again', function (t) {
     })
   })
 })
+
+test('misc: close order', function (t) {
+  tmpDir(function (err, downDir, cleanup) {
+    t.error(err, 'opened tmp dir')
+    Dat(downDir, {watch: true}, function (err, dat) {
+      t.error(err, 'dat properly opened')
+      dat.importFiles(function (err) {
+        t.error(err, 'started importing files')
+        t.ok(dat.importer, 'importer exists')
+        dat.joinNetwork({dht: false}, function (err) {
+          t.error(err, 'joined network')
+          var order = []
+          dat.network.on('error', function (err) {
+            t.error(err)
+          })
+          dat.network.on('close', function () {
+            order.push('network')
+          })
+          dat.importer.on('destroy', function () {
+            order.push('importer')
+          })
+          dat.archive.metadata.on('close', function () {
+            order.push('metadata')
+          })
+          dat.archive.content.on('close', function () {
+            order.push('content')
+            t.deepEquals(order, ['network', 'importer', 'metadata', 'content'], 'Close order as expected')
+            t.end()
+          })
+          dat.close()
+        })
+      })
+    })
+  })
+})

@@ -1,6 +1,5 @@
 var assert = require('assert')
 var path = require('path')
-var multicb = require('multicb')
 var xtend = require('xtend')
 var untildify = require('untildify')
 var importFiles = require('./lib/import-files')
@@ -210,17 +209,13 @@ Dat.prototype.close = function (cb) {
   var self = this
   self._closed = true
 
-  var done = multicb()
-  closeNet(done())
-  closeFileWatch(done())
-  closeArchive(done())
-
-  done(cb)
-
-  function closeArchive (cb) {
-    // self.archive.unreplicate()
-    self.archive.close(cb)
-  }
+  closeNet(function (err) {
+    if (err) debug('Error while closing network:', err.message)
+    closeFileWatch(function () {
+      // self.archive.unreplicate()
+      self.archive.close(cb)
+    })
+  })
 
   function closeNet (cb) {
     if (!self.network) return cb()
@@ -229,7 +224,11 @@ Dat.prototype.close = function (cb) {
 
   function closeFileWatch (cb) {
     if (!self.importer) return cb()
+    // Emitting an event, as imported doesn't emit an event on
+    // destroy and there is no other means to see if this was called.
+    self.importer.emit('destroy')
     self.importer.destroy()
+    delete self.importer
     process.nextTick(cb)
   }
 }
