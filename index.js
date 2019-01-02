@@ -89,7 +89,7 @@ function createDat (dirOrStorage, opts, cb) {
       // TODO: this should be an import option instead, https://github.com/mafintosh/hyperdrive/issues/160
       opts.indexing = true
     }
-    if (!key) return createArchive()
+    if (!key || (opts.createWithKey)) return createArchive()
 
     resolveDatLink(key, function (err, resolvedKey) {
       if (err) return cb(err)
