@@ -1,7 +1,6 @@
 var assert = require('assert')
 var fs = require('fs')
 var path = require('path')
-var xtend = require('xtend')
 var hyperdrive = require('hyperdrive')
 var resolveDatLink = require('dat-link-resolve')
 var debug = require('debug')('dat-node')
@@ -37,7 +36,7 @@ function createDat (dirOrStorage, opts, cb) {
   var createIfMissing = !(opts.createIfMissing === false)
   var errorIfExists = opts.errorIfExists || false
   var hasDat = false
-  opts = xtend({
+  opts = Object.assign({
     // TODO: make sure opts.dir is a directory, not file
     dir: dir,
     latest: true

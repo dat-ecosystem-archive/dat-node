@@ -1,6 +1,5 @@
 var assert = require('assert')
 var path = require('path')
-var xtend = require('xtend')
 var untildify = require('untildify')
 var importFiles = require('./lib/import-files')
 var createNetwork = require('./lib/network')
@@ -32,7 +31,7 @@ function Dat (archive, opts) {
   var self = this
 
   this.archive = archive
-  this.options = xtend(opts)
+  this.options = Object.assign({}, opts)
   if (opts.dir) {
     this.path = path.resolve(untildify(opts.dir))
   }
@@ -91,7 +90,7 @@ Dat.prototype.join = function (opts, cb) {
   else opts = opts || {}
   cb = cb || noop
 
-  var netOpts = xtend({
+  var netOpts = Object.assign({}, {
     stream: function (peer) {
       var stream = self.archive.replicate({
         upload: !(opts.upload === false),
@@ -157,7 +156,7 @@ Dat.prototype.resume = function () {
  * @type {Function}
  */
 Dat.prototype.trackStats = function (opts) {
-  opts = xtend({}, opts)
+  opts = Object.assign({}, opts)
   this.stats = stats(this.archive, opts)
   return this.stats
 }
@@ -177,7 +176,7 @@ Dat.prototype.importFiles = function (src, opts, cb) {
 
   var self = this
   src = src && src.length ? src : self.path
-  opts = xtend({
+  opts = Object.assign({
     indexing: (opts && opts.indexing) || (src === self.path)
   }, opts)
 

@@ -22,7 +22,7 @@
     "dat-ignore": "^2.1.1",
     "dat-link-resolve": "^2.2.0",
     "dat-storage": "^1.1.1",
-    "dat-swarm-defaults": "^1.0.0",
+    "dat-swarm-defaults": "^1.0.2",
     "debug": "^4.1.0",
     "discovery-swarm": "^5.1.2",
     "hyperdrive": "^9.14.2",
@@ -30,12 +30,11 @@
     "hyperdrive-network-speed": "^2.1.0",
     "mirror-folder": "^3.0.0",
     "random-access-file": "^2.0.1",
-    "random-access-memory": "^3.0.0",
+    "random-access-memory": "^3.1.1",
     "sparse-bitfield": "^3.0.3",
     "speedometer": "^1.1.0",
     "stream-each": "^1.2.3",
-    "untildify": "^3.0.2",
-    "xtend": "^4.0.1"
+    "untildify": "^3.0.2"
   },
   "devDependencies": {
     "count-files": "^2.6.2",
@@ -45,7 +44,7 @@
     "memdown": "^3.0.0",
     "mkdirp": "^0.5.1",
     "nyc": "^13.1.0",
-    "rimraf": "^2.5.4",
+    "rimraf": "^2.6.3",
     "standard": "^12.0.1",
     "tape": "^4.9.1",
     "temporary-directory": "^1.0.2"
