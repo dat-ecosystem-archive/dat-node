@@ -209,10 +209,13 @@ Dat.prototype.close = function (cb) {
   var self = this
   self._closed = true
 
+  debug('closing network')
   closeNet(function (err) {
     if (err) debug('Error while closing network:', err.message)
+    debug('closing closeFileWatch')
     closeFileWatch(function () {
       // self.archive.unreplicate()
+      debug('closing archive')
       self.archive.close(cb)
     })
   })
