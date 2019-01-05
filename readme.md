@@ -79,7 +79,7 @@ Dat('/download/cat-analysis', {
 })
 ```
 
-Thats it! By default, all files are automatically downloaded when you connect to the other users.
+That's it! By default, all files are automatically downloaded when you connect to the other users.
 
 Dig into more use cases below and please let us know if you have questions! You can [open a new issue](https://github.com/datproject/dat-node/issues) or talk to nice humans in [our chat room](https://gitter.im/datproject/discussions).
 
