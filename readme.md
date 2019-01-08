@@ -102,7 +102,7 @@ We'll go through what these are for and a few of the common usages of each eleme
 
 ### Storage
 
-Every dat archive has **storage**, this is the required first argument for dat-node. By default, we use [dat-storage](http://github.com/datproject/dat-storage) which stores the secret key in `~/.dat/` and the rest of the ddata in `dir/.dat`. Other common options are:
+Every dat archive has **storage**, this is the required first argument for dat-node. By default, we use [dat-storage](http://github.com/datproject/dat-storage) which stores the secret key in `~/.dat/` and the rest of the data in `dir/.dat`. Other common options are:
 
 * **Persistent storage**: Stored files in `/my-dir` and metadata in `my-dir/.dat` by passing `/my-dir` as the first argument.
 * **Temporary Storage**: Use the `temp: true` option to keep metadata stored in memory.
