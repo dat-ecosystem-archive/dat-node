@@ -303,7 +303,7 @@ Import files to your Dat Archive from the directory using [mirror-folder](https:
 Returns a `importer` object with properties:
 
 * `importer.on('error', err)`
-* `importer.on('put', src, dest)` - file put started. `src.live` is true is file was added by file watch event.
+* `importer.on('put', src, dest)` - file put started. `src.live` is true if file was added by file watch event.
 * `importer.on('put-data', chunk)` - chunk of file added
 * `importer.on('put-end', src, dest)` - end of file write stream
 * `importer.on('del', dest)` - file deleted from dest
