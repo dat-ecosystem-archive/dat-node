@@ -1,5 +1,4 @@
 const assert = require('assert')
-const { EventEmitter } = require('events')
 const path = require('path')
 
 const untildify = require('untildify')
@@ -11,10 +10,8 @@ const debug = require('debug')('dat-node')
 
 module.exports = (...args) => new Dat(...args)
 
-class Dat extends EventEmitter {
+class Dat {
   constructor (archive, opts) {
-    super()
-
     assert.ok(archive, 'archive required')
 
     this.archive = archive
