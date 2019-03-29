@@ -79,15 +79,17 @@ class Dat {
     return network
   }
 
-  leave (cb) {
-    if (!cb) cb = noop
-    if (!this || !this.network) return cb()
+  async leave () {
+    if (!this.network) return
     debug('leaveNetwork()')
-    // TODO: v8 unreplicate ?
-    // this.archive.unreplicate()
+    this.archive.content.undownload()
     this.network.leave(this.archive.discoveryKey)
-    this.network.destroy(cb)
-    delete this.network
+    return new Promise((resolve, reject) => {
+      this.network.destroy((err) => {
+        if (err) return reject(err)
+        resolve()
+      })
+    })
   }
 
   pause () {
@@ -127,37 +129,51 @@ class Dat {
     return this.server
   }
 
-  close (cb) {
-    cb = cb || noop
-    if (this._closed) return cb(new Error('Dat is already closed'))
+  async close () {
+    if (this._closed) return // cb(new Error('Dat is already closed'))
 
     var self = this
     self._closed = true
 
-    debug('closing network')
-    closeNet(function (err) {
-      if (err) debug('Error while closing network:', err.message)
-      debug('closing closeFileWatch')
-      closeFileWatch(function () {
-        // self.archive.unreplicate()
-        debug('closing archive')
-        self.archive.close(cb)
+    return new Promise(async (resolve, reject) => {
+      try {
+        debug('closing network')
+        if (self.network) await closeNet()
+        debug('closing closeFileWatch')
+        if (self.importer) await closeFileWatch()
+      } catch (e) {
+        reject(e)
+      }
+      self.archive.close((err) => {
+        if (err) return reject(err)
+        resolve()
       })
     })
 
-    function closeNet (cb) {
-      if (!self.network) return cb()
-      self.leave(cb)
+    async function closeNet () {
+      return new Promise(async (resolve, reject) => {
+        try {
+          await self.leave()
+          delete self.network
+          resolve()
+        } catch (e) {
+          reject(e)
+        }
+      })
     }
 
-    function closeFileWatch (cb) {
-      if (!self.importer) return cb()
+    async function closeFileWatch () {
       // Emitting an event, as imported doesn't emit an event on
       // destroy and there is no other means to see if this was called.
       self.importer.emit('destroy')
       self.importer.destroy()
       delete self.importer
-      process.nextTick(cb)
+      return new Promise((resolve, reject) => {
+        process.nextTick((err) => {
+          if (err) return reject(err)
+          resolve()
+        })
+      })
     }
   }
 }

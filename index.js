@@ -17,17 +17,12 @@ module.exports = createDat
  * @param {Boolean} [opts.createIfMissing = true] - Create storage if it does not exit.
  * @param {Boolean} [opts.errorIfExists = false] - Error if storage exists.
  * @param {Boolean} [opts.temp = false] - Use random-access-memory for temporary storage
- * @param {function(err, dat)} cb - callback that returns `Dat` instance
  * @see defaultStorage for storage information
  */
-function createDat (dirOrStorage, opts, cb) {
-  if (!cb) {
-    cb = opts
-    opts = {}
-  }
+async function createDat (dirOrStorage, opts) {
+  if (!opts) opts = {}
   assert.ok(dirOrStorage, 'dat-node: directory or storage required')
   assert.strictEqual(typeof opts, 'object', 'dat-node: opts should be type object')
-  assert.strictEqual(typeof cb, 'function', 'dat-node: callback required')
 
   var archive
   var key = opts.key
@@ -42,14 +37,19 @@ function createDat (dirOrStorage, opts, cb) {
     latest: true
   }, opts)
 
-  if (!opts.dir) return create() // TODO: check other storage
-  checkIfExists()
+  return new Promise(async (resolve, reject) => {
+    try {
+      await checkIfExists()
+      const dat = await create()
+      return resolve(dat)
+    } catch (e) {
+      reject(e)
+    }
+  })
 
-  /**
-   * Check if archive storage folder exists.
-   * @private
-   */
-  function checkIfExists () {
+  async function checkIfExists () {
+    if (!opts.dir) return
+
     // Create after we check for pre-sleep .dat stuff
     var createAfterValid = (createIfMissing && !errorIfExists)
 
@@ -60,56 +60,54 @@ function createDat (dirOrStorage, opts, cb) {
     var oldError = new Error('Dat folder contains incompatible metadata. Please remove your metadata (rm -rf .dat).')
     oldError.name = 'IncompatibleError'
 
-    fs.readdir(path.join(opts.dir, '.dat'), function (err, files) {
-      // TODO: omg please make this less confusing.
-      var noDat = !!(err || !files.length)
-      hasDat = !noDat
-      var validSleep = (files && files.length && files.indexOf('metadata.key') > -1)
-      var badDat = !(noDat || validSleep)
+    return new Promise((resolve, reject) => {
+      fs.readdir(path.join(opts.dir, '.dat'), function (err, files) {
+        // TODO: omg please make this less confusing.
+        var noDat = !!(err || !files.length)
+        hasDat = !noDat
+        var validSleep = (files && files.length && files.indexOf('metadata.key') > -1)
+        var badDat = !(noDat || validSleep)
 
-      if ((noDat || validSleep) && createAfterValid) return create()
-      else if (badDat) return cb(oldError)
+        if ((noDat || validSleep) && createAfterValid) return resolve()
+        else if (badDat) return reject(oldError)
 
-      if (err && !createIfMissing) return cb(missingError)
-      else if (!err && errorIfExists) return cb(existsError)
-
-      return create()
+        if (err && !createIfMissing) return reject(missingError)
+        else if (!err && errorIfExists) return reject(existsError)
+      })
     })
   }
 
-  /**
-   * Create the archive and call `archive.ready()` before callback.
-   * Set `archive.resumed` if archive has a content feed.
-   * @private
-   */
-  function create () {
+  async function create () {
     if (dir && !opts.temp && !key && (opts.indexing !== false)) {
       // Only set opts.indexing if storage is dat-storage
       // TODO: this should be an import option instead, https://github.com/mafintosh/hyperdrive/issues/160
       opts.indexing = true
     }
-    if (!key) return createArchive()
 
-    resolveDatLink(key, function (err, resolvedKey) {
-      if (err) return cb(err)
-      key = resolvedKey
-      createArchive()
-    })
+    return new Promise(async (resolve, reject) => {
+      if (!key) return createArchive()
 
-    function createArchive () {
-      archive = hyperdrive(storage, key, opts)
-      archive.on('error', cb)
-      archive.ready(function () {
-        debug('archive ready. version:', archive.version)
-        if (hasDat || (archive.metadata.has(0) && archive.version)) {
-          archive.resumed = true
-        } else {
-          archive.resumed = false
-        }
-        archive.removeListener('error', cb)
-
-        cb(null, Dat(archive, opts))
+      resolveDatLink(key, function (err, resolvedKey) {
+        if (err) return err
+        key = resolvedKey
+        createArchive()
       })
-    }
+
+      function createArchive () {
+        archive = hyperdrive(storage, key, opts)
+        archive.on('error', (err) => {
+          reject(err)
+        })
+        archive.ready(function () {
+          debug('archive ready. version:', archive.version)
+          if (hasDat || (archive.metadata.has(0) && archive.version)) {
+            archive.resumed = true
+          } else {
+            archive.resumed = false
+          }
+          resolve(Dat(archive, opts))
+        })
+      }
+    })
   }
 }
