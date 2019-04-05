@@ -73,6 +73,7 @@ async function createDat (dirOrStorage, opts) {
 
         if (err && !createIfMissing) return reject(missingError)
         else if (!err && errorIfExists) return reject(existsError)
+        resolve()
       })
     })
   }
