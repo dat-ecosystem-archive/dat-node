@@ -195,3 +195,27 @@ test('importing: import from hidden folder src', function (t) {
     })
   })
 })
+
+test('importing: make sure importing .. fails', function (t) {
+  tmpDir(function (_, dir, cleanup) {
+    var illegalDir = path.join(dir, '..', 'tmp')
+    fs.mkdirSync(illegalDir)
+    fs.writeFileSync(path.join(illegalDir, 'hello.txt'), 'hello world')
+    Dat(dir, { temp: true }, function (err, dat) {
+      t.error(err, 'no error')
+      dat.importFiles(function (err) {
+        t.error(err)
+        dat.archive.readdir('/', function (err, list) {
+          t.error(err, 'no error')
+          t.ok(list.length === 0, 'no files added')
+          rimraf.sync(illegalDir)
+          dat.close(function () {
+            cleanup(function () {
+              t.end()
+            })
+          })
+        })
+      })
+    })
+  })
+})
