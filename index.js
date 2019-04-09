@@ -108,7 +108,7 @@ function createDat (dirOrStorage, opts, cb) {
         }
         archive.removeListener('error', cb)
 
-        cb(null, new Dat(archive, opts))
+        cb(null, Dat(archive, opts))
       })
     }
   }

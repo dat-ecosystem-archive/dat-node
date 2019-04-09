@@ -1,238 +1,167 @@
-var assert = require('assert')
-var path = require('path')
-var untildify = require('untildify')
-var importFiles = require('./lib/import-files')
-var createNetwork = require('./lib/network')
-var stats = require('./lib/stats')
-var serveHttp = require('./lib/serve')
-var debug = require('debug')('dat-node')
+const assert = require('assert')
+const path = require('path')
 
-module.exports = Dat
+const untildify = require('untildify')
+const importFiles = require('./lib/import-files')
+const createNetwork = require('./lib/network')
+const stats = require('./lib/stats')
+const serveHttp = require('./lib/serve')
+const debug = require('debug')('dat-node')
 
-/**
- * @class Dat
- * @type {Object}
- * @param {Object} archive - Hyperdrive archive
- * @param {Object} [opts] - Options
- * @param {String} [opts.dir] - Directory of archive
- *
- * @property {Object} archive - Hyperdrive Archive
- * @property {String} path - Resolved path of archive
- * @property {Buffer} key - Archive Key (`archive.key`)
- * @property {Boolean} live - Archive is live (`archive.live`)
- * @property {Boolean} writable - Archive is writable (`archive.metadata.writable`)
- * @property {Boolean} version - Archive version (`archive.version`)
- * @property {Object} options - Initial options and all options passed to childen functions.
- * @returns {Object} Dat
- */
-function Dat (archive, opts) {
-  if (!(this instanceof Dat)) return new Dat(archive, opts)
-  assert.ok(archive, 'archive required')
-  var self = this
+module.exports = (...args) => new Dat(...args)
 
-  this.archive = archive
-  this.options = Object.assign({}, opts)
-  if (opts.dir) {
-    this.path = path.resolve(untildify(opts.dir))
+class Dat {
+  constructor (archive, opts) {
+    assert.ok(archive, 'archive required')
+
+    this.archive = archive
+    this.options = Object.assign({}, opts)
+    if (opts.dir) {
+      this.path = path.resolve(untildify(opts.dir))
+    }
   }
 
-  // Getters for convenience accessors
-  Object.defineProperties(this, {
-    key: {
-      enumerable: true,
-      get: function () {
-        return self.archive.key
-      }
-    },
-    live: {
-      enumerable: true,
-      get: function () {
-        return self.archive.live
-      }
-    },
-    resumed: {
-      enumerable: true,
-      get: function () {
-        return self.archive.resumed
-      }
-    },
-    writable: {
-      enumerable: true,
-      get: function () {
-        return self.archive.metadata.writable
-      }
-    },
-    version: {
-      enumerable: true,
-      get: function () {
-        return self.archive.version
-      }
-    }
-  })
-}
-
-/**
- * Join Dat Network via Hyperdiscovery
- * @type {Function}
- * @param {Object} [opts] - Network options, passed to hyperdiscovery.
- * @param {Function} [cb] - Callback after first round of discovery is finished.
- * @returns {Object} Discovery Swarm Instance
- */
-Dat.prototype.joinNetwork =
-Dat.prototype.join = function (opts, cb) {
-  if (typeof opts === 'function') {
-    cb = opts
-    opts = {}
+  get key () {
+    return this.archive.key
   }
 
-  var self = this
-  if (!opts && self.options.network) opts = self.options.network // use previous options
-  else opts = opts || {}
-  cb = cb || noop
+  get live () {
+    return this.archive.live
+  }
 
-  var netOpts = Object.assign({}, {
-    stream: function (peer) {
-      var stream = self.archive.replicate({
-        upload: !(opts.upload === false),
-        download: !self.writable && opts.download,
-        live: !opts.end
-      })
-      stream.on('close', function () {
-        debug('Stream close')
-      })
-      stream.on('error', function (err) {
-        debug('Replication error:', err.message)
-      })
-      stream.on('end', function () {
-        self.downloaded = true
-        debug('Replication stream ended')
-      })
-      return stream
+  get resumed () {
+    return this.archive.resumed
+  }
+
+  get writable () {
+    return this.archive.metadata.writable
+  }
+
+  get version () {
+    return this.archive.version
+  }
+
+  join (opts, cb) {
+    if (typeof opts === 'function') {
+      cb = opts
+      opts = {}
     }
-  }, opts)
 
-  var network = self.network = createNetwork(self.archive, netOpts, cb)
-  self.options.network = netOpts
+    var self = this
+    if (!opts && self.options.network) opts = self.options.network // use previous options
+    else opts = opts || {}
+    cb = cb || noop
 
-  return network
-}
+    var netOpts = Object.assign({}, {
+      stream: function (peer) {
+        var stream = self.archive.replicate({
+          upload: !(opts.upload === false),
+          download: !self.writable && opts.download,
+          live: !opts.end
+        })
+        stream.on('close', function () {
+          debug('Stream close')
+        })
+        stream.on('error', function (err) {
+          debug('Replication error:', err.message)
+        })
+        stream.on('end', function () {
+          self.downloaded = true
+          debug('Replication stream ended')
+        })
+        return stream
+      }
+    }, opts)
 
-/**
- * Leave Dat Network
- * @type {Function}
- * @param {Function} [cb] - Callback after network is closed
- */
-Dat.prototype.leaveNetwork =
-Dat.prototype.leave = function (cb) {
-  if (!this.network) return
-  debug('leaveNetwork()')
-  // TODO: v8 unreplicate ?
-  // this.archive.unreplicate()
-  this.network.leave(this.archive.discoveryKey)
-  this.network.destroy(cb)
-  delete this.network
-}
+    var network = self.network = createNetwork(self.archive, netOpts, cb)
+    self.options.network = netOpts
 
-/**
- * Pause Dat Network
- * @type {Function}
- */
-Dat.prototype.pause = function () {
-  debug('pause()')
-  this.leave()
-}
+    return network
+  }
 
-/**
- * Resume Dat Network
- * @type {Function}
- */
-Dat.prototype.resume = function () {
-  debug('resume()')
-  this.join()
-}
+  leave (cb) {
+    if (!cb) cb = noop
+    if (!this || !this.network) return cb()
+    debug('leaveNetwork()')
+    // TODO: v8 unreplicate ?
+    // this.archive.unreplicate()
+    this.network.leave(this.archive.discoveryKey)
+    this.network.destroy(cb)
+    delete this.network
+  }
 
-/**
- * Track archive stats
- * @type {Function}
- */
-Dat.prototype.trackStats = function (opts) {
-  opts = Object.assign({}, opts)
-  this.stats = stats(this.archive, opts)
-  return this.stats
-}
+  pause () {
+    debug('pause()')
+    this.leave()
+  }
 
-/**
- * Import files to archive via mirror-folder
- * @type {Function}
- * @param {String} [src=dat.path] - Directory or File to import to `archive`.
- * @param {Function} [cb] - Callback after import is finished
- * @param {Object} [opts] - Options passed to `mirror-folder` and `dat-ignore`
- * @returns {Object} - Import progress
- */
-Dat.prototype.importFiles = function (src, opts, cb) {
-  if (!this.writable) throw new Error('Must be archive owner to import files.')
-  if (typeof src !== 'string') return this.importFiles('', src, opts)
-  if (typeof opts === 'function') return this.importFiles(src, {}, opts)
+  resume () {
+    debug('resume()')
+    this.joinNetwork()
+  }
 
-  var self = this
-  src = src && src.length ? src : self.path
-  opts = Object.assign({
-    indexing: (opts && opts.indexing) || (src === self.path)
-  }, opts)
+  trackStats (opts) {
+    opts = Object.assign({}, opts)
+    this.stats = stats(this.archive, opts)
+    return this.stats
+  }
 
-  self.importer = importFiles(self.archive, src, opts, cb)
-  self.options.importer = self.importer.options
-  return self.importer
-}
+  importFiles (src, opts, cb) {
+    if (!this.writable) throw new Error('Must be archive owner to import files.')
+    if (typeof src !== 'string') return this.importFiles('', src, opts)
+    if (typeof opts === 'function') return this.importFiles(src, {}, opts)
 
-/**
- * Serve archive over http
- * @type {Function}
- * @param {Object} [opts] - Options passed to `mirror-folder` and `dat-ignore`
- * @returns {Object} - node http server instance
- */
-Dat.prototype.serveHttp = function (opts) {
-  this.server = serveHttp(this.archive, opts)
-  return this.server
-}
+    var self = this
+    src = src && src.length ? src : self.path
+    opts = Object.assign({
+      indexing: (opts && opts.indexing) || (src === self.path)
+    }, opts)
 
-/**
- * Close Dat archive and other things
- * @type {Function}
- * @param {Function} [cb] - Callback after all items closed
- */
-Dat.prototype.close = function (cb) {
-  cb = cb || noop
-  if (this._closed) return cb(new Error('Dat is already closed'))
+    self.importer = importFiles(self.archive, src, opts, cb)
+    self.options.importer = self.importer.options
+    return self.importer
+  }
 
-  var self = this
-  self._closed = true
+  serveHttp (opts) {
+    this.server = serveHttp(this.archive, opts)
+    return this.server
+  }
 
-  debug('closing network')
-  closeNet(function (err) {
-    if (err) debug('Error while closing network:', err.message)
-    debug('closing closeFileWatch')
-    closeFileWatch(function () {
-      // self.archive.unreplicate()
-      debug('closing archive')
-      self.archive.close(cb)
+  close (cb) {
+    cb = cb || noop
+    if (this._closed) return cb(new Error('Dat is already closed'))
+
+    var self = this
+    self._closed = true
+
+    debug('closing network')
+    closeNet(function (err) {
+      if (err) debug('Error while closing network:', err.message)
+      debug('closing closeFileWatch')
+      closeFileWatch(function () {
+        // self.archive.unreplicate()
+        debug('closing archive')
+        self.archive.close(cb)
+      })
     })
-  })
 
-  function closeNet (cb) {
-    if (!self.network) return cb()
-    self.leave(cb)
-  }
+    function closeNet (cb) {
+      if (!self.network) return cb()
+      self.leave(cb)
+    }
 
-  function closeFileWatch (cb) {
-    if (!self.importer) return cb()
-    // Emitting an event, as imported doesn't emit an event on
-    // destroy and there is no other means to see if this was called.
-    self.importer.emit('destroy')
-    self.importer.destroy()
-    delete self.importer
-    process.nextTick(cb)
+    function closeFileWatch (cb) {
+      if (!self.importer) return cb()
+      // Emitting an event, as imported doesn't emit an event on
+      // destroy and there is no other means to see if this was called.
+      self.importer.emit('destroy')
+      self.importer.destroy()
+      delete self.importer
+      process.nextTick(cb)
+    }
   }
 }
+Dat.prototype.joinNetwork = Dat.prototype.join
+Dat.prototype.leaveNetwork = Dat.prototype.leave
 
 function noop () { }
