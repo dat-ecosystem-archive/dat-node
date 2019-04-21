@@ -52,7 +52,7 @@ Dat('/joe/cat-pic-analysis', function (err, dat) {
   // 3. Share the files on the network!
   dat.joinNetwork()
   // (And share the link)
-  console.log('My Dat link is: dat://', dat.key.toString('hex'))
+  console.log('My Dat link is: dat://' + dat.key.toString('hex'))
 })
 ```
 
@@ -342,7 +342,7 @@ You can use a `.datignore` file in the imported directory, `src`, to ignore any 
 
 Emitted when archive stats are updated. Get new stats with `stats.get()`.
 
-##### `var st = dat.stats.get()`
+##### `var st = stats.get()`
 
 `dat.trackStats()` adds a `stats` object to `dat`.  Get general archive stats for the latest version:
 
