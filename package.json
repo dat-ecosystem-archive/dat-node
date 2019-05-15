@@ -29,7 +29,7 @@
     "hyperdrive-http": "^4.4.0",
     "hyperdrive-network-speed": "^2.1.0",
     "mirror-folder": "^3.0.0",
-    "random-access-file": "git+ssh://git@github.com:nharlow89/dat-node.git",
+    "random-access-file": "2.1.0",
     "random-access-memory": "^3.1.1",
     "sparse-bitfield": "^3.0.3",
     "speedometer": "^1.1.0",
