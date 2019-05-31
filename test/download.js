@@ -38,8 +38,8 @@ test('download: Download with default opts', function (t) {
         archive.content.on('sync', done)
       })
 
-      function done () {
-        var st = stats.get()
+      async function done () {
+        var st = await stats.get()
         t.ok(st.version === archive.version, 'stats version correct')
         t.ok(st.downloaded === st.length, 'all blocks downloaded')
         helpers.verifyFixtures(t, archive, async function (err) {
