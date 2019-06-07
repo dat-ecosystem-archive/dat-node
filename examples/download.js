@@ -10,19 +10,20 @@ if (!key) {
   process.exit(1)
 }
 
-var dest = path.join(__dirname, 'tmp')
-fs.mkdirSync(dest)
+var dest = path.join(__dirname, 'download-example-' + Date.now())
+fs.mkdir(dest, doDownload)
 
-Dat(ram, { key: key, sparse: true }, function (err, dat) {
-  if (err) throw err
-
-  var network = dat.joinNetwork()
+async function doDownload () {
+  const dat = await Dat(ram, { key: key, sparse: true })
+  const network = dat.joinNetwork()
   network.once('connection', function () {
     console.log('Connected')
   })
   dat.archive.metadata.update(download)
 
   function download () {
+    console.log(`Downloading: ${dat.key.toString('hex')}\n`)
+
     var progress = mirror({ fs: dat.archive, name: '/' }, dest, function (err) {
       if (err) throw err
       console.log('Done')
@@ -31,6 +32,4 @@ Dat(ram, { key: key, sparse: true }, function (err, dat) {
       console.log('Downloading', src.name)
     })
   }
-
-  console.log(`Downloading: ${dat.key.toString('hex')}\n`)
-})
+}
