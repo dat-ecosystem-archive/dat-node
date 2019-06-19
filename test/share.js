@@ -43,7 +43,7 @@ test('share: create dat with default ops', function (t) {
     liveKey = dat.key
     var putFiles = 0
     var stats = dat.trackStats()
-    var network = dat.joinNetwork()
+    var network = dat.joinNetwork({ utp: false })
 
     network.once('listening', function () {
       t.pass('network listening')
@@ -131,29 +131,6 @@ test('share: resume with empty .dat folder', function (t) {
     })
   })
 })
-
-// TODO: live = false, not implemented yet in hyperdrive v8
-// test('share snapshot', function (t) {
-//   Dat(fixtures, { live: false }, function (err, dat) {
-//     t.error(err, 'share cb without error')
-
-//     t.ok(!dat.live, 'live false')
-//     dat.importFiles(function (err) {
-//       t.error(err, 'no error')
-//       dat.archive.finalize(function (err) {
-//         t.error(err, 'no error')
-
-//         // TODO: saving mtime breaks this
-//         // t.skip(fixturesKey, dat.key, 'TODO: key matches snapshot key')
-
-//         dat.close(cleanFixtures(function () {
-//           rimraf.sync(path.join(fixtures, '.dat'))
-//           t.end()
-//         }))
-//       })
-//     })
-//   })
-// })
 
 if (!process.env.TRAVIS) {
   test('share: live - editing file', function (t) {

@@ -36,18 +36,6 @@ test('opts: createIfMissing false', function (t) {
   })
 })
 
-test('opts: createIfMissing false with empty .dat', function (t) {
-  t.skip('TODO')
-  t.end()
-  // rimraf.sync(path.join(fixtures, '.dat'))
-  // fs.mkdirSync(path.join(fixtures, '.dat'))
-  // Dat(fixtures, {createIfMissing: false}, function (err, dat) {
-  //   t.ok(err, 'errors')
-  //   rimraf.sync(path.join(fixtures, '.dat'))
-  //   t.end()
-  // })
-})
-
 test('opts: errorIfExists true', function (t) {
   rimraf.sync(path.join(fixtures, '.dat'))
   // create dat to resume from

@@ -42,23 +42,6 @@ test('misc: non existing invalid dat path', function (t) {
   t.end()
 })
 
-test('misc: open error', function (t) {
-  t.skip('TODO: lock file')
-  t.end()
-
-  // Dat(process.cwd(), function (err, datA) {
-  //   t.error(err)
-  //   Dat(process.cwd(), function (err, datB) {
-  //     t.ok(err, 'second open errors')
-  //     datA.close(function () {
-  //       rimraf(path.join(process.cwd(), '.dat'), function () {
-  //         t.end()
-  //       })
-  //     })
-  //   })
-  // })
-})
-
 test('misc: expose .key', function (t) {
   var key = Buffer.alloc(32)
   Dat(process.cwd(), { key: key, temp: true }, function (err, dat) {
@@ -82,7 +65,7 @@ test('misc: expose .writable', function (t) {
     Dat(fixtures, function (err, shareDat) {
       t.error(err, 'error')
       t.ok(shareDat.writable, 'is writable')
-      shareDat.joinNetwork()
+      shareDat.joinNetwork({ utp: false })
 
       Dat(downDir, { key: shareDat.key }, function (err, downDat) {
         t.error(err, 'error')
@@ -113,7 +96,7 @@ test('misc: expose swarm.connected', function (t) {
 
       t.doesNotThrow(shareDat.leave, 'leave before join should be noop')
 
-      var network = shareDat.joinNetwork()
+      var network = shareDat.joinNetwork({ utp: false })
       t.equal(network.connected, 0, '0 peers')
 
       network.once('connection', function () {
@@ -134,7 +117,7 @@ test('misc: expose swarm.connected', function (t) {
 
       Dat(downDir, { key: shareDat.key, temp: true }, function (err, dat) {
         t.error(err, 'error')
-        dat.joinNetwork()
+        dat.joinNetwork({ utp: false })
         downDat = dat
       })
     })
@@ -167,26 +150,6 @@ test('misc: close twice sync errors', function (t) {
   })
 })
 
-test('misc: create key and open with different key', function (t) {
-  t.skip('TODO')
-  t.end()
-  // TODO: hyperdrive needs to forward hypercore metadta errors
-  // https://github.com/mafintosh/hyperdrive/blob/master/index.js#L37
-
-  // rimraf.sync(path.join(fixtures, '.dat'))
-  // Dat(fixtures, function (err, dat) {
-  //   t.error(err, 'error')
-  //   dat.close(function (err) {
-  //     t.error(err, 'error')
-  //     Dat(fixtures, {key: '6161616161616161616161616161616161616161616161616161616161616161'}, function (err, dat) {
-  //       t.same(err.message, 'Another hypercore is stored here', 'has error')
-  //       rimraf.sync(path.join(fixtures, '.dat'))
-  //       t.end()
-  //     })
-  //   })
-  // })
-})
-
 test('misc: make dat with random key and open again', function (t) {
   tmpDir(function (err, downDir, cleanup) {
     t.error(err, 'error')
@@ -214,7 +177,7 @@ test('misc: close order', function (t) {
       dat.importFiles(function (err) {
         t.error(err, 'started importing files')
         t.ok(dat.importer, 'importer exists')
-        dat.joinNetwork({ dht: false }, function (err) {
+        dat.joinNetwork({ dht: false, utp: false }, function (err) {
           t.error(err, 'joined network')
           var order = []
           dat.network.on('error', function (err) {
