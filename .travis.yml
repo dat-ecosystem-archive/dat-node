@@ -1,9 +1,14 @@
 language: node_js
 
 node_js:
-  - "6"
-  - "8"
-  - "10"
+  - 'lts/*'
+  - '8'
+  - 'node'
+
+os:
+  - windows
+  - osx
+  - linux
 
 sudo: false
 
