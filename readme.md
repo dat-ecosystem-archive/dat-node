@@ -40,20 +40,19 @@ To send files via Dat:
 3. Share the files on the Dat network! (And share the link)
 
 ```js
-var Dat = require('dat-node')
+const Dat = require('dat-node')
 
 // 1. My files are in /joe/cat-pic-analysis
-Dat('/joe/cat-pic-analysis', function (err, dat) {
-  if (err) throw err
+const dat = await Dat('/joe/cat-pic-analysis')
 
-  // 2. Import the files
-  dat.importFiles()
+// 2. Import the files
+await dat.importFiles()
 
-  // 3. Share the files on the network!
-  dat.joinNetwork()
-  // (And share the link)
-  console.log('My Dat link is: dat://', dat.key.toString('hex'))
-})
+// 3. Share the files on the network!
+await dat.joinNetwork()
+
+// (And share the link)
+console.log('My Dat link is: dat://', dat.key.toString('hex'))
 ```
 
 These files are now available to share over the dat network via the key printed in the console.
@@ -65,18 +64,16 @@ To download the files, you can make another dat-node instance in a different fol
 3. Join the network and download!
 
 ```js
-var Dat = require('dat-node')
+const Dat = require('dat-node')
 
 // 1. Tell Dat where to download the files
-Dat('/download/cat-analysis', {
+const dat = await Dat('/download/cat-analysis', {
   // 2. Tell Dat what link I want
   key: '<dat-key>' // (a 64 character hash from above)
-}, function (err, dat) {
-  if (err) throw err
+})
 
   // 3. Join the network & download (files are automatically downloaded)
-  dat.joinNetwork()
-})
+await dat.joinNetwork()
 ```
 
 That's it! By default, all files are automatically downloaded when you connect to the other users.
@@ -109,14 +106,10 @@ Every dat archive has **storage**, this is the required first argument for dat-n
 
 ```js
 // Permanent Storage
-Dat('/my-dir', function (err, dat) {
-  // Do Dat Stuff
-})
+await Dat('/my-dir')
 
 // Temporary Storage
-Dat('/my-dir', {temp: true}, function (err, dat) {
-  // Do Dat Stuff
-})
+await Dat('/my-dir', {temp: true})
 ```
 
 Both of these will import files from `/my-dir` when doing `dat.importFiles()` but only the first will make a `.dat` folder and keep the metadata on disk.
@@ -128,11 +121,11 @@ The storage argument can also be passed through to hyperdrive for more advanced 
 Dat is all about the network! You'll almost always want to join the network right after you create your Dat:
 
 ```js
-Dat('/my-dir', function (err, dat) {
-  dat.joinNetwork()
-  dat.network.on('connection', function () {
-    console.log('I connected to someone!')
-  })
+const dat = await Dat('/my-dir')
+
+await dat.joinNetwork()
+dat.network.on('connection', function () {
+  console.log('I connected to someone!')
 })
 ```
 
@@ -144,18 +137,15 @@ Dat runs on a peer to peer network, sometimes there may not be anyone online for
 
 ```js
 // Downloading <key> with joinNetwork callback
-Dat('/my-dir', {key: '<key>'}, function (err, dat) {
-  dat.joinNetwork(function (err) {
-    if (err) throw err
+const dat = await Dat('/my-dir', {key: '<key>'})
+await dat.joinNetwork()
 
-    // After the first round of network checks, the callback is called
-    // If no one is online, you can exit and let the user know.
-    if (!dat.network.connected || !dat.network.connecting) {
-      console.error('No users currently online for that key.')
-      process.exit(1)
-    }
-  })
-})
+// After the first round of network checks, the callback is called
+// If no one is online, you can exit and let the user know.
+if (!dat.network.connected || !dat.network.connecting) {
+  console.error('No users currently online for that key.')
+  process.exit(1)
+}
 ```
 
 ##### Download on Demand
@@ -164,13 +154,12 @@ If you want to control what files and metadata are downloaded, you can use the s
 
 ```js
 // Downloading <key> with sparse option
-Dat('/my-dir', {key: '<key>', sparse: true}, function (err, dat) {
-  dat.joinNetwork()
+const dat = await Dat('/my-dir', {key: '<key>', sparse: true})
+await dat.joinNetwork()
 
-  // Manually download files via the hyperdrive API:
-  dat.archive.readFile('/cat-locations.txt', function (err, content) {
-    console.log(content) // prints cat-locations.txt file!
-  })
+// Manually download files via the hyperdrive API:
+dat.archive.readFile('/cat-locations.txt', function (err, content) {
+  console.log(content) // prints cat-locations.txt file!
 })
 ```
 
@@ -183,33 +172,28 @@ There are many ways to get files imported into an archive! Dat node provides a f
 By default, just call `dat.importFiles()` to import from the directory you initialized with. You can watch that folder for changes by setting the watch option:
 
 ```js
-Dat('/my-data', function (err, dat) {
-  if (err) throw err
+const dat = await Dat('/my-data')
 
-  var progress = dat.importFiles({watch: true}) // with watch: true, there is no callback
-  progress.on('put', function (src, dest) {
-    console.log('Importing ', src.name, ' into archive')
-  })
+dat.importFiles({watch: true})
+dat.importer.on('put', function (src, dest) {
+  console.log('Importing ', src.name, ' into archive')
 })
 ```
 
 You can also import from another directory:
 
 ```js
-Dat('/my-data', function (err, dat) {
-  if (err) throw err
+const dat = await Dat('/my-data')
 
-  dat.importFiles('/another-dir', function (err) {
-    console.log('done importing another-dir')
-  })
-})
+await dat.importFiles('/another-dir')
+console.log('done importing another-dir')
 ```
 
 That covers some of the common use cases, let us know if there are more to add! Keep reading for the full API docs.
 
 ## API
 
-### `Dat(dir|storage, [opts], callback(err, dat))`
+### `const dat = await Dat(dir|storage, [opts])`
 
 Initialize a Dat Archive in `dir`. If there is an existing Dat Archive, the archive will be resumed.
 

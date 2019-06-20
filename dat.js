@@ -41,42 +41,43 @@ class Dat {
     return this.archive.version
   }
 
-  join (opts, cb) {
-    if (typeof opts === 'function') {
-      cb = opts
-      opts = {}
-    }
-
-    var self = this
+  join (opts) {
+    const self = this
     if (!opts && self.options.network) opts = self.options.network // use previous options
     else opts = opts || {}
-    cb = cb || noop
 
-    var netOpts = Object.assign({}, {
-      stream: function (peer) {
-        var stream = self.archive.replicate({
-          upload: !(opts.upload === false),
-          download: !self.writable && opts.download,
-          live: !opts.end
-        })
-        stream.on('close', function () {
-          debug('Stream close')
-        })
-        stream.on('error', function (err) {
-          debug('Replication error:', err.message)
-        })
-        stream.on('end', function () {
-          self.downloaded = true
-          debug('Replication stream ended')
-        })
-        return stream
-      }
-    }, opts)
+    return new Promise((resolve, reject) => {
+      const netOpts = Object.assign({}, {
+        stream: function (peer) {
+          const stream = self.archive.replicate({
+            upload: !(opts.upload === false),
+            download: !self.writable && opts.download,
+            live: !opts.end
+          })
+          stream.on('close', () => {
+            debug('Stream close')
+          })
+          stream.on('error', (err) => {
+            debug('Replication error:', err.message)
+          })
+          stream.on('end', () => {
+            self.downloaded = true
+            debug('Replication stream ended')
+          })
+          return stream
+        }
+      }, opts)
 
-    var network = self.network = createNetwork(self.archive, netOpts, cb)
-    self.options.network = netOpts
+      const network = self.network = createNetwork(self.archive, netOpts, (err) => {
+        if (err) return reject(err)
+        resolve(network)
+      })
+      self.options.network = netOpts
 
-    return network
+      network.once('listening', () => {
+        resolve(network)
+      })
+    })
   }
 
   async leave () {
@@ -108,20 +109,25 @@ class Dat {
     return this.stats
   }
 
-  importFiles (src, opts, cb) {
-    if (!this.writable) throw new Error('Must be archive owner to import files.')
-    if (typeof src !== 'string') return this.importFiles('', src, opts)
-    if (typeof opts === 'function') return this.importFiles(src, {}, opts)
+  importFiles (src, opts) {
+    return new Promise((resolve, reject) => {
+      if (!this.writable) reject(Error('Must be archive owner to import files.'))
+      if (typeof src !== 'string') {
+        opts = src
+        src = this.path
+      }
 
-    var self = this
-    src = src && src.length ? src : self.path
-    opts = Object.assign({
-      indexing: (opts && opts.indexing) || (src === self.path)
-    }, opts)
+      src = src && src.length ? src : this.path
+      opts = Object.assign({
+        indexing: (opts && opts.indexing) || (src === this.path)
+      }, opts)
 
-    self.importer = importFiles(self.archive, src, opts, cb)
-    self.options.importer = self.importer.options
-    return self.importer
+      this.importer = importFiles(this.archive, src, opts, (err) => {
+        if (err) return reject(err)
+        resolve()
+      })
+      this.options.importer = this.importer.options
+    })
   }
 
   serveHttp (opts) {
