@@ -106,101 +106,37 @@ test('misc: expose swarm.connected', async (t) => {
 })
 
 test('misc: close twice errors', async (t) => {
-  Dat(fixtures, { temp: true }, function (err, dat) {
-    t.error(err, 'error')
-    dat.close(function (err) {
-      t.error(err, 'error')
-      dat.close(function (err) {
-        t.ok(err, 'has close error second time')
-        t.end()
-      })
-    })
-  })
+  const dat = await Dat(fixtures, { temp: true })
+  await dat.close()
+  try {
+    await dat.close()
+  } catch (e) {
+    t.ok(e, 'errors')
+    t.end()
+  }
 })
 
 test('misc: close twice sync errors', async (t) => {
-  Dat(fixtures, { temp: true }, function (err, dat) {
-    t.error(err, 'error')
-    dat.close(function (err) {
-      t.error(err, 'error')
-      t.end()
-    })
-    dat.close(function (err) {
-      t.ok(err, 'has close error second time')
-    })
-  })
-})
-
-test('misc: create key and open with different key', async (t) => {
-  t.skip('TODO')
-  t.end()
-  // TODO: hyperdrive needs to forward hypercore metadta errors
-  // https://github.com/mafintosh/hyperdrive/blob/master/index.js#L37
-
-  // rimraf.sync(path.join(fixtures, '.dat'))
-  // Dat(fixtures, function (err, dat) {
-  //   t.error(err, 'error')
-  //   dat.close(function (err) {
-  //     t.error(err, 'error')
-  //     Dat(fixtures, {key: '6161616161616161616161616161616161616161616161616161616161616161'}, function (err, dat) {
-  //       t.same(err.message, 'Another hypercore is stored here', 'has error')
-  //       rimraf.sync(path.join(fixtures, '.dat'))
-  //       t.end()
-  //     })
-  //   })
-  // })
+  const dat = await Dat(fixtures, { temp: true })
+  dat.close()
+  try {
+    dat.close()
+  } catch (e) {
+    t.ok(e, 'errors')
+    t.end()
+  }
 })
 
 test('misc: make dat with random key and open again', async (t) => {
   tmpDir(async (err, downDir, cleanup) => {
     t.error(err, 'error')
     var key = '6161616161616161616161616161616161616161616161616161616161616161'
-    Dat(downDir, { key: key }, function (err, dat) {
-      t.error(err, 'error')
-      t.ok(dat, 'has dat')
-      dat.close(function (err) {
-        t.error(err, 'error')
-        Dat(downDir, { key: key }, function (err, dat) {
-          t.error(err, 'error')
-          t.ok(dat, 'has dat')
-          t.end()
-        })
-      })
-    })
-  })
-})
+    const dat = await Dat(downDir, { key: key })
+    await dat.close()
 
-test('misc: close order', async (t) => {
-  tmpDir(async (err, downDir, cleanup) => {
-    t.error(err, 'opened tmp dir')
-    Dat(downDir, { watch: true }, function (err, dat) {
-      t.error(err, 'dat properly opened')
-      dat.importFiles(function (err) {
-        t.error(err, 'started importing files')
-        t.ok(dat.importer, 'importer exists')
-        dat.joinNetwork({ dht: false }, function (err) {
-          t.error(err, 'joined network')
-          var order = []
-          dat.network.on('error', function (err) {
-            t.error(err)
-          })
-          dat.network.on('close', function () {
-            order.push('network')
-          })
-          dat.importer.on('destroy', function () {
-            order.push('importer')
-          })
-          dat.archive.metadata.on('close', function () {
-            order.push('metadata')
-          })
-          dat.archive.content.on('close', function () {
-            order.push('content')
-            t.deepEquals(order, ['network', 'importer', 'metadata', 'content'], 'Close order as expected')
-            t.end()
-          })
-          dat.close()
-        })
-      })
-    })
+    const dat2 = await Dat(downDir, { key: key })
+    t.ok(dat2)
+    await dat2.close()
+    cleanup(t.end)
   })
 })

@@ -1,72 +1,57 @@
-var path = require('path')
-var test = require('tape')
-var rimraf = require('rimraf')
-var encoding = require('dat-encoding')
+const path = require('path')
+const test = require('tape')
+const rimraf = require('rimraf')
+const encoding = require('dat-encoding')
 
-var Dat = require('..')
-var fixtures = path.join(__dirname, 'fixtures')
+const Dat = require('..')
+const fixtures = path.join(__dirname, 'fixtures')
 
-test('opts: string or buffer .key', function (t) {
+test('opts: string or buffer .key', async (t) => {
   rimraf.sync(path.join(process.cwd(), '.dat')) // for failed tests
-  var buf = Buffer.alloc(32)
-  Dat(process.cwd(), { key: buf }, function (err, dat) {
-    t.error(err, 'no callback error')
-    t.deepEqual(dat.archive.key, buf, 'keys match')
+  const buf = Buffer.alloc(32)
+  const dat = await Dat(process.cwd(), { key: buf })
+  t.deepEqual(dat.archive.key, buf, 'keys match')
 
-    dat.close(function (err) {
-      t.error(err, 'no close error')
+  await dat.close()
 
-      Dat(process.cwd(), { key: encoding.encode(buf) }, function (err, dat) {
-        t.error(err, 'no callback error')
-        t.deepEqual(dat.archive.key, buf, 'keys match still')
-        dat.close(function () {
-          rimraf.sync(path.join(process.cwd(), '.dat'))
-          t.end()
-        })
-      })
-    })
-  })
-})
-
-test('opts: createIfMissing false', function (t) {
-  rimraf.sync(path.join(fixtures, '.dat'))
-  Dat(fixtures, { createIfMissing: false }, function (err, dat) {
-    t.ok(err, 'throws error')
-    t.end()
-  })
-})
-
-test('opts: createIfMissing false with empty .dat', function (t) {
-  t.skip('TODO')
+  const dat2 = await Dat(process.cwd(), { key: encoding.encode(buf) })
+  t.deepEqual(dat2.archive.key, buf, 'keys match still')
+  await dat2.close()
+  rimraf.sync(path.join(process.cwd(), '.dat'))
   t.end()
-  // rimraf.sync(path.join(fixtures, '.dat'))
-  // fs.mkdirSync(path.join(fixtures, '.dat'))
-  // Dat(fixtures, {createIfMissing: false}, function (err, dat) {
-  //   t.ok(err, 'errors')
-  //   rimraf.sync(path.join(fixtures, '.dat'))
-  //   t.end()
-  // })
 })
 
-test('opts: errorIfExists true', function (t) {
+test('opts: createIfMissing false', async (t) => {
   rimraf.sync(path.join(fixtures, '.dat'))
-  // create dat to resume from
-  Dat(fixtures, function (err, dat) {
-    t.ifErr(err)
-    dat.close(function () {
-      Dat(fixtures, { errorIfExists: true }, function (err, dat) {
-        t.ok(err, 'throws error')
-        t.end()
-      })
-    })
-  })
-})
-
-test('opts: errorIfExists true without existing dat', function (t) {
-  rimraf.sync(path.join(fixtures, '.dat'))
-  // create dat to resume from
-  Dat(fixtures, { errorIfExists: true }, function (err, dat) {
-    t.ifErr(err)
+  let dat
+  try {
+    dat = await Dat(fixtures, { createIfMissing: false })
+  } catch (e) {
+    t.ok(e, 'errors')
     t.end()
-  })
+  }
+  if (dat) t.fail('dat should not be created')
+})
+
+test('opts: errorIfExists true', async (t) => {
+  rimraf.sync(path.join(fixtures, '.dat'))
+  // create dat to resume from
+  const dat = await Dat(fixtures)
+  await dat.close()
+
+  let dat2
+  try {
+    dat2 = await Dat(fixtures, { errorIfExists: true })
+  } catch (e) {
+    t.ok(e, 'errors')
+    t.end()
+  }
+  if (dat2) t.fail('dat should not be created')
+})
+
+test('opts: errorIfExists true without existing dat', async (t) => {
+  rimraf.sync(path.join(fixtures, '.dat'))
+  await Dat(fixtures, { errorIfExists: true })
+  t.pass()
+  t.end()
 })
