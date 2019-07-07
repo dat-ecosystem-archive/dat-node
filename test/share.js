@@ -38,12 +38,10 @@ test('share: create dat with default ops', async (t) => {
   })
 
   liveKey = dat.key
-  let putFiles = 0
   const stats = dat.trackStats()
   await dat.joinNetwork()
 
-  dat.importFiles()
-  const progress = dat.importer
+  await dat.importFiles()
   const archive = dat.archive
   const st = await stats.get()
 
@@ -52,7 +50,6 @@ test('share: create dat with default ops', async (t) => {
   t.same(st.version, archive.version, 'stats version')
   t.same(st.byteLength, 1452, 'stats bytes')
 
-  t.same(putFiles, 3, 'importer puts')
   t.same(archive.version, 3, 'archive version')
   t.same(archive.metadata.length, 4, 'entries in metadata')
 
@@ -61,10 +58,6 @@ test('share: create dat with default ops', async (t) => {
     await dat.close()
     t.pass('close okay')
     t.end()
-  })
-
-  progress.on('put', () => {
-    putFiles++
   })
 })
 
@@ -119,11 +112,11 @@ if (!process.env.TRAVIS) {
       dat.archive.stat('/folder/empty.txt', (err, stat) => {
         t.ifError(err, 'error')
         t.same(stat.size, 9, 'empty file has new content')
-        dat.close(() => {
-          // make file empty again
-          fs.writeFileSync(path.join(fixtures, 'folder', 'empty.txt'), '')
-          t.end()
-        })
+        await dat.close()
+
+        // make file empty again
+        fs.writeFileSync(path.join(fixtures, 'folder', 'empty.txt'), '')
+        t.end()
       })
     }
   })

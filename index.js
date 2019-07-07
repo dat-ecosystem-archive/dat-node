@@ -24,20 +24,26 @@ async function createDat (dirOrStorage, opts) {
   assert.ok(dirOrStorage, 'dat-node: directory or storage required')
   assert.strictEqual(typeof opts, 'object', 'dat-node: opts should be type object')
 
-  var archive
-  var key = opts.key
-  var dir = (typeof dirOrStorage === 'string') ? dirOrStorage : null
-  var storage = datStore(dirOrStorage, opts)
-  var createIfMissing = !(opts.createIfMissing === false)
-  var errorIfExists = opts.errorIfExists || false
-  var hasDat = false
-  opts = Object.assign({
-    // TODO: make sure opts.dir is a directory, not file
-    dir: dir,
-    latest: true
-  }, opts)
-
   return new Promise(async (resolve, reject) => {
+    let archive
+    let storage
+    let hasDat = false
+    let key = opts.key
+
+    const createIfMissing = !(opts.createIfMissing === false)
+    const errorIfExists = opts.errorIfExists || false
+    const dir = (typeof dirOrStorage === 'string') ? dirOrStorage : null
+    try {
+      storage = datStore(dirOrStorage, opts)
+    } catch (e) {
+      return reject(e)
+    }
+    opts = Object.assign({
+      // TODO: make sure opts.dir is a directory, not file
+      dir: dir,
+      latest: true
+    }, opts)
+
     try {
       await checkIfExists()
       const dat = await create()
@@ -45,70 +51,70 @@ async function createDat (dirOrStorage, opts) {
     } catch (e) {
       reject(e)
     }
-  })
 
-  async function checkIfExists () {
-    if (!opts.dir) return
+    async function checkIfExists () {
+      if (!opts.dir) return
 
-    // Create after we check for pre-sleep .dat stuff
-    var createAfterValid = (createIfMissing && !errorIfExists)
+      // Create after we check for pre-sleep .dat stuff
+      var createAfterValid = (createIfMissing && !errorIfExists)
 
-    var missingError = new Error('Dat storage does not exist.')
-    missingError.name = 'MissingError'
-    var existsError = new Error('Dat storage already exists.')
-    existsError.name = 'ExistsError'
-    var oldError = new Error('Dat folder contains incompatible metadata. Please remove your metadata (rm -rf .dat).')
-    oldError.name = 'IncompatibleError'
+      var missingError = new Error('Dat storage does not exist.')
+      missingError.name = 'MissingError'
+      var existsError = new Error('Dat storage already exists.')
+      existsError.name = 'ExistsError'
+      var oldError = new Error('Dat folder contains incompatible metadata. Please remove your metadata (rm -rf .dat).')
+      oldError.name = 'IncompatibleError'
 
-    return new Promise((resolve, reject) => {
-      fs.readdir(path.join(opts.dir, '.dat'), function (err, files) {
-        // TODO: omg please make this less confusing.
-        var noDat = !!(err || !files.length)
-        hasDat = !noDat
-        var validSleep = (files && files.length && files.indexOf('metadata.key') > -1)
-        var badDat = !(noDat || validSleep)
+      return new Promise((resolve, reject) => {
+        fs.readdir(path.join(opts.dir, '.dat'), function (err, files) {
+          // TODO: omg please make this less confusing.
+          var noDat = !!(err || !files.length)
+          hasDat = !noDat
+          var validSleep = (files && files.length && files.indexOf('metadata.key') > -1)
+          var badDat = !(noDat || validSleep)
 
-        if ((noDat || validSleep) && createAfterValid) return resolve()
-        else if (badDat) return reject(oldError)
+          if ((noDat || validSleep) && createAfterValid) return resolve()
+          else if (badDat) return reject(oldError)
 
-        if (err && !createIfMissing) return reject(missingError)
-        else if (!err && errorIfExists) return reject(existsError)
-        resolve()
+          if (err && !createIfMissing) return reject(missingError)
+          else if (!err && errorIfExists) return reject(existsError)
+          resolve()
+        })
       })
-    })
-  }
-
-  async function create () {
-    if (dir && !opts.temp && !key && (opts.indexing !== false)) {
-      // Only set opts.indexing if storage is dat-storage
-      // TODO: this should be an import option instead, https://github.com/mafintosh/hyperdrive/issues/160
-      opts.indexing = true
     }
 
-    return new Promise(async (resolve, reject) => {
-      if (!key) return createArchive()
-
-      resolveDatLink(key, function (err, resolvedKey) {
-        if (err) return err
-        key = resolvedKey
-        createArchive()
-      })
-
-      function createArchive () {
-        archive = hyperdrive(storage, key, opts)
-        archive.on('error', (err) => {
-          reject(err)
-        })
-        archive.ready(function () {
-          debug('archive ready. version:', archive.version)
-          if (hasDat || (archive.metadata.has(0) && archive.version)) {
-            archive.resumed = true
-          } else {
-            archive.resumed = false
-          }
-          resolve(Dat(archive, opts))
-        })
+    async function create () {
+      if (dir && !opts.temp && !key && (opts.indexing !== false)) {
+        // Only set opts.indexing if storage is dat-storage
+        // TODO: this should be an import option instead, https://github.com/mafintosh/hyperdrive/issues/160
+        opts.indexing = true
       }
-    })
-  }
+
+      return new Promise(async (resolve, reject) => {
+        if (!key) return createArchive()
+
+        resolveDatLink(key, function (err, resolvedKey) {
+          if (err) return err
+          key = resolvedKey
+          createArchive()
+        })
+
+        function createArchive () {
+          archive = hyperdrive(storage, key, opts)
+          archive.on('error', (err) => {
+            reject(err)
+          })
+          archive.ready(function () {
+            debug('archive ready. version:', archive.version)
+            if (hasDat || (archive.metadata.has(0) && archive.version)) {
+              archive.resumed = true
+            } else {
+              archive.resumed = false
+            }
+            resolve(Dat(archive, opts))
+          })
+        }
+      })
+    }
+  })
 }

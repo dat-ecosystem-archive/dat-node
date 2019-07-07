@@ -81,12 +81,13 @@ class Dat {
   }
 
   async leave () {
-    if (!this.network) return
-    debug('leaveNetwork()')
-    this.archive.content.undownload()
-    this.network.leave(this.archive.discoveryKey)
+    const self = this
     return new Promise((resolve, reject) => {
-      this.network.destroy((err) => {
+      if (!self.network) return resolve()
+      debug('leaveNetwork()')
+      if (self.archive && self.archive.content) self.archive.content.undownload()
+      self.network.leave(self.archive.discoveryKey)
+      self.network.destroy((err) => {
         if (err) return reject(err)
         resolve()
       })
@@ -137,7 +138,7 @@ class Dat {
   }
 
   async close () {
-    if (this._closed) return // cb(new Error('Dat is already closed'))
+    if (this._closed) throw new Error('Dat is already closed')
 
     var self = this
     self._closed = true

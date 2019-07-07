@@ -35,9 +35,9 @@ test('misc: existing invalid dat folder', (t) => {
   })
 })
 
-test('misc: non existing invalid dat path', (t) => {
+test('misc: non existing invalid dat path', async (t) => {
   try {
-    Dat('/non/existing/folder/')
+    await Dat('/non/existing/folder/')
   } catch (e) {
     t.ok(e, 'errors')
     t.end()
@@ -81,26 +81,24 @@ test('misc: expose swarm.connected', async (t) => {
     t.error(err, 'error')
 
     const shareDat = await Dat(fixtures, { temp: true })
-    t.doesNotThrow(shareDat.leave, 'leave before join should be noop')
+    try {
+      shareDat.leave()
+      t.pass('leave before join should be noop')
+    } catch (e) {
+      t.fail('should not error')
+    }
 
     const network = await shareDat.joinNetwork()
     t.equal(network.connected, 0, '0 peers')
 
     const downDat = await Dat(downDir, { key: shareDat.key, temp: true })
-    downDat.joinNetwork()
+    await downDat.joinNetwork()
 
     network.once('connection', async () => {
       t.ok(network.connected >= 1, '>=1 peer')
-      await shareDat.leave()
-      t.ok(downDat.network.connected, 0, '0 peers') // TODO: Fix connection count
-
       await downDat.close()
       await shareDat.close()
-      t.error(err, 'error')
-      cleanup(function (err) {
-        t.error(err, 'error')
-        t.end()
-      })
+      cleanup(t.end)
     })
   })
 })
@@ -110,6 +108,8 @@ test('misc: close twice errors', async (t) => {
   await dat.close()
   try {
     await dat.close()
+    t.fail('should error')
+    t.end()
   } catch (e) {
     t.ok(e, 'errors')
     t.end()
@@ -120,7 +120,9 @@ test('misc: close twice sync errors', async (t) => {
   const dat = await Dat(fixtures, { temp: true })
   dat.close()
   try {
-    dat.close()
+    await dat.close()
+    t.fail('should error')
+    t.end()
   } catch (e) {
     t.ok(e, 'errors')
     t.end()
