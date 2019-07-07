@@ -125,7 +125,7 @@ test('misc: close twice sync errors', async (t) => {
     t.end()
   } catch (e) {
     t.ok(e, 'errors')
-    t.end()
+    process.nextTick(t.end)
   }
 })
 

@@ -13,12 +13,12 @@ try { fs.unlinkSync(path.join(__dirname, 'fixtures', '.DS_Store')) } catch (e) {
 const fixtures = path.join(__dirname, 'fixtures')
 
 test('download: Download with default opts', async (t) => {
-  const [shareKey, closeShare] = await shareFixtures()
+  const shareDat = await shareFixtures()
 
   tmpDir(async function (err, downDir, cleanup) {
     t.error(err, 'error')
 
-    const dat = await Dat(downDir, { key: shareKey })
+    const dat = await Dat(downDir, { key: shareDat.key })
     t.ok(dat, 'callsback with dat object')
     t.ok(dat.key, 'has key')
     t.ok(dat.archive, 'has archive')
@@ -26,11 +26,11 @@ test('download: Download with default opts', async (t) => {
 
     const stats = dat.trackStats()
     const network = await dat.joinNetwork()
-    network.once('connection', function () {
+    network.once('connection', () => {
       t.pass('connects via network')
     })
     const archive = dat.archive
-    archive.once('content', function () {
+    archive.once('content', () => {
       t.pass('gets content')
       archive.content.on('sync', done)
     })
@@ -39,15 +39,15 @@ test('download: Download with default opts', async (t) => {
       const st = await stats.get()
       t.ok(st.version === archive.version, 'stats version correct')
       t.ok(st.downloaded === st.length, 'all blocks downloaded')
-      helpers.verifyFixtures(t, archive, async function (err) {
+      helpers.verifyFixtures(t, archive, async (err) => {
         t.error(err, 'error')
         t.ok(dat.network, 'network is open')
         try {
           await dat.close()
           t.equal(dat.network, undefined, 'network is closed')
-          cleanup(async function (err) {
+          cleanup(async (err) => {
             t.error(err, 'error here')
-            await closeShare()
+            await shareDat.close()
             t.end()
           })
         } catch (e) {
@@ -66,9 +66,5 @@ async function shareFixtures (opts) {
   await dat.joinNetwork({ dht: false })
   await dat.importFiles()
 
-  return [dat.key, close]
-
-  async function close (cb) {
-    await dat.close()
-  }
+  return dat
 }

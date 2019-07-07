@@ -109,7 +109,7 @@ if (!process.env.TRAVIS) {
     })
 
     function done () {
-      dat.archive.stat('/folder/empty.txt', (err, stat) => {
+      dat.archive.stat('/folder/empty.txt', async (err, stat) => {
         t.ifError(err, 'error')
         t.same(stat.size, 9, 'empty file has new content')
         await dat.close()
@@ -154,7 +154,7 @@ if (!process.env.TRAVIS) {
 }
 
 test('share: cleanup', (t) => {
-  cleanFixtures(t.end())
+  cleanFixtures(t.end)
 })
 
 test('share: dir storage and opts.temp', async (t) => {
@@ -171,7 +171,7 @@ test('share: dir storage and opts.temp', async (t) => {
   }
 })
 
-test('share: ram storage & import other dir', async (t) => {
+test('share: srage & import other dir', async (t) => {
   const dat = await Dat(ram)
   t.false(dat.resumed, 'resume flag false')
 
