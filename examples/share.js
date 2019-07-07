@@ -1,25 +1,26 @@
-var path = require('path')
-var Dat = require('..')
+const path = require('path')
+const Dat = require('..');
 
-var src = path.join(__dirname, '..')
+(async () => {
+  const src = path.join(__dirname, '..')
+  console.log(`sharing ${src}`)
 
-Dat(src, { temp: true }, function (err, dat) {
-  if (err) throw err
-
-  var network = dat.joinNetwork()
-  network.once('connection', function () {
+  const dat = await Dat(src, { temp: true })
+  const network = await dat.joinNetwork()
+  network.once('connection', () => {
     console.log('Connected')
   })
-  var progress = dat.importFiles(src, {
-    ignore: ['**/dat-node/node_modules/**']
-  }, function (err) {
-    if (err) throw err
-    console.log('Done importing')
-    console.log('Archive size:', dat.archive.content.byteLength)
-  })
-  progress.on('put', function (src, dest) {
-    console.log('Added', dest.name)
+
+  dat.importFiles(src, {
+    ignore: ['node_modules', 'test']
   })
 
+  dat.importer.on('put', (src, dest) => {
+    console.log('IMPORT:', dest.name)
+  })
+  // dat.importer.on('ignore', (src, dest) => {
+  //   console.log('IGNORE:', dest.name)
+  // })
+
   console.log(`Sharing: ${dat.key.toString('hex')}\n`)
-})
+})()

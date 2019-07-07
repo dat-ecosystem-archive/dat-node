@@ -119,7 +119,8 @@ class Dat {
 
       src = src && src.length ? src : this.path
       opts = Object.assign({
-        indexing: (opts && opts.indexing) || (src === this.path)
+        indexing: (opts && opts.indexing) || (src === this.path),
+        keepExisting: (opts && opts.keepExisting) || (src !== this.path) // do not delete existing if importing other dir
       }, opts)
 
       this.importer = importFiles(this.archive, src, opts, (err) => {
@@ -185,5 +186,3 @@ class Dat {
 }
 Dat.prototype.joinNetwork = Dat.prototype.join
 Dat.prototype.leaveNetwork = Dat.prototype.leave
-
-function noop () { }

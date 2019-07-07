@@ -46,7 +46,7 @@ const Dat = require('dat-node')
 const dat = await Dat('/joe/cat-pic-analysis')
 
 // 2. Import the files
-await dat.importFiles()
+dat.importFiles()
 
 // 3. Share the files on the network!
 await dat.joinNetwork()
