@@ -4,6 +4,8 @@
 
 [![npm][0]][1] [![Travis][2]][3] [![Test coverage][4]][5] [![Greenkeeper badge](https://badges.greenkeeper.io/datproject/dat-node.svg)](https://greenkeeper.io/)
 
+**This module is being superceded by the [Dat SDK](https://github.com/datproject/sdk) which works in Node and the Web**
+
 [Dat](http://datproject.org) is a decentralized tool for distributing data and
 files, built for scientific and research data.
 You can start using Dat today in these client applications:
