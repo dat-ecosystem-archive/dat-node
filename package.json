@@ -1,6 +1,6 @@
 {
   "name": "dat-node",
-  "version": "3.5.15",
+  "version": "4.0.0",
   "description": "Build node applications with Dat archives on the file system.",
   "main": "index.js",
   "scripts": {
@@ -22,13 +22,13 @@
     "dat-ignore": "^2.1.2",
     "dat-link-resolve": "^2.3.0",
     "dat-storage": "^1.1.1",
-    "dat-swarm-defaults": "^1.0.2",
     "debug": "^4.1.0",
-    "discovery-swarm": "^5.1.4",
     "hyperdrive": "^9.14.5",
     "hyperdrive-http": "^4.4.0",
     "hyperdrive-network-speed": "^2.1.0",
+    "hyperswarm": "^2.8.0",
     "mirror-folder": "^3.0.0",
+    "pump": "^3.0.0",
     "random-access-file": "^2.1.2",
     "random-access-memory": "^3.1.1",
     "sparse-bitfield": "^3.0.3",
