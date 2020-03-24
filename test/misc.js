@@ -104,7 +104,7 @@ test('misc: expose .writable', function (t) {
   })
 })
 
-test('misc: expose swarm.connected', function (t) {
+test('misc: expose swarm.connections', function (t) {
   tmpDir(function (err, downDir, cleanup) {
     t.error(err, 'error')
     var downDat
@@ -114,12 +114,12 @@ test('misc: expose swarm.connected', function (t) {
       t.doesNotThrow(shareDat.leave, 'leave before join should be noop')
 
       var network = shareDat.joinNetwork()
-      t.equal(network.connected, 0, '0 peers')
+      t.equal(network.connections.size, 0, '0 peers')
 
       network.once('connection', function () {
-        t.ok(network.connected >= 1, '>=1 peer')
+        t.ok(network.connections.size >= 1, '>=1 peer')
         shareDat.leave()
-        t.skip(downDat.network.connected, 0, '0 peers') // TODO: Fix connection count
+        t.skip(downDat.network.connections.size, 0, '0 peers') // TODO: Fix connection count
         downDat.close(function (err) {
           t.error(err, 'error')
           shareDat.close(function (err) {

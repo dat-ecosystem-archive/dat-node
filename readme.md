@@ -4,42 +4,39 @@
 
 [![npm][0]][1] [![Travis][2]][3] [![Test coverage][4]][5] [![Greenkeeper badge](https://badges.greenkeeper.io/datproject/dat-node.svg)](https://greenkeeper.io/)
 
-**This module is being superceded by the [Dat SDK](https://github.com/datproject/sdk) which works in Node and the Web**
+**For a lower-level API for building your own applications, use the [Dat SDK](https://github.com/datproject/sdk) which works in Node and the Web**
 
-[Dat](http://datproject.org) is a decentralized tool for distributing data and
-files, built for scientific and research data.
-You can start using Dat today in these client applications:
+#### Compatibility
 
-* [Dat Command Line](https://github.com/datproject/dat): Use Dat in the command line
-* [Dat Desktop](https://github.com/datproject/dat-desktop): A desktop application for Dat
-* [Beaker Browser](https://beakerbrowser.com): An experimental P2P browser with Dat built in
+Note: Version 4 of `dat-node` is not compatible with earlier versions (3.5.15
+and below). 
 
 #### Dat Project Documentation & Resources
 
-* [Dat Project Docs](http://docs.datproject.org/)
-* [Dat Protocol](https://www.datprotocol.com/)
-* [Gitter Chat](https://gitter.im/datproject/discussions) or [#dat on IRC](http://webchat.freenode.net/?channels=dat)
+* [dat project Docs](http://docs.datproject.org/)
+* [dat protocol](https://www.datprotocol.com/)
+* Chat on [Gitter](https://gitter.im/datproject/discussions) or [#dat on IRC](http://webchat.freenode.net/?channels=dat)
 
 ### Features
 
-* High-level glue for common Dat and [hyperdrive](https://github.com/mafintosh/hyperdrive) modules.
+* High-level glue for common dat:// and [hyperdrive](https://github.com/mafintosh/hyperdrive) modules.
 * Sane defaults and consistent management of storage & secret keys across applications, using [dat-storage](https://github.com/datproject/dat-storage).
-* Easily connect to the Dat network, using [discovery-swarm](https://github.com/mafintosh/discovery-swarm)
+* Easily connect to the dat:// network with holepunching, using [hyperswarm](https://github.com/hyperswarm)
 * Import files from the file system, using [mirror-folder](https://github.com/mafintosh/mirror-folder/)
 * Serve dats over http with [hyperdrive-http](https://github.com/joehand/hyperdrive-http)
 * Access APIs to lower level modules with a single `require`!
 
 #### Browser Support
 
-Many of our dependencies work in the browser, but `dat-node` is tailored for file system applications. See [dat-js](https://github.com/datproject/dat-js) if you want to build browser-friendly Dat applications.
+Many of our dependencies work in the browser, but `dat-node` is tailored for file system applications. See [dat-sdk](https://github.com/datproject/sdk) if you want to build browser-friendly applications.
 
 ## Example
 
-To send files via Dat:
+To send files via dat:
 
 1. Tell dat-node where the files are.
 2. Import the files.
-3. Share the files on the Dat network! (And share the link)
+3. Share the files on the dat network! (And share the link)
 
 ```js
 var Dat = require('dat-node')
@@ -87,8 +84,8 @@ Dig into more use cases below and please let us know if you have questions! You 
 
 ### Example Applications
 
-* [Dat CLI](https://github.com/datproject/dat): We use dat-node in the dat CLI.
-* [Dat Desktop](https://github.com/datproject/dat-desktop): The Dat Desktop application manages multiple dat-node instances via [dat-worker](https://github.com/juliangruber/dat-worker).
+* [CLI](https://github.com/datproject/dat): We use dat-node in the dat CLI.
+* [Desktop](https://github.com/datproject/dat-desktop): The Dat Desktop application manages multiple dat-node instances via [dat-worker](https://github.com/juliangruber/dat-worker).
 * See the [examples folder](examples) for a minimal share + download usage.
 * And more! Let us know if you have a neat dat-node application to add here.
 
@@ -142,7 +139,7 @@ Dat('/my-dir', function (err, dat) {
 
 Remember, if you are downloading - metadata and file downloads will happen automatically once you join the network!
 
-Dat runs on a peer to peer network, sometimes there may not be anyone online for a particular key. You can make your application more user friendly by using the callback in `joinNetwork`:
+dat runs on a peer to peer network, sometimes there may not be anyone online for a particular key. You can make your application more user friendly by using the callback in `joinNetwork`:
 
 ```js
 // Downloading <key> with joinNetwork callback
